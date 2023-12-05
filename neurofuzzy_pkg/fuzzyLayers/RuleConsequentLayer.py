@@ -43,10 +43,10 @@ class RuleConsequentLayer():
         self.mf_type = mf_type
         self.built = False
         self.threshold = 0.5 # hc
-        self.class_weights = None # the weights that assign a rule to a class 
+        self.weights = None # the weights that assign a rule to a class 
 
         # for training
-        self.tunable = True 
+        self.tunable = False 
         self.inputs = []
         self.outputs = []
         
@@ -66,12 +66,12 @@ class RuleConsequentLayer():
         save_path = os.path.dirname(__file__) +  relative_path
         completeName = os.path.join(save_path, file_name)
         with open(completeName, 'w') as yaml_file:
-            yaml.dump(self.class_weights.tolist(), yaml_file, default_flow_style=False)
+            yaml.dump(self.weights.tolist(), yaml_file, default_flow_style=False)
 
         # opt 2: np.save
         file_name = "config_weights"
         other_name = os.path.join(save_path, file_name)
-        np.save(other_name, self.class_weights)
+        np.save(other_name, self.weights)
     
     def load_weights(self):
         """load weights from yaml file
@@ -97,9 +97,13 @@ class RuleConsequentLayer():
         file_name = "config_weights"
         other_name = os.path.join(save_path, file_name)
         loaded_weights = np.load(other_name+'.npy')
-      #  print("HERE")
+        print("sucessfully loaded weights")
        # print(loaded_weights)
        # return weights
+        self.train_params = {'weights': self.weights}
+        self.weights = loaded_weights
+       
+        self.built = True
         return loaded_weights
 
 
@@ -120,15 +124,15 @@ class RuleConsequentLayer():
         
         if load==0:
             # # build weights     
-            self.class_weights = np.zeros((inputs.shape[0], 2), dtype=np.float32) # danger output classes hc 
+            self.weights = np.zeros((inputs.shape[0], 2), dtype=np.float32) # danger output classes hc 
         # print("weights", self.class_weights)
             for ruleID, firingStrength in enumerate(inputs):  
                 if firingStrength > self.threshold:
-                    self.class_weights[ruleID] = one_hot_tar
+                    self.weights[ruleID] = one_hot_tar
 
 
         if load:
-            self.class_weights = self.load_weights()
+            self.weights = self.load_weights()
       #  print("weights after", self.class_weights)
 
         # self.weights = np.ones((inputs.shape[0], inputs_og.shape[0] ), dtype=np.float32)
@@ -136,7 +140,7 @@ class RuleConsequentLayer():
         # # build biases
         # self.biases = np.full(inputs.shape[0], 0.5, dtype=np.float32)
 
-        # self.train_params = {'weights': self.weights, 'biases': self.biases}
+      #  self.train_params = {'weights': self.weights}#, 'biases': self.biases}
         self.built = True
 
         # call self
@@ -170,10 +174,10 @@ class RuleConsequentLayer():
 
 
             #       0.8 * [0 1] = [0 0.8]
-            output = x * self.class_weights
+            output = x * self.weights
 
             self.rulesTHEN[ruleID] = []
-            self.rulesTHEN[ruleID].append({'RS': x, 'target': self.class_weights})             
+            self.rulesTHEN[ruleID].append({'RS': x, 'target': self.weights})             
 
             out = out.write(out.size(), output)
 

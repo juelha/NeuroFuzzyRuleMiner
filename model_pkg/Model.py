@@ -123,6 +123,13 @@ class Model():
         self.built = True
         return True
 
+    def trainMyArc(self):
+        self.arc.FuzzificationLayer.load_weights()
+        self.arc.RuleConsequentLayer.load_weights()
+        self.trainer.arc = self.arc
+
+        self.train()
+
     def train(self):
         """Calling trainer
         """

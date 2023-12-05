@@ -177,7 +177,11 @@ class FuzzificationLayer():
         # file_name = "config_weights"
         # other_name = os.path.join(save_path, file_name)
         # loaded_weights = np.load(other_name+'.npy')
-        print("self.centers")
-        print(self.centers)
+        #print("self.centers")
+        #print(self.centers)
+                # save params for training 
+        self.train_params = {'centers': self.centers, 'widths': self.widths}
+        print("sucessfully loaded weights")
+        self.built = True
        # return weights
         return 0
