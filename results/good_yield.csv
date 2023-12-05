@@ -1,5 +1,1 @@
-,ruleID,N (%),P (%),K (%),Ca (%),Mg (%)
-0,19,medium,,,medium,
-1,29,high,,high,,
-2,49,,medium,,medium,
-3,71,,,medium,high,
+,ruleID,fixed acidity,volatile acidity,citric acid,residual sugar,chlorides,free sulfur dioxide,total sulfur dioxide,density,pH,sulphates,alcohol

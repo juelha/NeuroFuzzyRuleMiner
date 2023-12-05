@@ -34,6 +34,7 @@ class DataPipeline():
 
         self.n_batches = n_batches
         self.params = [self.n_batches]
+        self.batch_size = 32 # hc
         
         self.online = online
 
@@ -62,7 +63,7 @@ class DataPipeline():
         return df
 
 
-    def pipeline(self, ds):
+    def pipeline(self, df):
         """Performs the needed operations to prepare the datasets for training
         Args:
             ds (tf.data.Dataset): dataset to prepare
@@ -71,14 +72,15 @@ class DataPipeline():
             ds (tf.PrefetchDataset): prepared dataset
         """
         # target is one-hot-encoded to have two outputs, representing two output perceptrons
-        ds = ds.map(lambda inputs, target: (inputs, tf.one_hot(int(target), 2)))
+        df = df.map(lambda features, target: (features, self.make_binary(target)))
+        df = df.map(lambda inputs, target: (inputs, tf.one_hot(int(target), 2)))
         # cache this progress in memory
-        ds = ds.cache()
+        df = df.cache()
         # shuffle, batch, prefetch
-        ds = ds.shuffle(50)
-        ds = ds.batch(self.batch_size)
-        ds = ds.prefetch(buffer_size=1)
-        return ds
+        df = df.shuffle(50)
+        df = df.batch(self.batch_size)
+        df = df.prefetch(buffer_size=1)
+        return df
 
 
     def load_data(self):
@@ -87,93 +89,49 @@ class DataPipeline():
         = 80:10:10
         """
 
-        if self.online:
-            df_merged = pd.read_csv('https://raw.githubusercontent.com/juelha/IANNWTF_FINAL/main/data/df_merged.csv?token=GHSAT0AAAAAABOICJN2K2HDESZ7CSHXL2MGYSTLCOA')
-            df_merged_aug = pd.read_csv('https://raw.githubusercontent.com/juelha/IANNWTF_FINAL/main/data/df_merged_aug.csv?token=GHSAT0AAAAAABOICJN3CABVYOG5H2KZMVBQYSTLDHQ')
+        df = pd.read_csv(
+            "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv", 
+            delimiter=";")
 
-        else:
-            # import original and augmented citrus data sets
-            # get save path 
-            file_name = 'df_merged' + '.csv'
-            file_name_aug = 'df_merged' + '.csv'
-            save_path = os.path.dirname(__file__) +  '/../data'
-            full_path = os.path.join(save_path, file_name)
-            full_path_aug = os.path.join(save_path, file_name_aug)
+        # shuffle first so inputs and targets stay on same row
+        df = df.sample(frac=1)
 
-            assert  os.path.exists(full_path), f'File {file_name} is not downloaded to correct folder'
-            assert  os.path.exists(full_path_aug), f'File {file_name_aug} is not downloaded to correct folder'
-
-            df_merged = pd.read_csv(full_path)
-            df_merged_aug = pd.read_csv(full_path_aug)
-            
-
-        # create features and labels
-        df_merged_features = df_merged.copy()
-        targets = df_merged_features.pop('yield')
-
-        # df_merged_features.pop('Unnamed: 0')
-        df_merged_features.pop('region')
-        df_merged_features.pop('season')
-
-        df_merged_aug.pop('season')
-        # merge augmented to the rest
-        frames = [df_merged, df_merged_aug]
-        df_merged = pd.concat(frames)
-        
-        self.batch_size = 32# int(len(df_merged)/self.n_batches)
-        self.feature_names = df_merged_features.columns
-
-        inputs = {}    # Building a set of symbolic keras.Input objects
-
-        # iterating over the columns and names
-        for name, column in df_merged_features.items():
-            # check data type
-            dtype = column.dtype
-            # matching the names and data-types of the CSV columns
-            if dtype == object:
-                dtype = tf.string
-            else:
-                dtype = tf.float32
-            inputs[name] = tf.keras.Input(shape=(1,), name=name, dtype=dtype)
-
-        numeric_inputs = {name: input for name, input in inputs.items()
-                        if input.dtype == tf.float32}
-        x = layers.Concatenate()(list(numeric_inputs.values()))
-        all_numeric_inputs = x
-
-        # Collecting the symbolic preprocessing results, to concatenate them later.
-        preprocessed_inputs = [all_numeric_inputs]
-
-        # concatenate all the preprocessed inputs together
-        preprocessed_inputs_cat = layers.Concatenate()(preprocessed_inputs)
-        # build a model that handles the input preprocessing
-        df_merged_preprocessing = tf.keras.Model(inputs, preprocessed_inputs_cat)
-        # Convert the data set to a dictionary of tensors:
-        df_merged_features_dict = {name: np.array(value) for name, value in df_merged_features.items()}
-        # Slice out the first training example
-        # features_dict = {name: values[:1] for name, values in df_merged_features_dict.items()}
-        # pass the encoded features to the preprocessing model
-        encoded_features = df_merged_preprocessing(df_merged_features_dict)
-        # convert the dictionary to a numpy array
-        feature_array = encoded_features.numpy()
+        # separate into input and targets 
+        targets = df.pop('quality')
+    
+        self.feature_names = list(df.columns)
+        #self.batch_size = 32# int(len(df_merged)/self.n_batches)
+        #self.feature_names = df.columns
 
         # get mean of all cols
-        print(feature_array)
-        self.inputs_mean = np.mean(feature_array, axis=0)
-        print(self.inputs_mean)
+        self.inputs_mean = np.mean(df, axis=0)      
 
-
-        # Split the dataset into a train, test and validation split
+        # # Split the dataset into a train, test and validation split
         # ratio is 80:10:10
-        train_ds, test_ds, validation_ds = np.split(feature_array, [int(.8*len(feature_array)), int(.9*len(feature_array))])
+        train_ds, test_ds, validation_ds = np.split(df, [int(.8*len(df)), int(.9*len(df))])
         train_tar, test_tar, validation_tar = np.split(targets, [int(.8*len(targets)), int(.9*len(targets))])
 
         # convert to tensor dataset
+        df = tf.data.Dataset.from_tensor_slices((df.values, targets.values))
+
         training_ds = tf.data.Dataset.from_tensor_slices((train_ds, train_tar))
         testing_ds = tf.data.Dataset.from_tensor_slices((test_ds, test_tar))
         validating_ds = tf.data.Dataset.from_tensor_slices((validation_ds, validation_tar))
+
+        self.treshhold = np.median(targets)
 
         # pipeline and one-hot encoding target vector
         self.train_ds = training_ds.apply(self.pipeline)
         self.test_ds = testing_ds.apply(self.pipeline)
         self.validation_ds = validating_ds.apply(self.pipeline)
+
+        
+    def make_binary(self,target):
+        """
+        is needed to make the non-binary classification problem binary
+        input: the target to be simplified 
+        returns: boolean 
+        """
+        # note: casting to integers lowers accuracy
+        return(tf.expand_dims(int(target >= self.treshhold), -1))
+        #return(tf.expand_dims(target >= self.treshhold, -1))

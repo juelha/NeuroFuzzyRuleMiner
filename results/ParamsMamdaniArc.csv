@@ -1,9 +1,9 @@
 ,0
 n_batch,3
 Total layer params,0
-Trainable layer params,765
-Non-trainable layer params,-765
+Trainable layer params,4059
+Non-trainable layer params,-4059
 n_epochs,5
 learning_rate,0.01
-loss_func,<bound method Trainer.error_function of <neurofuzzy_pkg.utils.neurofuzzyTrainer.neurofuzzyTrainer object at 0x000001952C3D7F10>>
-optimizer_func,<keras.optimizers.optimizer_v2.adam.Adam object at 0x000001953A78A200>
+loss_func,<bound method Trainer.error_function of <neurofuzzy_pkg.utils.neurofuzzyTrainer.neurofuzzyTrainer object at 0x000002D3E4247F40>>
+optimizer_func,<keras.optimizers.optimizer_v2.adam.Adam object at 0x000002D3F25FE290>
