@@ -1,0 +1,6 @@
+,0
+n_batch,3
+n_epochs,5
+learning_rate,0.01
+loss_func,<bound method Trainer.error_function of <model_pkg.Trainer.Trainer object at 0x0000019541A7E5C0>>
+optimizer_func,<keras.optimizers.optimizer_v2.adam.Adam object at 0x0000019541A7C7F0>

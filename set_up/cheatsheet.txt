@@ -1,0 +1,42 @@
+## STEP BY STEP:
+
+1) nagivate to NeuroFuzzySystem dir 
+
+2) make sure conda is installed and up to date
+download link: https://docs.anaconda.com/anaconda/install/
+
+3) create env from yaml file:
+$ conda env create -f set_up/env.yaml
+
+4) activate env:
+$ conda activate neurofuzzy
+
+5) run the test_tensorflow.py to make sure that tensorflow is installed correctly
+$ python set_up/test_tensorflow.py
+
+
+## General useful stuff:
+
+check what is in conda env:
+conda list
+
+update yaml file:
+conda env update --prefix ./env --file set_up/env.yaml  --prune
+
+check what conda envs are installed: 
+conda info --envs
+
+remove unnessecary envs:
+conda remove --name myenv --all
+
+export env as yaml file:
+conda env create -f set_up/env.yaml
+
+
+## Sources & helpful links:
+
+anaconda doc:
+https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
+
+How to Export and Load Anaconda Environments for Data Science Projects:
+https://towardsdatascience.com/how-to-export-and-load-anaconda-environments-for-data-science-projects-77dc3b781369
