@@ -125,7 +125,54 @@ class DataPipeline():
         self.test_ds = testing_ds.apply(self.pipeline)
         self.validation_ds = validating_ds.apply(self.pipeline)
 
+    def pipeline_for_building(self, df):
+        """
+        input: tensorflow dataset
+        returns: preprocessed and prepared dataset
+        """
+        df = df.map(lambda features, target: (features, self.make_binary(target)))
+        # note: perfomance is better without converting to one_hot
+        df = df.map(lambda inputs, target: (inputs, tf.one_hot(target,2)))
+        return df
         
+    def load_data_for_building(self):
+        """
+        one batch dataset, input and target 
+
+        """
+
+        df = pd.read_csv(
+            "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv", 
+            delimiter=";")
+
+        # shuffle first so inputs and targets stay on same row
+        df = df.sample(frac=1)
+
+        # separate into input and targets 
+        targets = df.pop('quality')
+    
+        self.feature_names = list(df.columns)
+
+        # get mean of all cols
+        self.inputs_mean = np.mean(df, axis=0)      
+
+        # convert to tensor dataset
+        df = tf.data.Dataset.from_tensor_slices((df.values, targets.values))
+
+        self.treshhold = np.median(targets)
+
+        # pipeline and one-hot encoding target vector
+        df = df.apply(self.pipeline_for_building)
+
+        for features, targets in df.take(5):
+          print ('Features: {}, Target: {}'.format(features, targets))
+
+        self.inputs = df.map(lambda x,y: x)
+        self.targets = df.map(lambda x,y: y) # doing weird shit  
+        print("over here", df)
+
+        return 0#self.inputs, self.targets
+
     def make_binary(self,target):
         """
         is needed to make the non-binary classification problem binary

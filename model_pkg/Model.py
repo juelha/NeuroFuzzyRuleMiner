@@ -36,6 +36,10 @@ class Model():
 
         # data
         self.data = data
+        # load data for building my arc
+        self.data.load_data_for_building()
+        self.inputs = data.inputs
+        self.targets = data.targets
         # loading data, performing datapipeline and getting datasets
         self.data.load_data()
         self.train_ds = data.train_ds
@@ -101,6 +105,13 @@ class Model():
         self.train()
         self.summary()
 
+    def build_MyArc(self):
+      # todo just do example datastet
+      #  print("self.inputs_mean", self.inputs_mean)
+        self.arc.build(self.inputs, self.targets, self.inputs_mean)
+       # self.trainer.test(self.inputs_mean)
+        self.built = True
+        print("Build done")
 
     def build(self):
         """

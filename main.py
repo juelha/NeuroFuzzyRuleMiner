@@ -26,23 +26,27 @@ def main():
 "╚═╝░░╚══╝╚══════╝░╚═════╝░╚═╝░░╚═╝░╚════╝░░░░░░░╚═╝░░░░░░╚═════╝░╚══════╝╚══════╝░░░╚═╝░░░░░░░░░╚═╝░░░░░╚═╝░╚════╝░╚═════╝░╚══════╝╚══════╝")
 
 
-    ## Model based on Mamdani Inference
-    MamdaniModel = Model(DataPipeline(), MamdaniArc(), neurofuzzyTrainer())
-    MamdaniModel.run()
+    ## Model based on Mamdani Inference <- WORKS!!!
+   # MamdaniModel = Model(DataPipeline(), MamdaniArc(), neurofuzzyTrainer())
+  # MamdaniModel.run()
 
     ## Model based on Sugeno Inference
   #  SugenoModel = Model(DataPipeline(), SugenoArc(), neurofuzzyTrainer())
    # SugenoModel.run()
   
+    # My Model
+    MyModel = Model(DataPipeline(), MyArc(), neurofuzzyTrainer())
+    MyModel.build_MyArc()
+
     ## Model with MLP arc
-    MLPModel = Model(DataPipeline(),  MLP((4,32),2),  Trainer())
+    # MLPModel = Model(DataPipeline(),  MLP((4,32),2),  Trainer())
 
-    MLPModel.train()
-    print(MLPModel.summary()) 
+    # MLPModel.train()
+    # print(MLPModel.summary()) 
 
 
-    rules = ruleExtractor(MamdaniModel, MLPModel)
-    rules.print_results()
+    # rules = ruleExtractor(MamdaniModel, MLPModel)
+    # rules.print_results()
     
     return 0
 

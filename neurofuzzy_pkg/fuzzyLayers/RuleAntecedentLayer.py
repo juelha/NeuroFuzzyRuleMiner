@@ -31,7 +31,7 @@ class RuleAntecedentLayer():
         """
         # for training
         self.built = False
-        self.tunable = True
+        self.tunable = False
         self.train_params = None 
 
         # for rule extraction
@@ -46,13 +46,13 @@ class RuleAntecedentLayer():
         Args:
             inputs (tf.Tensor): inputs
         """
-        n_rows, n_cols = inputs.shape
+        # n_rows, n_cols = inputs.shape
 
-        # build weights which will be used to weight the inputs <- importance of participant in rule?
-        self.weights = np.ones((n_rows, n_cols), dtype=np.float32)
+        # # build weights which will be used to weight the inputs <- importance of participant in rule?
+        # self.weights = np.ones((n_rows, n_cols), dtype=np.float32)
 
-        self.train_params = {'weights': self.weights}
-        self.built = True
+        # self.train_params = {'weights': self.weights}
+        # self.built = True
 
         # call self
         return self(inputs)
@@ -73,7 +73,7 @@ class RuleAntecedentLayer():
         """
 
         # check if trainable params have been built
-        assert self.built, f'Layer {type(self)} is not built yet'
+       # assert self.built, f'Layer {type(self)} is not built yet'
 
         self.inputs = inputs # saved for training
 
@@ -92,7 +92,7 @@ class RuleAntecedentLayer():
                 mu1 = inputs[xID1][mfID1]
                 
                 # weighting the input
-                weighted_mu1 = self.weights[xID1][mfID1] * mu1
+                weighted_mu1 =  mu1 #* self.weights[xID1][mfID1] *
 
                 # get second participant
                 # by looping over the rest of rows
@@ -101,7 +101,7 @@ class RuleAntecedentLayer():
                         mu2 = inputs[xID2][mfID2]
 
                         # weighting the input
-                        weighted_mu2 = self.weights[xID2][mfID2] * mu2
+                        weighted_mu2 =  mu2 # self.weights[xID2][mfID2] *
 
                         # calculating TNorm with min() or mul
                         # TNorm = min(weighted_mu1,weighted_mu2)
