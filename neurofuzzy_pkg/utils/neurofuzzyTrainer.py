@@ -159,6 +159,7 @@ class neurofuzzyTrainer(Trainer):
 
         ## step 1: calculating gradients for each entry in batch
         # iterating over data entries of a batch
+        deltas_avg = None
         for inputs, targets in (zip(tqdm(inputs_batch, desc='training'), targets_batch)):
         #for inputs, targets in zip(inputs_batch,targets_batch):
 
@@ -168,30 +169,41 @@ class neurofuzzyTrainer(Trainer):
             # calculating error in outputlayer
             errorterm = self.error_function_derivedMyArc(prediction, targets)
             errors_average.append(self.error_function(prediction, targets))
-            delta = errorterm
+            delta = np.array(errorterm)
+            if deltas_avg.any == None: 
+                deltas_avg = delta
+            else:
 
-            # backpropagation part
-            for layerID, layer in  enumerate(reversed(list(self.arc.internal_layers))): 
+                print("ddddelta", np.shape(delta))
+                deltas_avg = np.concatenate((deltas_avg, delta), axis=1)
 
-                # if layer has parameters to tune
-                if layer.tunable:
+        #     # backpropagation part
+        #     for layerID, layer in  enumerate(reversed(list(self.arc.internal_layers))): 
 
-                    # get delta, the inforamtion about the error of a layer
-                    delta = self.get_deltaMyArc(layer, delta)
+        #         # if layer has parameters to tune
+        #         if layer.tunable:
 
-                    # calculate gradient for each param 
-                    for param in layer.train_params:
-                        grad = self.calc_grads(param, delta, layer)
-                        gradients[layerID][param].append(grad)
+        #             # get delta, the inforamtion about the error of a layer
+        #             delta = self.get_deltaMyArc(layer, delta)
 
-        ## step 2: get averages of all entries
-        # error
-        errors_average = tf.reduce_mean(errors_average)  
+        #             # calculate gradient for each param 
+        #             for param in layer.train_params:
+        #                 grad = self.calc_grads(param, delta, layer)
+        #                 gradients[layerID][param].append(grad)
+
+        # ## step 2: get averages of all entries
+        # # error
+        # errors_average = tf.reduce_mean(errors_average)  
         # gradients
+        print("del", deltas_avg)
+        deltas_avg = np.mean(deltas_avg,axis=1)
+        gradients= deltas_avg
+        print("gradients", gradients)
         for layerID in gradients:
             for param in gradients[layerID]:
                 gradients[layerID][param] = tf.stack(gradients[layerID][param])
                 gradients[layerID][param] = tf.reduce_mean(gradients[layerID][param], axis=0)
+        print("gradients after stack", gradients)
 
         ## step 3: adapt the parameters with average gradients
         for layerID,layer in enumerate(reversed(list(self.arc.internal_layers))):  
@@ -224,9 +236,12 @@ class neurofuzzyTrainer(Trainer):
      #   print(np.shape(targets))
      #   print(np.shape(prediction))
        # np.concatenate((targets,prediction))
+        error_term = []
         for i in range(495):
-            error_term = -1*np.dot(prediction[i],targets[i]) # NOTE CHANGED BC OF ONE HOT ENCODED OUTPUT VECTOR
-        #error_term = (prediction - targets)
+            term = -1*np.dot(prediction[i],targets[i]) # NOTE CHANGED BC OF ONE HOT ENCODED OUTPUT VECTOR
+            error_term.append(term)
+        #err
+        # or_term = (prediction - targets)
         return error_term
 
     def get_deltaMyArc(self,layer,deltas):
