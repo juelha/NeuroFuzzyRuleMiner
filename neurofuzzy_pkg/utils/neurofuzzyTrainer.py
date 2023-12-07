@@ -166,7 +166,7 @@ class neurofuzzyTrainer(Trainer):
             prediction =  self.arc(inputs)
 
             # calculating error in outputlayer
-            errorterm = self.error_function_derived(prediction, targets)
+            errorterm = self.error_function_derivedMyArc(prediction, targets)
             errors_average.append(self.error_function(prediction, targets))
             delta = errorterm
 
@@ -177,7 +177,7 @@ class neurofuzzyTrainer(Trainer):
                 if layer.tunable:
 
                     # get delta, the inforamtion about the error of a layer
-                    delta = self.get_delta(layer, delta)
+                    delta = self.get_deltaMyArc(layer, delta)
 
                     # calculate gradient for each param 
                     for param in layer.train_params:
@@ -198,10 +198,41 @@ class neurofuzzyTrainer(Trainer):
         
             # if layer has parameters to tune
             if layer.tunable:
-                self.adapt(layer, gradients[layerID])
+                self.adaptMyArc(layer, gradients[layerID])
         
         return errors_average
 
+    def error_function_derivedMyArc(self, prediction, targets):
+        """Derived error function:  
+            derived error function: (prediction - targets)
+        
+        Args:
+            prediction (tf.Tensor): output of model
+            target (tf.Tensor): desired output of model 
+        Returns:
+            error_term (float): output of derived error function
+        """
+        
+        targets = np.resize(targets,new_shape=(495, 2))
+      #  print(targets)
+
+     #   print("pr",prediction)
+        prediction = prediction.numpy() 
+     #   print("pr np", prediction)
+
+      #  print("shapes")
+     #   print(np.shape(targets))
+     #   print(np.shape(prediction))
+       # np.concatenate((targets,prediction))
+        for i in range(495):
+            error_term = -1*np.dot(prediction[i],targets[i]) # NOTE CHANGED BC OF ONE HOT ENCODED OUTPUT VECTOR
+        #error_term = (prediction - targets)
+        return error_term
+
+    def get_deltaMyArc(self,layer,deltas):
+
+
+        return deltas
 
     def get_delta(self, layer, deltas):
         """Get the deltas of a layer, 
@@ -320,6 +351,7 @@ class neurofuzzyTrainer(Trainer):
         """
 
         if param == "centers" or param == "widths":
+            return deltas # !
             n_params = layer.centers.shape
             grads = self.calc_grads_mfs( deltas, layer)
 
@@ -331,7 +363,8 @@ class neurofuzzyTrainer(Trainer):
             n_params = layer.biases.shape
             grads = self.calc_grads_bias(deltas, layer)
 
-
+       # print("grads", grads)
+       # print()
         assert  (grads.shape[0] == n_params[0] and grads.shape[1] == n_params[1]), f'Gradient has wrong shape \n \
         should have shape {n_params[0], n_params[1]} but has shape {grads.shape[0], grads.shape[1]} \n \
         layer: {type(layer)} \n \
@@ -393,6 +426,34 @@ class neurofuzzyTrainer(Trainer):
 
         return gradients
 
+    def adaptMyArc(self, layer, gradients):
+        
+        if hasattr(layer, 'n_mfs'):
+
+            n_rows, n_cols = layer.centers.shape
+
+            # picking first participant of a rule 
+            # by looping over rows of input 
+            
+          #  print("delt", gradients)
+            #for delta in gradients:
+            for xID1 in range(n_rows):
+                for mfID1 in range(n_cols):
+
+                    # print("D", gradients)
+                    # print("c", layer.centers[xID1][mfID1])
+                    # print("w", layer.widths[xID1][mfID1])
+                
+                    layer.centers[xID1][mfID1] = gradients["centers"] *layer.centers[xID1][mfID1]
+                    layer.widths[xID1][mfID1] = gradients["widths"]*layer.widths[xID1][mfID1]
+
+
+                    # get second participant
+                    # by looping over the rest of rows
+                    for xID2 in range(xID1+1, n_rows):
+                        for mfID2 in range(n_cols):  
+                            layer.centers[xID2][mfID2] = gradients["centers"] *layer.centers[xID2][mfID2]
+                            layer.widths[xID2][mfID2] =gradients["widths"] * layer.widths[xID2][mfID2]
 
     def adapt(self, layer, gradients):
         """Adapt the parameters using the gradients from calc_grads

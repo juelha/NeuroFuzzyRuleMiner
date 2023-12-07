@@ -40,7 +40,6 @@ class RuleConsequentLayer():
         """
 
         # for MFs
-        self.mf_type = mf_type
         self.built = False
         self.threshold = 0.5 # hc
         self.weights = None # the weights that assign a rule to a class 
@@ -174,7 +173,7 @@ class RuleConsequentLayer():
 
 
             #       0.8 * [0 1] = [0 0.8]
-            output = x * self.weights
+            output = x * self.weights[ruleID]
 
             self.rulesTHEN[ruleID] = []
             self.rulesTHEN[ruleID].append({'RS': x, 'target': self.weights})             
@@ -186,7 +185,7 @@ class RuleConsequentLayer():
         out = out.stack()       
         self.outputs = out #     saved for training   
 
-      #  print("out", out)  
+       # print("out", out)  
       #
       #   self.save_weights()
        # self.load_weights()
