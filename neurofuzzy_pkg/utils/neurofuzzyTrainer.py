@@ -166,10 +166,12 @@ class neurofuzzyTrainer(Trainer):
 
             # forward propagation
             prediction =  self.arc(inputs)
+            print("out", prediction)
 
             # calculating error in outputlayer
             errorterm = self.error_function_derivedMyArc(prediction, targets)
             errors_average.append(self.error_function(prediction, targets))
+            print("errorterm", errorterm)
             delta = np.array(errorterm)
             delta = np.reshape(delta, (495,1))
             if assigned == False: 
@@ -466,7 +468,7 @@ class neurofuzzyTrainer(Trainer):
                     
                         layer.centers[xID1][mfID1] = delta*layer.centers[xID1][mfID1]
                         layer.widths[xID1][mfID1] = delta*layer.widths[xID1][mfID1]
-
+                        
 
                         # get second participant
                         # by looping over the rest of rows
@@ -474,6 +476,7 @@ class neurofuzzyTrainer(Trainer):
                             for mfID2 in range(n_cols):  
                                 layer.centers[xID2][mfID2] = delta *layer.centers[xID2][mfID2]
                                 layer.widths[xID2][mfID2] = delta * layer.widths[xID2][mfID2]
+            print("centers",delta*layer.centers)
 
     def adapt(self, layer, gradients):
         """Adapt the parameters using the gradients from calc_grads

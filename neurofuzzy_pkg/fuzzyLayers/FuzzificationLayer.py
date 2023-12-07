@@ -45,7 +45,7 @@ class FuzzificationLayer():
         self.inputs = []
         self.outputs = []
 
-
+ 
     def build(self, inputs_mean, inputs):
         """Initializes trainable parameters
 
