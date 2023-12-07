@@ -160,6 +160,7 @@ class neurofuzzyTrainer(Trainer):
         ## step 1: calculating gradients for each entry in batch
         # iterating over data entries of a batch
         deltas_avg = None
+        assigned = False
         for inputs, targets in (zip(tqdm(inputs_batch, desc='training'), targets_batch)):
         #for inputs, targets in zip(inputs_batch,targets_batch):
 
@@ -170,11 +171,14 @@ class neurofuzzyTrainer(Trainer):
             errorterm = self.error_function_derivedMyArc(prediction, targets)
             errors_average.append(self.error_function(prediction, targets))
             delta = np.array(errorterm)
-            if deltas_avg.any == None: 
+            delta = np.reshape(delta, (495,1))
+            if assigned == False: 
                 deltas_avg = delta
+                assigned = True
             else:
 
                 print("ddddelta", np.shape(delta))
+                print("asfasdgf", np.shape(deltas_avg))
                 deltas_avg = np.concatenate((deltas_avg, delta), axis=1)
 
         #     # backpropagation part
@@ -199,18 +203,19 @@ class neurofuzzyTrainer(Trainer):
         deltas_avg = np.mean(deltas_avg,axis=1)
         gradients= deltas_avg
         print("gradients", gradients)
-        for layerID in gradients:
-            for param in gradients[layerID]:
-                gradients[layerID][param] = tf.stack(gradients[layerID][param])
-                gradients[layerID][param] = tf.reduce_mean(gradients[layerID][param], axis=0)
-        print("gradients after stack", gradients)
+        print("gradients", np.shape(gradients)) # 495,
+        # for layerID in gradients:
+        #     for param in gradients[layerID]:
+        #         gradients[layerID][param] = tf.stack(gradients[layerID][param])
+        #         gradients[layerID][param] = tf.reduce_mean(gradients[layerID][param], axis=0)
+       # print("gradients after stack", gradients)
 
         ## step 3: adapt the parameters with average gradients
         for layerID,layer in enumerate(reversed(list(self.arc.internal_layers))):  
         
             # if layer has parameters to tune
             if layer.tunable:
-                self.adaptMyArc(layer, gradients[layerID])
+                self.adaptMyArc(layer, gradients)
         
         return errors_average
 
@@ -239,7 +244,7 @@ class neurofuzzyTrainer(Trainer):
         error_term = []
         for i in range(495):
             term = -1*np.dot(prediction[i],targets[i]) # NOTE CHANGED BC OF ONE HOT ENCODED OUTPUT VECTOR
-            error_term.append(term)
+            error_term.append([term])
         #err
         # or_term = (prediction - targets)
         return error_term
@@ -451,24 +456,24 @@ class neurofuzzyTrainer(Trainer):
             # by looping over rows of input 
             
           #  print("delt", gradients)
-            #for delta in gradients:
-            for xID1 in range(n_rows):
-                for mfID1 in range(n_cols):
+            for delta in gradients:
+                for xID1 in range(n_rows):
+                    for mfID1 in range(n_cols):
 
-                    # print("D", gradients)
-                    # print("c", layer.centers[xID1][mfID1])
-                    # print("w", layer.widths[xID1][mfID1])
-                
-                    layer.centers[xID1][mfID1] = gradients["centers"] *layer.centers[xID1][mfID1]
-                    layer.widths[xID1][mfID1] = gradients["widths"]*layer.widths[xID1][mfID1]
+                        # print("D", gradients)
+                        # print("c", layer.centers[xID1][mfID1])
+                        # print("w", layer.widths[xID1][mfID1])
+                    
+                        layer.centers[xID1][mfID1] = delta*layer.centers[xID1][mfID1]
+                        layer.widths[xID1][mfID1] = delta*layer.widths[xID1][mfID1]
 
 
-                    # get second participant
-                    # by looping over the rest of rows
-                    for xID2 in range(xID1+1, n_rows):
-                        for mfID2 in range(n_cols):  
-                            layer.centers[xID2][mfID2] = gradients["centers"] *layer.centers[xID2][mfID2]
-                            layer.widths[xID2][mfID2] =gradients["widths"] * layer.widths[xID2][mfID2]
+                        # get second participant
+                        # by looping over the rest of rows
+                        for xID2 in range(xID1+1, n_rows):
+                            for mfID2 in range(n_cols):  
+                                layer.centers[xID2][mfID2] = delta *layer.centers[xID2][mfID2]
+                                layer.widths[xID2][mfID2] = delta * layer.widths[xID2][mfID2]
 
     def adapt(self, layer, gradients):
         """Adapt the parameters using the gradients from calc_grads

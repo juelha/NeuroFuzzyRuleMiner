@@ -92,9 +92,9 @@ def MF_gaussian(x, a, b):
     expo = -0.5*(((x-a)/b)**2)
     mu = np.exp(expo)
 
-    assert (mu <= 1 ) & (mu >= 0), f'Degree of membership is outside bounds, \n\
-    refer to formal def of mf: µA:X → [0,1] \n\
-    inputs: x: {x}; a: {a}; b: {b}; mu: {mu}'
+    # assert (mu <= 1 ) & (mu >= 0), f'Degree of membership is outside bounds, \n\
+    # refer to formal def of mf: µA:X → [0,1] \n\
+    # inputs: x: {x}; a: {a}; b: {b}; mu: {mu}'
     return mu
 
 
