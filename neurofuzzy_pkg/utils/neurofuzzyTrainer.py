@@ -468,17 +468,19 @@ class neurofuzzyTrainer(Trainer):
                         # print("c", layer.centers[xID1][mfID1])
                         # print("w", layer.widths[xID1][mfID1])
                     
-                        layer.centers[xID1][mfID1] = delta*layer.centers[xID1][mfID1]
-                        layer.widths[xID1][mfID1] = delta*layer.widths[xID1][mfID1]
+                        layer.centers[xID1][mfID1] = delta +  layer.centers[xID1][mfID1]
+                        layer.widths[xID1][mfID1] = delta + layer.widths[xID1][mfID1]
                         
 
                         # get second participant
                         # by looping over the rest of rows
                         for xID2 in range(xID1+1, n_rows):
                             for mfID2 in range(n_cols):  
-                                layer.centers[xID2][mfID2] = delta *layer.centers[xID2][mfID2]
-                                layer.widths[xID2][mfID2] = delta * layer.widths[xID2][mfID2]
-            print("centers",delta*layer.centers)
+                               # print("delta," ,)
+                                layer.centers[xID2][mfID2] = delta + layer.centers[xID2][mfID2]
+                                layer.widths[xID2][mfID2] = delta + layer.widths[xID2][mfID2]
+            print("centers", layer.centers)
+            print("widths", layer.widths)
 
     def adapt(self, layer, gradients):
         """Adapt the parameters using the gradients from calc_grads
