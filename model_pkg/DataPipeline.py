@@ -96,6 +96,7 @@ class DataPipeline():
         # shuffle first so inputs and targets stay on same row
         df = df.sample(frac=1)
 
+
         # separate into input and targets 
         targets = df.pop('quality')
     
@@ -130,7 +131,7 @@ class DataPipeline():
         input: tensorflow dataset
         returns: preprocessed and prepared dataset
         """
-        df = df.map(lambda features, target: (features, self.make_binary(target)))
+        #df = df.map(lambda features, target: (features, self.make_binary(target)))
         # note: perfomance is better without converting to one_hot
         df = df.map(lambda inputs, target: (inputs, tf.one_hot(target,2)))
         return df
@@ -146,8 +147,13 @@ class DataPipeline():
             delimiter=";")
 
         # shuffle first so inputs and targets stay on same row
-        df = df.sample(frac=1)
+       # df = df.sample(frac=1)
 
+        
+        treshhold = np.mean(df['quality'])
+        print("tresh", treshhold)
+        
+        df['quality'] = df['quality'].apply(lambda x: int(x >= treshhold))
         # separate into input and targets 
         targets = df.pop('quality')
     
