@@ -174,6 +174,7 @@ class neurofuzzyTrainer(Trainer):
             print("errorterm", errorterm)
             delta = np.array(errorterm)
             delta = np.reshape(delta, (495,1))
+            delta = np.ones(shape=(495,1))
             if assigned == False: 
                 deltas_avg = delta
                 assigned = True
