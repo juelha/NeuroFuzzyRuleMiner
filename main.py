@@ -36,7 +36,7 @@ def main():
   
     # My Model
     MyModel = Model(DataPipeline(), MyArc(), neurofuzzyTrainer())
-  #  MyModel.build_MyArc() # works 
+   # MyModel.build_MyArc() # works 
     MyModel.trainMyArc()
 
     ## Model with MLP arc
