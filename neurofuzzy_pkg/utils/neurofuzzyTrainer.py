@@ -166,13 +166,13 @@ class neurofuzzyTrainer(Trainer):
 
             # forward propagation
             prediction =  self.arc(inputs)
-            print("out", prediction)
-            print("tar", targets)
+        #    print("out", prediction)
+         #   print("tar", targets)
 
             # calculating error in outputlayer
             errorterm = self.error_function_derivedMyArc(prediction, targets)
             errors_average.append(self.error_function(prediction, targets))
-            print("errorterm", errorterm)
+       #     print("errorterm", errorterm)
             delta = np.array(errorterm)
             delta = np.reshape(delta, (495,1))
            #delta = np.ones(shape=(495,1)) 
@@ -181,8 +181,8 @@ class neurofuzzyTrainer(Trainer):
                 assigned = True
             else:
 
-                print("ddddelta", np.shape(delta))
-                print("asfasdgf", np.shape(deltas_avg))
+            #    print("ddddelta", np.shape(delta))
+            #    print("asfasdgf", np.shape(deltas_avg))
                 deltas_avg = np.concatenate((deltas_avg, delta), axis=1)
 
             # backpropagation part
@@ -205,11 +205,11 @@ class neurofuzzyTrainer(Trainer):
         # # error
         # errors_average = tf.reduce_mean(errors_average)  
         # gradients
-        print("del", deltas_avg)
+    #    print("del", deltas_avg)
         deltas_avg = np.mean(deltas_avg,axis=1)
         gradients= deltas_avg
-        print("gradients", gradients)
-        print("gradients", np.shape(gradients)) # 495
+     #  print("gradients", gradients)
+       # print("gradients", np.shape(gradients)) # 495
         centers_derived = self.calc_mf_derv_center()
         widths_der = self.calc_mf_derv_widths()
         # for layerID in gradients:
@@ -219,12 +219,16 @@ class neurofuzzyTrainer(Trainer):
        # print("gradients after stack", gradients)
 
         ## step 3: adapt the parameters with average gradients
+      #  print("centers before", self.arc.FuzzificationLayer.centers)
+
         for layerID,layer in enumerate(reversed(list(self.arc.internal_layers))):  
         
             # if layer has parameters to tune
             if layer.tunable:
                 self.adaptMyArc(layer, gradients, centers_derived, widths_der)
         
+       # print("centers after", self.arc.FuzzificationLayer.centers)
+      #  assert 1==0, "Invalid Operation" # denominator can't be 0
         return errors_average
 
 
@@ -508,38 +512,54 @@ class neurofuzzyTrainer(Trainer):
             # picking first participant of a rule 
             # by looping over rows of input 
             
-          #  print("delt", gradients)
-            for delta in gradients:
-                for xID1 in range(n_rows):
-                    for mfID1 in range(n_cols):
+         #  print("delt", gradients)
+            i = 0
+            for xID1 in range(n_rows):
+                for mfID1 in range(n_cols):
 
-                        # print("D", gradients)
-                        # print("c", layer.centers[xID1][mfID1])
-                        # print("w", layer.widths[xID1][mfID1])
+                    # print("D", gradients)
+                    # print("c", layer.centers[xID1][mfID1])
+                    # print("w", layer.widths[xID1][mfID1])
+                    if xID1+1 == n_rows: 
+                    #    print("I", i)
+
+                        return 0 
+                    else:
                         other_mu = self.arc.RuleAntecedentLayer.inputs[xID1+1,mfID1] # get tghe other mu errror
 
-                        delta *= other_mu
+                    delta = float32(gradients[i])
 
-                        delta_center = delta* centers_derived[xID1][mfID1]
-                        delta_widths = delta * widths_der[xID1][mfID1]
+              #      print("delta", delta)
+              #      print("other mu", other_mu)
+                    delta *= other_mu
+
+               #     print("centers_derived[xID1][mfID1]",centers_derived[xID1][mfID1])
+                    delta_center = delta* centers_derived[xID1][mfID1]
+                    delta_widths = delta* widths_der[xID1][mfID1]
+                
+                #    print("delta_center", delta_center)
+                #    print("delta_widths", delta_widths) # is zero
+
+                    layer.centers[xID1][mfID1] -= delta_center# np.multiply(delta_center, self.learning_rate)
+                    layer.widths[xID1][mfID1] -= delta_widths#np.multiply(delta_widths, self.learning_rate)
                     
-                        layer.centers[xID1][mfID1] -= np.multiply(delta_center, self.learning_rate)
-                        layer.widths[xID1][mfID1] -= np.multiply(delta_widths, self.learning_rate)
-                        
 
-                        # get second participant
-                        # by looping over the rest of rows
-                        for xID2 in range(xID1+1, n_rows):
-                            for mfID2 in range(n_cols):  
-                                other_mu = self.arc.RuleAntecedentLayer.inputs[xID1,mfID1]
-                                delta *= other_mu
-                                delta_center = delta* centers_derived[xID2][mfID2]
-                                delta_widths = delta * widths_der[xID2][mfID2]
-                               # print("delta," ,)
-                                layer.centers[xID2][mfID2] -= np.multiply(delta_center, self.learning_rate)
-                                layer.widths[xID2][mfID2] -= np.multiply(delta_widths, self.learning_rate)
-            print("centers", layer.centers)
-            print("widths", layer.widths)
+                    # get second participant
+                    # by looping over the rest of rows
+                    for xID2 in range(xID1+1, n_rows):
+                        for mfID2 in range(n_cols):  
+                            other_mu = self.arc.RuleAntecedentLayer.inputs[xID1,mfID1]
+                            delta = float32(gradients[i])
+                           # print("delta", delta)
+
+
+                            delta *= other_mu
+                            delta_center = delta* centers_derived[xID2][mfID2]
+                            delta_widths = delta * widths_der[xID2][mfID2]
+                            # print("delta," ,)
+                            layer.centers[xID2][mfID2] -= np.multiply(delta_center, self.learning_rate)
+                            layer.widths[xID2][mfID2] -= np.multiply(delta_widths, self.learning_rate)
+                            i += 1
 
     def adapt(self, layer, gradients):
         """Adapt the parameters using the gradients from calc_grads
