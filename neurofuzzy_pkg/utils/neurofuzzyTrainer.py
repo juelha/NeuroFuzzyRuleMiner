@@ -7,7 +7,7 @@ import numpy as np
 from model_pkg import Trainer
 from neurofuzzy_pkg.fuzzyLayers import MF_gaussian_prime_a
 from neurofuzzy_pkg import utils
-from neurofuzzy_pkg.utils.MFs import MF_gaussian,MF_gaussian_prime_a
+from neurofuzzy_pkg.utils.MFs import MF_gaussian,MF_gaussian_prime_a, MF_gaussian_prime_b
 
 from tqdm import tqdm 
 #from neurofuzzy_pkg.fuzzyLayers.RuleConsequentLayer import RuleConsequentLayer
@@ -185,19 +185,21 @@ class neurofuzzyTrainer(Trainer):
                 print("asfasdgf", np.shape(deltas_avg))
                 deltas_avg = np.concatenate((deltas_avg, delta), axis=1)
 
-        #     # backpropagation part
-        #     for layerID, layer in  enumerate(reversed(list(self.arc.internal_layers))): 
+            # backpropagation part
+          #  for layerID, layer in  enumerate(reversed(list(self.arc.internal_layers))): 
 
-        #         # if layer has parameters to tune
-        #         if layer.tunable:
+ 
 
-        #             # get delta, the inforamtion about the error of a layer
-        #             delta = self.get_deltaMyArc(layer, delta)
+                # if layer has parameters to tune
+                #if layer.tunable:
 
-        #             # calculate gradient for each param 
-        #             for param in layer.train_params:
-        #                 grad = self.calc_grads(param, delta, layer)
-        #                 gradients[layerID][param].append(grad)
+                    # # get delta, the inforamtion about the error of a layer
+                    # delta = self.get_deltaMyArc(layer, delta)
+
+                    # # calculate gradient for each param 
+                    # for param in layer.train_params:
+                    #     grad = self.calc_grads(param, delta, layer)
+                    #     gradients[layerID][param].append(grad)
 
         # ## step 2: get averages of all entries
         # # error
@@ -207,7 +209,9 @@ class neurofuzzyTrainer(Trainer):
         deltas_avg = np.mean(deltas_avg,axis=1)
         gradients= deltas_avg
         print("gradients", gradients)
-        print("gradients", np.shape(gradients)) # 495,
+        print("gradients", np.shape(gradients)) # 495
+        centers_derived = self.calc_mf_derv_center()
+        widths_der = self.calc_mf_derv_widths()
         # for layerID in gradients:
         #     for param in gradients[layerID]:
         #         gradients[layerID][param] = tf.stack(gradients[layerID][param])
@@ -219,9 +223,54 @@ class neurofuzzyTrainer(Trainer):
         
             # if layer has parameters to tune
             if layer.tunable:
-                self.adaptMyArc(layer, gradients)
+                self.adaptMyArc(layer, gradients, centers_derived, widths_der)
         
         return errors_average
+
+
+    def calc_mf_derv_widths(self):
+         # to output
+        fuzzified_inputs  = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
+
+        # calculating the MF values μ "mus" per input
+        for xID, x in enumerate(self.arc.FuzzificationLayer.inputs):
+
+            # there will be n_mfs mus per input
+            mus_per_x = []
+            for mfID in range(self.arc.FuzzificationLayer.n_mfs):
+
+                # calling MF 
+                mu = MF_gaussian_prime_a(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
+                mus_per_x.append(mu)
+        
+            # write to TensorArray
+            fuzzified_inputs = fuzzified_inputs.write(fuzzified_inputs.size(), mus_per_x)
+
+        # return the values in the TensorArray as a stacked tensor
+        fuzzified_inputs = fuzzified_inputs.stack()
+        return fuzzified_inputs
+
+    def calc_mf_derv_center(self):
+            # to output
+        fuzzified_inputs  = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
+
+        # calculating the MF values μ "mus" per input
+        for xID, x in enumerate(self.arc.FuzzificationLayer.inputs):
+
+            # there will be n_mfs mus per input
+            mus_per_x = []
+            for mfID in range(self.arc.FuzzificationLayer.n_mfs):
+
+                # calling MF 
+                mu = MF_gaussian_prime_b(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
+                mus_per_x.append(mu)
+        
+            # write to TensorArray
+            fuzzified_inputs = fuzzified_inputs.write(fuzzified_inputs.size(), mus_per_x)
+
+        # return the values in the TensorArray as a stacked tensor
+        fuzzified_inputs = fuzzified_inputs.stack()
+        return fuzzified_inputs
 
     def error_function_derivedMyArc(self, prediction, targets):
         """Derived error function:  
@@ -450,7 +499,7 @@ class neurofuzzyTrainer(Trainer):
 
         return gradients
 
-    def adaptMyArc(self, layer, gradients):
+    def adaptMyArc(self, layer, gradients, centers_derived, widths_der):
         
         if hasattr(layer, 'n_mfs'):
 
@@ -467,18 +516,28 @@ class neurofuzzyTrainer(Trainer):
                         # print("D", gradients)
                         # print("c", layer.centers[xID1][mfID1])
                         # print("w", layer.widths[xID1][mfID1])
+                        other_mu = self.arc.RuleAntecedentLayer.inputs[xID1+1,mfID1] # get tghe other mu errror
+
+                        delta *= other_mu
+
+                        delta_center = delta* centers_derived[xID1][mfID1]
+                        delta_widths = delta * widths_der[xID1][mfID1]
                     
-                        layer.centers[xID1][mfID1] = delta +  layer.centers[xID1][mfID1]
-                        layer.widths[xID1][mfID1] = delta + layer.widths[xID1][mfID1]
+                        layer.centers[xID1][mfID1] -= np.multiply(delta_center, self.learning_rate)
+                        layer.widths[xID1][mfID1] -= np.multiply(delta_widths, self.learning_rate)
                         
 
                         # get second participant
                         # by looping over the rest of rows
                         for xID2 in range(xID1+1, n_rows):
                             for mfID2 in range(n_cols):  
+                                other_mu = self.arc.RuleAntecedentLayer.inputs[xID1,mfID1]
+                                delta *= other_mu
+                                delta_center = delta* centers_derived[xID2][mfID2]
+                                delta_widths = delta * widths_der[xID2][mfID2]
                                # print("delta," ,)
-                                layer.centers[xID2][mfID2] = delta + layer.centers[xID2][mfID2]
-                                layer.widths[xID2][mfID2] = delta + layer.widths[xID2][mfID2]
+                                layer.centers[xID2][mfID2] -= np.multiply(delta_center, self.learning_rate)
+                                layer.widths[xID2][mfID2] -= np.multiply(delta_widths, self.learning_rate)
             print("centers", layer.centers)
             print("widths", layer.widths)
 

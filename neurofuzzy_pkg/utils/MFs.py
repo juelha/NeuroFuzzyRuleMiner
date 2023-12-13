@@ -99,7 +99,7 @@ def MF_gaussian(x, a, b):
 
 
 def MF_gaussian_prime_a(x, a, b):
-    """Derived Gaussian membership function needed for backpropagation
+    """Derived Gaussian membership function with respective to a 
     Args:
         x (tensor): input to fuzzify
         a (float): center of MF
@@ -109,6 +109,21 @@ def MF_gaussian_prime_a(x, a, b):
     """    
     expo = -0.5*(((x-a)/b)**2)
     factor = (a-x)/(b**2)
+    mu =  factor*np.exp(expo)
+    return mu
+
+
+def MF_gaussian_prime_b(x, a, b):
+    """Derived Gaussian membership function with respective to b 
+    Args:
+        x (tensor): input to fuzzify
+        a (float): center of MF
+        b (float): width of MF
+    Returns:
+        mu (float): degree of membership of x
+    """    
+    expo = -0.5*(((x-a)/b)**2)
+    factor = (a-x)**2/(b**3)
     mu =  factor*np.exp(expo)
     return mu
 
