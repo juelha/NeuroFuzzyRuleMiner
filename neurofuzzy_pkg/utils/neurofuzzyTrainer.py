@@ -34,6 +34,9 @@ class neurofuzzyTrainer(Trainer):
             train_ds (PrefetchDataset): dataset for training
             test_ds (PrefetchDataset): dataset for testing
         """
+
+      #  self.n_epochs = 10
+        self.learning_rate = 0.0
         
         ## run once to init the parameters of the membership functions for comparison
         # picking random batch from dataset
@@ -112,7 +115,7 @@ class neurofuzzyTrainer(Trainer):
             # train and keep track
             epoch_loss_agg = []
             for input,target in train_ds:
-                train_loss = self.train_step(input, target)
+                train_loss = self.train_step_MyArc(input, target)
                 epoch_loss_agg.append(train_loss)
 
             #track training loss
@@ -132,9 +135,7 @@ class neurofuzzyTrainer(Trainer):
         return 0
 
 
-  
-
-    def train_step(self, inputs_batch, targets_batch):
+    def train_step_MyArc(self, inputs_batch, targets_batch):
         """Tuning the parameters of the MFs using Backpropagation
         Args:
             input (tf.Tensor): input sequence of a dataset
@@ -167,15 +168,15 @@ class neurofuzzyTrainer(Trainer):
             # forward propagation
             prediction =  self.arc(inputs)
         #    print("out", prediction)
-         #   print("tar", targets)
+        #   print("tar", targets)
 
             # calculating error in outputlayer
             errorterm = self.error_function_derivedMyArc(prediction, targets)
             errors_average.append(self.error_function(prediction, targets))
-       #     print("errorterm", errorterm)
+            print("errorterm", errorterm)
             delta = np.array(errorterm)
             delta = np.reshape(delta, (495,1))
-           #delta = np.ones(shape=(495,1)) 
+        #delta = np.ones(shape=(495,1)) 
             if assigned == False: 
                 deltas_avg = delta
                 assigned = True
@@ -186,9 +187,9 @@ class neurofuzzyTrainer(Trainer):
                 deltas_avg = np.concatenate((deltas_avg, delta), axis=1)
 
             # backpropagation part
-          #  for layerID, layer in  enumerate(reversed(list(self.arc.internal_layers))): 
+        #  for layerID, layer in  enumerate(reversed(list(self.arc.internal_layers))): 
 
- 
+
 
                 # if layer has parameters to tune
                 #if layer.tunable:
@@ -208,18 +209,18 @@ class neurofuzzyTrainer(Trainer):
     #    print("del", deltas_avg)
         deltas_avg = np.mean(deltas_avg,axis=1)
         gradients= deltas_avg
-     #  print("gradients", gradients)
-       # print("gradients", np.shape(gradients)) # 495
+    #  print("gradients", gradients)
+    # print("gradients", np.shape(gradients)) # 495
         centers_derived = self.calc_mf_derv_center()
         widths_der = self.calc_mf_derv_widths()
         # for layerID in gradients:
         #     for param in gradients[layerID]:
         #         gradients[layerID][param] = tf.stack(gradients[layerID][param])
         #         gradients[layerID][param] = tf.reduce_mean(gradients[layerID][param], axis=0)
-       # print("gradients after stack", gradients)
+    # print("gradients after stack", gradients)
 
         ## step 3: adapt the parameters with average gradients
-      #  print("centers before", self.arc.FuzzificationLayer.centers)
+    #  print("centers before", self.arc.FuzzificationLayer.centers)
 
         for layerID,layer in enumerate(reversed(list(self.arc.internal_layers))):  
         
@@ -227,10 +228,80 @@ class neurofuzzyTrainer(Trainer):
             if layer.tunable:
                 self.adaptMyArc(layer, gradients, centers_derived, widths_der)
         
-       # print("centers after", self.arc.FuzzificationLayer.centers)
-      #  assert 1==0, "Invalid Operation" # denominator can't be 0
+    # print("centers after", self.arc.FuzzificationLayer.centers)
+    #  assert 1==0, "Invalid Operation" # denominator can't be 0
         return errors_average
 
+
+    def train_step(self, inputs_batch, targets_batch):
+        """Tuning the parameters of the MFs using Backpropagation
+        Args:
+            input (tf.Tensor): input sequence of a dataset
+            target (tf.Tensor): output sequence of a dataset
+            
+        Returns: 
+            loss (float): loss before the trainig step
+        """
+
+        errors_average = [] # average over all errors in a batch
+        gradients = {} # dict for gradients
+
+        # setting up gradients dict 
+        for layerID, layer in  enumerate(reversed(list(self.arc.internal_layers))): 
+
+            # if layer has parameters to tune
+            if layer.tunable:
+
+                # set up dict per layer
+                list_params = layer.train_params.keys()
+                gradients[layerID] = {k: [] for k in list_params}
+
+        ## step 1: calculating gradients for each entry in batch
+        # iterating over data entries of a batch
+        for inputs, targets in (zip(tqdm(inputs_batch, desc='training'), targets_batch)):
+        #for inputs, targets in zip(inputs_batch,targets_batch):
+
+            # forward propagation
+            prediction =  self.arc(inputs)
+
+            # calculating error in outputlayer
+            errorterm = self.error_function_derived(prediction, targets)
+            errors_average.append(self.error_function(prediction, targets))
+            delta = errorterm
+
+            # backpropagation part
+            for layerID, layer in  enumerate(reversed(list(self.arc.internal_layers))): 
+
+                # if layer has parameters to tune
+                if layer.tunable:
+
+                    # get delta, the inforamtion about the error of a layer
+                    delta = self.get_delta(layer, delta)
+
+                    # calculate gradient for each param 
+                    for param in layer.train_params:
+                        grad = self.calc_grads(param, delta, layer)
+                        gradients[layerID][param].append(grad)
+
+        ## step 2: get averages of all entries
+        # error
+        errors_average = tf.reduce_mean(errors_average)  
+        # gradients
+        for layerID in gradients:
+            for param in gradients[layerID]:
+                gradients[layerID][param] = tf.stack(gradients[layerID][param])
+                gradients[layerID][param] = tf.reduce_mean(gradients[layerID][param], axis=0)
+
+        ## step 3: adapt the parameters with average gradients
+        for layerID,layer in enumerate(reversed(list(self.arc.internal_layers))):  
+        
+            # if layer has parameters to tune
+            if layer.tunable:
+                self.adapt(layer, gradients[layerID])
+        
+        return errors_average
+
+       
 
     def calc_mf_derv_widths(self):
          # to output
@@ -428,7 +499,6 @@ class neurofuzzyTrainer(Trainer):
         """
 
         if param == "centers" or param == "widths":
-            return deltas # !
             n_params = layer.centers.shape
             grads = self.calc_grads_mfs( deltas, layer)
 
@@ -540,8 +610,8 @@ class neurofuzzyTrainer(Trainer):
                 #    print("delta_center", delta_center)
                 #    print("delta_widths", delta_widths) # is zero
 
-                    layer.centers[xID1][mfID1] -= delta_center# np.multiply(delta_center, self.learning_rate)
-                    layer.widths[xID1][mfID1] -= delta_widths#np.multiply(delta_widths, self.learning_rate)
+                    layer.centers[xID1][mfID1] -=  np.multiply(delta_center, self.learning_rate)
+                    layer.widths[xID1][mfID1] -=np.multiply(delta_widths, self.learning_rate)
                     
 
                     # get second participant

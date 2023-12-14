@@ -1,16 +1,13 @@
 # basics
 import tensorflow as tf
 import numpy as np
-import yaml 
-from yaml.loader import UnsafeLoader
-import os
 
 # custom
 import neurofuzzy_pkg.utils.MFs as MFs
 import neurofuzzy_pkg.utils.math_funcs as math_funcs
 
 
-class FuzzificationLayer():
+class FuzzificationLayerMam():
     """
     The FuzzificationLayer()-Class is:
     - fuzzifying of the crisp inputs by calculating their degree of membership 
@@ -45,17 +42,16 @@ class FuzzificationLayer():
         self.inputs = []
         self.outputs = []
 
- 
-    def build(self, inputs_mean, inputs=None):
+
+    def build(self, x):
         """Initializes trainable parameters
 
         Args:
             inputs (tf.Tensor): inputs
         """
 
-        feature_names = inputs_mean.keys().values.tolist()
+        inputs_mean, feature_names = x
         n_inputs = tf.shape(inputs_mean)[0]
-
 
 
         # build centers and widths of MFs
@@ -76,7 +72,7 @@ class FuzzificationLayer():
         self.built = True
 
         # call self
-        return self(inputs)
+        return self(inputs_mean)
 
 
     def __call__(self, inputs):
@@ -128,60 +124,3 @@ class FuzzificationLayer():
   
         self.outputs = fuzzified_inputs # saved for training 
         return fuzzified_inputs
-    
-    
-    def save_weights(self, dataset_name=None):
-        """saves weights to yaml file
-        
-        Args:
-            dataset_name (str): name of datasets weights have been built on
-        """
-        # save
-        # opt 1: yaml
-        file_name = f"config_mf.yaml"
-        relative_path = "\weights"
-        save_path = os.path.dirname(__file__) +  relative_path
-        completeName = os.path.join(save_path, file_name)
-        with open(completeName, 'w') as yaml_file:
-            yaml.dump(self.train_params, yaml_file, default_flow_style=False)
-
-        # opt 2: np.save
-        # file_name = "config_weights"
-        # other_name = os.path.join(save_path, file_name)
-        # np.save(other_name, self.class_weights)
-        print("saved successfully")
-    
-    def load_weights(self):
-        """load weights from yaml file
-        
-        Args:
-            filename etc
-        Returns:
-            loaded_weights (numpy.ndarray): 
-        """
-        # opt 1: yaml
-        file_name = f"config_mf.yaml"
-        relative_path =  "\weights"
-        save_path = os.path.dirname(__file__) +  relative_path
-        completeName = os.path.join(save_path, file_name)
-        with open(completeName, 'r') as config_file:
-            # Converts yaml document to python object
-            config =yaml.load(config_file, Loader=UnsafeLoader)
-            config = dict(config)
-            self.centers = config["centers"]
-            self.widths = config["widths"]
-          #  print(type(weights))
-          # print(weights)
-        
-        # # opt 2: np.save
-        # file_name = "config_weights"
-        # other_name = os.path.join(save_path, file_name)
-        # loaded_weights = np.load(other_name+'.npy')
-        #print("self.centers")
-        #print(self.centers)
-                # save params for training 
-        self.train_params = {'centers': self.centers, 'widths': self.widths}
-        print("sucessfully loaded weights")
-        self.built = True
-       # return weights
-        return 0

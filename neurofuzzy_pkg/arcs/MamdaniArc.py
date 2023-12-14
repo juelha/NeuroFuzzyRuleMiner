@@ -30,8 +30,8 @@ class MamdaniArc():
         self.total_params = 0
         self.trainable_params = 0
 
-        self.FuzzificationLayer = FuzzificationLayer()
-        self.RuleAntecedentLayer = RuleAntecedentLayer()
+        self.FuzzificationLayer = FuzzificationLayerMam()
+        self.RuleAntecedentLayer = RuleAntecedentLayerMam()
         self.RuleConsequentLayer = RuleConsequentLayerMam()
         self.DefuzzificationLayer = DefuzzificationLayerMam()
 

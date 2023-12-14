@@ -198,7 +198,9 @@ class Trainer():
 
                # print("sample_test_accuracy np mean" , sample_test_accuracy)
 
-                test_loss_aggregator.append(sample_test_loss.numpy())
+                test_loss_aggregator.append(sample_test_loss)
+#                test_loss_aggregator.append(sample_test_loss.numpy())
+
 
                # print("np.mean(sample_test_accuracy", np.mean(sample_test_accuracy))
                 test_accuracy_aggregator.append(np.mean(sample_test_accuracy))  

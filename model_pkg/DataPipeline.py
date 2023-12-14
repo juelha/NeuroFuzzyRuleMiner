@@ -134,6 +134,8 @@ class DataPipeline():
         #df = df.map(lambda features, target: (features, self.make_binary(target)))
         # note: perfomance is better without converting to one_hot
         df = df.map(lambda inputs, target: (inputs, tf.one_hot(target,2)))
+        df = df.shuffle(50)
+
         return df
         
     def load_data_for_building(self):
