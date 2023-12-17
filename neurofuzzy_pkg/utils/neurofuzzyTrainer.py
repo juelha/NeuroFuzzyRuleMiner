@@ -173,7 +173,7 @@ class neurofuzzyTrainer(Trainer):
             # calculating error in outputlayer
             errorterm = self.error_function_derivedMyArc(prediction, targets)
             errors_average.append(self.error_function(prediction, targets))
-            print("errorterm", errorterm)
+            #print("errorterm", errorterm)
             delta = np.array(errorterm)
             delta = np.reshape(delta, (495,1))
         #delta = np.ones(shape=(495,1)) 
@@ -371,7 +371,7 @@ class neurofuzzyTrainer(Trainer):
        # np.concatenate((targets,prediction))
         error_term = []
         for i in range(495):
-            term = -1*np.dot(prediction[i],targets[i]) # NOTE CHANGED BC OF ONE HOT ENCODED OUTPUT VECTOR
+            term = 1*np.dot(prediction[i],targets[i]) # NOTE CHANGED BC OF ONE HOT ENCODED OUTPUT VECTOR
             error_term.append([term])
         #err
         # or_term = (prediction - targets)

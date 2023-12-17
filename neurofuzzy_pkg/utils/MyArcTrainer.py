@@ -137,7 +137,11 @@ class MyArcTrainer(Trainer):
                 # forward pass to get prediction
                 prediction = self.arc(inputs)
 
+                target = np.resize(target, prediction.shape)
+
                 # get loss
+              #  print(prediction)
+               # print(target)
                 sample_test_loss = self.error_function(prediction, target)
                 # get accuracy
                 sample_test_accuracy =  target == np.round(prediction, 0)
@@ -177,10 +181,10 @@ class MyArcTrainer(Trainer):
             # calculating error in outputlayer
             train_loss_agg.append(self.error_function(prediction, targets))
             errorterm = self.error_function_derived(prediction, targets)
-            print("errorterm\n\n")
-            print(errorterm)
-            print("targets\n\n")
-            print(targets)
+            # print("errorterm\n\n")
+            # print(errorterm)
+            # print("targets\n\n")
+            # print(targets)
             delta = np.array(errorterm)
             delta = np.reshape(delta, (495,1))
             if assigned == False: 
