@@ -69,6 +69,10 @@ class MyArc():
         done = False
         #inputs = inputs[0]
         print("MARK", inputs)
+        for i in range(495):
+            self.RuleConsequentLayer.dictrules[i] = []
+            self.RuleConsequentLayer.tars[i] = []
+
         for weird_thingy, weirdtar in zip(inputs,targets): 
             for layer in self.internal_layers:
                 if type(layer) == type(self.FuzzificationLayer):
@@ -77,7 +81,18 @@ class MyArc():
                     x = layer.build(x, weirdtar)
                 else:
                     x = layer.build(x)
-
+        print("dict", self.RuleConsequentLayer.dictrules)
+        # class weights 
+        for ruleID in self.RuleConsequentLayer.dictrules:
+            l = self.RuleConsequentLayer.dictrules[ruleID]
+            max_val = max(l)
+            idx_max = l.index(max_val)
+            print("l", l)
+            print("max", max_val)
+            
+            tar = self.RuleConsequentLayer.tars[ruleID][idx_max]
+            print("tar", tar)
+            self.RuleConsequentLayer.weights[ruleID] = tar
         # for layer in self.internal_layers:
         #     if type(layer) == type(self.RuleConsequentLayer):
         #         x = layer(x, x_og)

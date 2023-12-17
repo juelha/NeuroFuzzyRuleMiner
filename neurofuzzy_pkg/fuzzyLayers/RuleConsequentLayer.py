@@ -40,6 +40,8 @@ class RuleConsequentLayer():
         """
 
         # for MFs
+        self.dictrules = {}
+        self.tars = {}
         self.built = False
         self.threshold = 0.1 # hc
         self.weights = None # the weights that assign a rule to a class 
@@ -121,15 +123,18 @@ class RuleConsequentLayer():
         
         load =0
         
+        
         if load==0:
+            
+                
             # # build weights     
             self.weights = np.zeros((inputs.shape[0], 2), dtype=np.float32) # danger output classes hc 
         # print("weights", self.class_weights)
             for ruleID, firingStrength in enumerate(inputs):  
+                self.dictrules[ruleID].append(firingStrength)
+                self.tars[ruleID].append(one_hot_tar)
               #  print("firingStrength", firingStrength)
-                if firingStrength > self.threshold:
-                    self.weights[ruleID] = one_hot_tar
-                  #  print("TRUE")
+            
 
 
         if load:
