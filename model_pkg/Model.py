@@ -41,7 +41,7 @@ class Model():
         self.inputs = data.inputs
         self.targets = data.targets
         # loading data, performing datapipeline and getting datasets
-        self.data.load_data()
+        self.data.load_data_for_training()
         self.train_ds = data.train_ds
         self.test_ds = data.test_ds
         self.validation_ds = data.validation_ds

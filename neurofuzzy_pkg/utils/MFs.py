@@ -9,7 +9,7 @@ Collection of
 - the functions needed for the initialization of their parameters
 """
 
-def center_init_con(n_mfs, domain_input):
+def center_init_con(n_mfs, mean_input, domain=10):
     """Calculating the centers of the MFs by dividing domain of input equally
     Args:
         n_mfs (int): number of MFs
@@ -18,11 +18,12 @@ def center_init_con(n_mfs, domain_input):
         centers (list(float)): the centers for the respective MFs
     """
     centers = []
+    
     for i in range(n_mfs):
-        centers.append((domain_input/(n_mfs+1))*(i+1))
+        centers.append((domain/(n_mfs+1))*(i+1))
     return centers
 
-def center_init(n_mfs, inputs):
+def center_init(n_mfs, inputs, domain=10):
     """Calculating the centers of the MFs by dividing domain of input equally
     Args:
         n_mfs (int): number of MFs
@@ -39,7 +40,7 @@ def center_init(n_mfs, inputs):
         centers_per_x = []
        # print("\n")
         for i in range(n_mfs):
-            center = (x/(n_mfs+1))*(i+1)
+            center = (domain/(n_mfs+1))*(i+1)
            # print("center", center)
             centers_per_x.append(center)
         centers.append(centers_per_x)
@@ -165,7 +166,8 @@ Args:
     # for each input see what the mfs mean -> domain input might be diff
     for xID, name in enumerate(names):
     #for name, input in zip(names,layer.inputs):
-        x = np.arange(0, means[xID] , (means[xID]*0.01))
+#        x = np.arange(0, means[xID] , (means[xID]*0.01))
+        x = np.arange(0, 10,0.01)
         y = {}
 
         for mfID in range(layer.n_mfs):

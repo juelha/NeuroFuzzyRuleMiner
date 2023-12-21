@@ -82,23 +82,42 @@ class DataPipeline():
         df = df.prefetch(buffer_size=1)
         return df
 
+    def load_wine(self):
+        df = pd.read_csv(
+        "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv", 
+        delimiter=";")
 
-    def load_data(self):
+        # shuffle first so inputs and targets stay on same row
+        df = df.sample(frac=1)
+        # separate into input and targets 
+        targets = df.pop('quality')
+        return df, targets
+
+    def load_dummy(self):
+        # get save path 
+        file_name = 'dummy_df.csv'
+        save_path = os.path.dirname(__file__) +  '/../data'
+        full_path = os.path.join(save_path, file_name)
+        assert  os.path.exists(full_path), f'File {file_name} not found'
+        df = pd.read_csv(full_path)
+        # shuffle first so inputs and targets stay on same row
+        df = df.sample(frac=1)
+        # separate into input and targets 
+        targets = df.pop('out')
+        return df, targets
+
+    def load_data_for_training(self, df_name="dummy"):
         """Initializes the datasets: train_ds, test_ds, validation_ds,
         which have been split from the original dataset using the ratio 
         = 80:10:10
         """
 
-        df = pd.read_csv(
-            "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv", 
-            delimiter=";")
-
-        # shuffle first so inputs and targets stay on same row
-        df = df.sample(frac=1)
-
-
-        # separate into input and targets 
-        targets = df.pop('quality')
+        if df_name==None:
+            print("no df specified")
+        elif df_name=="wine":
+            df, targets = self.load_wine()
+        elif df_name=="dummy":
+            df, targets = self.load_dummy()
     
         self.feature_names = list(df.columns)
         #self.batch_size = 32# int(len(df_merged)/self.n_batches)
@@ -138,27 +157,25 @@ class DataPipeline():
 
         return df
         
-    def load_data_for_building(self):
+    def load_data_for_building(self, df_name="dummy"):
         """
         one batch dataset, input and target 
 
         """
 
-        df = pd.read_csv(
-            "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv", 
-            delimiter=";")
-
-        # shuffle first so inputs and targets stay on same row
-       # df = df.sample(frac=1)
+        if df_name==None:
+            print("no df specified")
+        elif df_name=="wine":
+            df, targets = self.load_wine()
+        elif df_name=="dummy":
+            df, targets = self.load_dummy()
 
         
-        treshhold = np.mean(df['quality'])
-        print("tresh", treshhold)
+        treshhold = np.mean(targets)
+       # print("tresh", treshhold)
         
-        df['quality'] = df['quality'].apply(lambda x: int(x >= treshhold))
-        # separate into input and targets 
-        targets = df.pop('quality')
-    
+        targets = targets.apply(lambda x: int(x >= treshhold))
+        
         self.feature_names = list(df.columns)
 
         # get mean of all cols

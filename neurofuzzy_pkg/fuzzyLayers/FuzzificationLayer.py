@@ -130,7 +130,7 @@ class FuzzificationLayer():
         return fuzzified_inputs
     
     
-    def save_weights(self, dataset_name=None):
+    def save_weights(self, df_name="dummy"):
         """saves weights to yaml file
         
         Args:
@@ -139,7 +139,7 @@ class FuzzificationLayer():
         # save
         # opt 1: yaml
         file_name = f"config_mf.yaml"
-        relative_path = "\weights"
+        relative_path = f"\{df_name}\weights"
         save_path = os.path.dirname(__file__) +  relative_path
         completeName = os.path.join(save_path, file_name)
         with open(completeName, 'w') as yaml_file:
