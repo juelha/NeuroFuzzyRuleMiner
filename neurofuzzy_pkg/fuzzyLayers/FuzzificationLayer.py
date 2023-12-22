@@ -139,7 +139,7 @@ class FuzzificationLayer():
         # save
         # opt 1: yaml
         file_name = f"config_mf.yaml"
-        relative_path = f"\{df_name}\weights"
+        relative_path = f"/weights/{df_name}"
         save_path = os.path.dirname(__file__) +  relative_path
         completeName = os.path.join(save_path, file_name)
         with open(completeName, 'w') as yaml_file:
@@ -151,7 +151,7 @@ class FuzzificationLayer():
         # np.save(other_name, self.class_weights)
         print("saved successfully")
     
-    def load_weights(self):
+    def load_weights(self, df_name="dummy"):
         """load weights from yaml file
         
         Args:
@@ -161,7 +161,7 @@ class FuzzificationLayer():
         """
         # opt 1: yaml
         file_name = f"config_mf.yaml"
-        relative_path =  "\weights"
+        relative_path =  f"/weights/{df_name}"
         save_path = os.path.dirname(__file__) +  relative_path
         completeName = os.path.join(save_path, file_name)
         with open(completeName, 'r') as config_file:

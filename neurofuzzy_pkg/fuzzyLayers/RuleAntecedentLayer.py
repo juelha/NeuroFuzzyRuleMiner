@@ -81,14 +81,14 @@ class RuleAntecedentLayer():
         TNorms = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
 
         # for rule extraction
-        n_rows, n_cols = inputs.shape
+        n_inputs, n_mfs = inputs.shape
         self.rulesIF = {}     
         ruleID = 0
         
         # picking first participant of a rule 
         # by looping over rows of input 
-        for xID1 in range(n_rows):
-            for mfID1 in range(n_cols):
+        for xID1 in range(n_inputs):
+            for mfID1 in range(n_mfs):
                 mu1 = inputs[xID1][mfID1]
                 
                 # weighting the input
@@ -96,8 +96,8 @@ class RuleAntecedentLayer():
 
                 # get second participant
                 # by looping over the rest of rows
-                for xID2 in range(xID1+1, n_rows):
-                    for mfID2 in range(n_cols):  
+                for xID2 in range(xID1+1, n_inputs):
+                    for mfID2 in range(n_mfs):  
                         mu2 = inputs[xID2][mfID2]
 
                         # weighting the input
@@ -115,9 +115,14 @@ class RuleAntecedentLayer():
                         ruleID += 1
 
         # validate shape of output
-        n = n_cols * n_rows
+        n = n_mfs * n_inputs
         k = self.n_participants 
         self.n_rules = int(coefficient(n, k) - n)
+        # print("in", inputs)
+        # print("n", n)
+        # print("k", k)
+        # print("n rules", self.n_rules)
+        # print(ruleID)
 
         assert self.n_rules == ruleID, f'the number of rules generated in IF-Part: {ruleID} has to equal: {self.n_rules} -> coefficient(n_cols * n_rows, k) - n_cols * n_rows' 
 
