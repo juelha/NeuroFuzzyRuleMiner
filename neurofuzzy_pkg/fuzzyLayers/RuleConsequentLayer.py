@@ -54,7 +54,7 @@ class RuleConsequentLayer():
         # for rule extraction
         self.rulesTHEN = {}
 
-    def save_weights(self, dataset_name=None):
+    def save_weights(self, df_name="dummy"):
         """saves weights to yaml file
         
         Args:
@@ -63,7 +63,7 @@ class RuleConsequentLayer():
         # save
         # opt 1: yaml
         file_name = f"config_weights.yaml"
-        relative_path = "\weights"
+        relative_path = f"/weights/{df_name}"
         save_path = os.path.dirname(__file__) +  relative_path
         completeName = os.path.join(save_path, file_name)
         with open(completeName, 'w') as yaml_file:
@@ -74,7 +74,7 @@ class RuleConsequentLayer():
         other_name = os.path.join(save_path, file_name)
         np.save(other_name, self.weights)
     
-    def load_weights(self):
+    def load_weights(self, df_name="dummy"):
         """load weights from yaml file
         
         Args:
@@ -84,7 +84,7 @@ class RuleConsequentLayer():
         """
         # opt 1: yaml
         file_name = f"config_weights.yaml"
-        relative_path =  "\weights"
+        relative_path =  f"/weights/{df_name}"
         save_path = os.path.dirname(__file__) +  relative_path
         completeName = os.path.join(save_path, file_name)
         with open(completeName, 'r') as config_file:
@@ -126,14 +126,16 @@ class RuleConsequentLayer():
         
         if load==0:
             
-                
+            #print("In", inputs)
             # # build weights     
             self.weights = np.zeros((inputs.shape[0], 2), dtype=np.float32) # danger output classes hc 
         # print("weights", self.class_weights)
+
             for ruleID, firingStrength in enumerate(inputs):  
                 self.dictrules[ruleID].append(firingStrength)
                 self.tars[ruleID].append(one_hot_tar)
-              #  print("firingStrength", firingStrength)
+              #  print("ruleID",ruleID)
+               # print("firingStrength", firingStrength)
             
 
 

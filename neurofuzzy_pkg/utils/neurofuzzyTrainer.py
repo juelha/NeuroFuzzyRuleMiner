@@ -7,7 +7,7 @@ import numpy as np
 from model_pkg import Trainer
 from neurofuzzy_pkg.fuzzyLayers import MF_gaussian_prime_a
 from neurofuzzy_pkg import utils
-from neurofuzzy_pkg.utils.MFs import MF_gaussian,MF_gaussian_prime_a, MF_gaussian_prime_b
+from neurofuzzy_pkg.utils.MFs import MF_gaussian,MF_gaussian_prime_a
 
 from tqdm import tqdm 
 #from neurofuzzy_pkg.fuzzyLayers.RuleConsequentLayer import RuleConsequentLayer
@@ -34,9 +34,6 @@ class neurofuzzyTrainer(Trainer):
             train_ds (PrefetchDataset): dataset for training
             test_ds (PrefetchDataset): dataset for testing
         """
-
-      #  self.n_epochs = 10
-        self.learning_rate = 0.0
         
         ## run once to init the parameters of the membership functions for comparison
         # picking random batch from dataset
@@ -115,7 +112,7 @@ class neurofuzzyTrainer(Trainer):
             # train and keep track
             epoch_loss_agg = []
             for input,target in train_ds:
-                train_loss = self.train_step_MyArc(input, target)
+                train_loss = self.train_step(input, target)
                 epoch_loss_agg.append(train_loss)
 
             #track training loss
@@ -135,103 +132,7 @@ class neurofuzzyTrainer(Trainer):
         return 0
 
 
-    def train_step_MyArc(self, inputs_batch, targets_batch):
-        """Tuning the parameters of the MFs using Backpropagation
-        Args:
-            input (tf.Tensor): input sequence of a dataset
-            target (tf.Tensor): output sequence of a dataset
-            
-        Returns: 
-            loss (float): loss before the trainig step
-        """
-
-        errors_average = [] # average over all errors in a batch
-        gradients = {} # dict for gradients
-
-        # setting up gradients dict 
-        for layerID, layer in  enumerate(reversed(list(self.arc.internal_layers))): 
-
-            # if layer has parameters to tune
-            if layer.tunable:
-
-                # set up dict per layer
-                list_params = layer.train_params.keys()
-                gradients[layerID] = {k: [] for k in list_params}
-
-        ## step 1: calculating gradients for each entry in batch
-        # iterating over data entries of a batch
-        deltas_avg = None
-        assigned = False
-        for inputs, targets in (zip(tqdm(inputs_batch, desc='training'), targets_batch)):
-        #for inputs, targets in zip(inputs_batch,targets_batch):
-
-            # forward propagation
-            prediction =  self.arc(inputs)
-        #    print("out", prediction)
-        #   print("tar", targets)
-
-            # calculating error in outputlayer
-            errorterm = self.error_function_derivedMyArc(prediction, targets)
-            errors_average.append(self.error_function(prediction, targets))
-            #print("errorterm", errorterm)
-            delta = np.array(errorterm)
-            delta = np.reshape(delta, (495,1))
-        #delta = np.ones(shape=(495,1)) 
-            if assigned == False: 
-                deltas_avg = delta
-                assigned = True
-            else:
-
-            #    print("ddddelta", np.shape(delta))
-            #    print("asfasdgf", np.shape(deltas_avg))
-                deltas_avg = np.concatenate((deltas_avg, delta), axis=1)
-
-            # backpropagation part
-        #  for layerID, layer in  enumerate(reversed(list(self.arc.internal_layers))): 
-
-
-
-                # if layer has parameters to tune
-                #if layer.tunable:
-
-                    # # get delta, the inforamtion about the error of a layer
-                    # delta = self.get_deltaMyArc(layer, delta)
-
-                    # # calculate gradient for each param 
-                    # for param in layer.train_params:
-                    #     grad = self.calc_grads(param, delta, layer)
-                    #     gradients[layerID][param].append(grad)
-
-        # ## step 2: get averages of all entries
-        # # error
-        # errors_average = tf.reduce_mean(errors_average)  
-        # gradients
-    #    print("del", deltas_avg)
-        deltas_avg = np.mean(deltas_avg,axis=1)
-        gradients= deltas_avg
-    #  print("gradients", gradients)
-    # print("gradients", np.shape(gradients)) # 495
-        centers_derived = self.calc_mf_derv_center()
-        widths_der = self.calc_mf_derv_widths()
-        # for layerID in gradients:
-        #     for param in gradients[layerID]:
-        #         gradients[layerID][param] = tf.stack(gradients[layerID][param])
-        #         gradients[layerID][param] = tf.reduce_mean(gradients[layerID][param], axis=0)
-    # print("gradients after stack", gradients)
-
-        ## step 3: adapt the parameters with average gradients
-    #  print("centers before", self.arc.FuzzificationLayer.centers)
-
-        for layerID,layer in enumerate(reversed(list(self.arc.internal_layers))):  
-        
-            # if layer has parameters to tune
-            if layer.tunable:
-                self.adaptMyArc(layer, gradients, centers_derived, widths_der)
-        
-    # print("centers after", self.arc.FuzzificationLayer.centers)
-    #  assert 1==0, "Invalid Operation" # denominator can't be 0
-        return errors_average
-
+  
 
     def train_step(self, inputs_batch, targets_batch):
         """Tuning the parameters of the MFs using Backpropagation
@@ -301,86 +202,6 @@ class neurofuzzyTrainer(Trainer):
         
         return errors_average
 
-       
-
-    def calc_mf_derv_widths(self):
-         # to output
-        fuzzified_inputs  = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
-
-        # calculating the MF values μ "mus" per input
-        for xID, x in enumerate(self.arc.FuzzificationLayer.inputs):
-
-            # there will be n_mfs mus per input
-            mus_per_x = []
-            for mfID in range(self.arc.FuzzificationLayer.n_mfs):
-
-                # calling MF 
-                mu = MF_gaussian_prime_a(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
-                mus_per_x.append(mu)
-        
-            # write to TensorArray
-            fuzzified_inputs = fuzzified_inputs.write(fuzzified_inputs.size(), mus_per_x)
-
-        # return the values in the TensorArray as a stacked tensor
-        fuzzified_inputs = fuzzified_inputs.stack()
-        return fuzzified_inputs
-
-    def calc_mf_derv_center(self):
-            # to output
-        fuzzified_inputs  = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
-
-        # calculating the MF values μ "mus" per input
-        for xID, x in enumerate(self.arc.FuzzificationLayer.inputs):
-
-            # there will be n_mfs mus per input
-            mus_per_x = []
-            for mfID in range(self.arc.FuzzificationLayer.n_mfs):
-
-                # calling MF 
-                mu = MF_gaussian_prime_b(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
-                mus_per_x.append(mu)
-        
-            # write to TensorArray
-            fuzzified_inputs = fuzzified_inputs.write(fuzzified_inputs.size(), mus_per_x)
-
-        # return the values in the TensorArray as a stacked tensor
-        fuzzified_inputs = fuzzified_inputs.stack()
-        return fuzzified_inputs
-
-    def error_function_derivedMyArc(self, prediction, targets):
-        """Derived error function:  
-            derived error function: (prediction - targets)
-        
-        Args:
-            prediction (tf.Tensor): output of model
-            target (tf.Tensor): desired output of model 
-        Returns:
-            error_term (float): output of derived error function
-        """
-        
-        targets = np.resize(targets,new_shape=(495, 2))
-      #  print(targets)
-
-     #   print("pr",prediction)
-        prediction = prediction.numpy() 
-     #   print("pr np", prediction)
-
-      #  print("shapes")
-     #   print(np.shape(targets))
-     #   print(np.shape(prediction))
-       # np.concatenate((targets,prediction))
-        error_term = []
-        for i in range(495):
-            term = 1*np.dot(prediction[i],targets[i]) # NOTE CHANGED BC OF ONE HOT ENCODED OUTPUT VECTOR
-            error_term.append([term])
-        #err
-        # or_term = (prediction - targets)
-        return error_term
-
-    def get_deltaMyArc(self,layer,deltas):
-
-
-        return deltas
 
     def get_delta(self, layer, deltas):
         """Get the deltas of a layer, 
@@ -510,8 +331,7 @@ class neurofuzzyTrainer(Trainer):
             n_params = layer.biases.shape
             grads = self.calc_grads_bias(deltas, layer)
 
-       # print("grads", grads)
-       # print()
+
         assert  (grads.shape[0] == n_params[0] and grads.shape[1] == n_params[1]), f'Gradient has wrong shape \n \
         should have shape {n_params[0], n_params[1]} but has shape {grads.shape[0], grads.shape[1]} \n \
         layer: {type(layer)} \n \
@@ -573,63 +393,6 @@ class neurofuzzyTrainer(Trainer):
 
         return gradients
 
-    def adaptMyArc(self, layer, gradients, centers_derived, widths_der):
-        
-        if hasattr(layer, 'n_mfs'):
-
-            n_rows, n_cols = layer.centers.shape
-
-            # picking first participant of a rule 
-            # by looping over rows of input 
-            
-         #  print("delt", gradients)
-            i = 0
-            for xID1 in range(n_rows):
-                for mfID1 in range(n_cols):
-
-                    # print("D", gradients)
-                    # print("c", layer.centers[xID1][mfID1])
-                    # print("w", layer.widths[xID1][mfID1])
-                    if xID1+1 == n_rows: 
-                    #    print("I", i)
-
-                        return 0 
-                    else:
-                        other_mu = self.arc.RuleAntecedentLayer.inputs[xID1+1,mfID1] # get tghe other mu errror
-
-                    delta = float32(gradients[i])
-
-              #      print("delta", delta)
-              #      print("other mu", other_mu)
-                    delta *= other_mu
-
-               #     print("centers_derived[xID1][mfID1]",centers_derived[xID1][mfID1])
-                    delta_center = delta* centers_derived[xID1][mfID1]
-                    delta_widths = delta* widths_der[xID1][mfID1]
-                
-                #    print("delta_center", delta_center)
-                #    print("delta_widths", delta_widths) # is zero
-
-                    layer.centers[xID1][mfID1] -=  np.multiply(delta_center, self.learning_rate)
-                    layer.widths[xID1][mfID1] -=np.multiply(delta_widths, self.learning_rate)
-                    
-
-                    # get second participant
-                    # by looping over the rest of rows
-                    for xID2 in range(xID1+1, n_rows):
-                        for mfID2 in range(n_cols):  
-                            other_mu = self.arc.RuleAntecedentLayer.inputs[xID1,mfID1]
-                            delta = float32(gradients[i])
-                           # print("delta", delta)
-
-
-                            delta *= other_mu
-                            delta_center = delta* centers_derived[xID2][mfID2]
-                            delta_widths = delta * widths_der[xID2][mfID2]
-                            # print("delta," ,)
-                            layer.centers[xID2][mfID2] -= np.multiply(delta_center, self.learning_rate)
-                            layer.widths[xID2][mfID2] -= np.multiply(delta_widths, self.learning_rate)
-                            i += 1
 
     def adapt(self, layer, gradients):
         """Adapt the parameters using the gradients from calc_grads
@@ -653,5 +416,4 @@ class neurofuzzyTrainer(Trainer):
                     layer.weights -= np.multiply(gradients[param], self.learning_rate)
 
         return 0
-
 

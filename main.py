@@ -28,7 +28,7 @@ def main():
 
     ## Model based on Mamdani Inference <- WORKS!!!
    # MamdaniModel = Model(DataPipeline(), MamdaniArc(), neurofuzzyTrainer())
-   # MamdaniModel.run()
+    #MamdaniModel.run()
 
     ## Model based on Sugeno Inference
   #  SugenoModel = Model(DataPipeline(), SugenoArc(), neurofuzzyTrainer())
@@ -36,7 +36,7 @@ def main():
   
     # My Model
     MyModel = Model(DataPipeline(), MyArc(), MyArcTrainer())
-    #MyModel.build_MyArc() # works 
+   # MyModel.build_MyArc() # works 
     MyModel.trainMyArc()
 
     ## Model with MLP arc

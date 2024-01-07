@@ -186,7 +186,9 @@ class MyArcTrainer(Trainer):
             # print("targets\n\n")
             # print(targets)
             delta = np.array(errorterm)
-            delta = np.reshape(delta, (495,1))
+            #n_rules = 495
+            n_rules = 9
+            delta = np.reshape(delta, (n_rules,1))
             if assigned == False: 
                 deltas_avg = delta
                 assigned = True
