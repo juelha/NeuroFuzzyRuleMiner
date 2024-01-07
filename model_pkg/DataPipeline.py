@@ -75,7 +75,7 @@ class DataPipeline():
         df = df.map(lambda features, target: (features, self.make_binary(target)))
         df = df.map(lambda inputs, target: (inputs, tf.one_hot(int(target), 2)))
         # cache this progress in memory
-        df = df.cache()
+       # df = df.cache()
         # shuffle, batch, prefetch
         df = df.shuffle(50)
         df = df.batch(self.batch_size)
