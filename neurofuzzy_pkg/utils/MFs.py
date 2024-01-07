@@ -155,7 +155,7 @@ def MF_tri_prime_b(x, a, b):
     mu = (2*abs(a-x)/b**2)
     return mu
 
-def visuMFs(layer, dir, func,names, means):
+def visuMFs(layer, dir, func, names):
     """Visualizing the current MFs
 visuMFs(inputMFs, self.arc, dir="before_training", func="inputMFs")
 inputMFs.mf_type, inputMFs.n_mfs, inputMFs.centers, inputMFs.widths, inputMFs.domain_input, 

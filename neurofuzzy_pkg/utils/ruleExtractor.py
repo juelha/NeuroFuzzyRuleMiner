@@ -164,6 +164,29 @@ class ruleExtractor():
 
         return False  
 
+    def validate_input(self, rule_ds):
+        """Validate an input obtained by a rule in ruleExtractor()
+
+        Args: 
+            rule_ds (PrefetchDataset): input dataset, created in ruleExtractor()
+
+        Returns:
+            (boolean): if a rule has been validated by producing the target
+            that was given by the rule
+        """
+        bias = 0.5
+        for (input, targets) in rule_ds:
+            input = tf.reshape(input,(len(self.feature_names),))
+
+            # pass forwards
+            prediction = self.arc(input)
+
+            # get accuracy
+            sample_test_accuracy =  targets == np.round(prediction, 0)
+            sample_test_accuracy = np.mean(sample_test_accuracy)
+            if sample_test_accuracy < bias:
+                return False
+            return True
 
     def print_results(self,):
         """Printing results of rule extraction to console

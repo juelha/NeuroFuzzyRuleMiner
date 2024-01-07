@@ -11,12 +11,7 @@ from model_pkg import *
 
 
 class Model():
-    """    
-    The Model()-Class is combinating all parts needed to make a model:
-    - datasets (train, test, evaluation)
-    - an architecture
-    - a trainer
-    ___________________________________________________________
+    """Masterclass for combining data, architecture and trainer.
     """
 
     def __init__(self, data, arc, trainer):
@@ -36,15 +31,7 @@ class Model():
 
         # data
         self.data = data
-        # load data for building my arc
-        self.data.load_data_for_building()
-        self.inputs = data.inputs
-        self.targets = data.targets
-        # loading data, performing datapipeline and getting datasets
-        self.data.load_data_for_training()
-        self.train_ds = data.train_ds
-        self.test_ds = data.test_ds
-        self.validation_ds = data.validation_ds
+
         # get feature_names names 
         self.feature_names = data.feature_names
 
@@ -54,16 +41,77 @@ class Model():
 
         # trainer
         self.trainer = trainer
-        # passing arc onto trainer
+
+    def run(self):
+        """
+        """
+        self.build()
+        self.train()
+        self.summary()
+
+    def build_MyArc(self):
+        # load data for building my arc
+        self.data.load_data_for_building()
+        self.arc.build(self.data.inputs, self.data.targets, self.data.inputs_mean)
+        print("Build done")
+
+    def build_MyArc_MF(self):
+        # load data for building my arc
+        self.data.load_data_for_building()
+        self.arc.build_MFs(self.data.inputs, self.data.targets, self.data.inputs_mean)
+        print("Build done")
+
+    def build(self):
+        """
+        """
+        # todo just do example datastet
+        print("self.inputs_mean", self.inputs_mean)
+        self.arc.build(self.inputs_mean, self.feature_names)
+       # self.trainer.test(self.inputs_mean)
+        self.built = True
+        return True
+
+    def trainMyArc(self):
+        self.arc.FuzzificationLayer.load_weights()
+        self.arc.RuleConsequentLayer.load_weights()
+        self.train()
+
+    def train(self):
+        """Calling trainer
+        """
+        # loading data, performing datapipeline and getting datasets
         self.trainer.arc = self.arc
+
+        self.data.load_data_for_training()
+        self.train_ds = self.data.train_ds
+        self.test_ds = self.data.test_ds
+        self.validation_ds = self.data.validation_ds
         # passing parameter names onto trainer
-        trainer.feature_names = self.feature_names 
-        trainer.inputs_mean = data.inputs_mean 
+        self.trainer.feature_names = self.data.feature_names 
 
-        # for building 
-        self.inputs_mean = data.inputs_mean 
-        self.built = False
+        tf.keras.backend.clear_session()
+        # trainig model
+        self.trainer(self.train_ds,  self.test_ds, self.validation_ds)
 
+
+    def evalutate(self):
+        """Testing the model with the validation dataset
+        """
+        # results from using validation data
+        eval_loss, eval_accuracy =  self.trainer.test(self.validation_ds)
+
+        print("\nEvaluation")
+        print(f'accuracy: {eval_loss}%')
+        print(f'loss:     {eval_accuracy}%')
+
+    def save_params(self):
+        """
+        """
+        # save results to csv  
+        save_path = os.path.dirname(__file__) +  '/../results'        
+        file_name = str ("Params" + self.arc.Name + ".csv")
+        completeName = os.path.join(save_path, file_name)
+        self.result.to_csv(completeName)
 
     def summary(self):
         """Printing & Saving all important information of a model
@@ -83,126 +131,3 @@ class Model():
 
         self.save_params()
         
-
-
-
-    def save_params(self):
-        """
-        """
-        
-        # save results to csv  
-        save_path = os.path.dirname(__file__) +  '/../results'        
-        file_name = str ("Params" + self.arc.Name + ".csv")
-        completeName = os.path.join(save_path, file_name)
-        self.result.to_csv(completeName)
-
-
-    def run(self):
-        """
-        """
-        self.build()
-        # asset ? 
-        self.train()
-        self.summary()
-
-    def build_MyArc(self):
-      # todo just do example datastet
-      #  print("self.inputs_mean", self.inputs_mean)
-        self.arc.build(self.inputs, self.targets, self.inputs_mean)
-       # self.trainer.test(self.inputs_mean)
-        self.built = True
-        print("Build done")
-
-    def build(self):
-        """
-        """
-        # todo just do example datastet
-        print("self.inputs_mean", self.inputs_mean)
-        self.arc.build(self.inputs_mean, self.feature_names)
-       # self.trainer.test(self.inputs_mean)
-        self.built = True
-        return True
-
-    def trainMyArc(self):
-        self.arc.FuzzificationLayer.load_weights()
-        self.arc.RuleConsequentLayer.load_weights()
-        self.trainer.arc = self.arc
-
-        self.train()
-
-    def train(self):
-        """Calling trainer
-        """
-        tf.keras.backend.clear_session()
-        # trainig model
-        self.trainer(self.train_ds,  self.test_ds, self.validation_ds)
-
-
-    def evalutate(self):
-        """Testing the model with the validation dataset
-        """
-        # results from using validation data
-        test_loss, test_accuracy =  self.trainer.test(self.validation_ds)
-
-        print("\nEvaluation")
-        print(f'accuracy: {test_accuracy}%')
-        print(f'loss:     {test_loss}%')
-
-
-
-    def validate_input(self, rule_ds):
-        """Validate an input obtained by a rule in ruleExtractor()
-
-        Args: 
-            rule_ds (PrefetchDataset): input dataset, created in ruleExtractor()
-
-        Returns:
-            (boolean): if a rule has been validated by producing the target
-            that was given by the rule
-        """
-        bias = 0.5
-        for (input, targets) in rule_ds:
-            input = tf.reshape(input,(len(self.feature_names),))
-
-            # pass forwards
-            prediction = self.arc(input)
-
-            # get accuracy
-            sample_test_accuracy =  targets == np.round(prediction, 0)
-            sample_test_accuracy = np.mean(sample_test_accuracy)
-            if sample_test_accuracy < bias:
-                return False
-            return True
-
-
-    def run_backwards(self):
-        """Inversion of a model 
-        """
-        self.train()
-
-        target = tf.convert_to_tensor([[1] * 11],dtype=tf.float32)
-        print("target       ", target)
-
-        best_input  =  self.arc.invert(target)
-        print("best_input    ", best_input)
-
-        # test best_input
-        prediction = self.arc(best_input)
-
-
-        print("prediciton from best input: ", prediction)
-        print("loss of best input:   ", 1-prediction)
-
-
-        save_path = os.path.dirname(__file__) +  '/../results'
-        file_name = "results.csv"
-        completeName = os.path.join(save_path, file_name)
-        new_file = open(completeName, "a")
-
-        #tf.io.write_file(file_name, output)
-        text =  str(best_input)
-        new_file.write(text)
-
-        new_file.close()
-
-

@@ -11,9 +11,7 @@ import neurofuzzy_pkg.utils.math_funcs as math_funcs
 
 
 class FuzzificationLayer():
-    """
-    The FuzzificationLayer()-Class is:
-    - fuzzifying of the crisp inputs by calculating their degree of membership 
+    """Fuzzifying the crisp inputs by calculating their degree of membership 
     Fuzzification-Neurons for the MFs Low, Medium, High:
         μ_L(x_1)
         /
@@ -56,8 +54,6 @@ class FuzzificationLayer():
         feature_names = inputs_mean.keys().values.tolist()
         n_inputs = tf.shape(inputs_mean)[0]
 
-
-
         # build centers and widths of MFs
         self.centers = np.asarray(MFs.center_init(self.n_mfs, inputs_mean),dtype=np.float32)
         self.widths = np.asarray(MFs.widths_init(self.n_mfs, self.centers, n_inputs), dtype=np.float32)
@@ -68,7 +64,7 @@ class FuzzificationLayer():
         # print("weights in fu", self.weights)
 
 
-        MFs.visuMFs(self, dir="after_building", func="InputMFs", names=feature_names, means=inputs_mean)
+        MFs.visuMFs(self, dir="after_building", func="InputMFs", names=feature_names)
 
         # save params for training 
         self.train_params = {'centers': self.centers, 'widths': self.widths}#, 'weights':self.weights}#, 'biases':self.biases}

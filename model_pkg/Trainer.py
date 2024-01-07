@@ -14,22 +14,21 @@ import os
 from tqdm import tqdm 
 
 class Trainer():
-    """
-    The Trainer()-Class is:
-    - training the model while keeping track of the accuracies and losses
-    - using SGD 
+    """Training the model while keeping track of the accuracies and losses using SGD.
     ___________________________________________________________
     """
 
     def __init__(self, arc=None, n_epochs=5, learning_rate=0.01, optimizer_func=Adam):
         """Initializes Trainer()-Object
+        
         Args:
             arc (MLP): architecture of the NN
             n_epochs (int): iterations of training loop
             learning_rate (float): learning rate for training
             optimizer_func (tf.keras.optimizers)
+        
         Attributes:
-        loss_func
+            loss_func
             test_accuracies (list(float)): keeping track of test accuracies during training
             test_losses (list(float)): keeping track of test losses during training
             train_losses (list(float)): keeping track of train losses during training
@@ -69,14 +68,6 @@ class Trainer():
         self.training_loop(train_ds,  test_ds, validation_ds)
         self.visualize_training(self.arc.Name)
 
-
-    def summary(self):
-        column_names = ['n_epochs', 'learning_rate', 'loss_func', 'optimizer_func']
-        d = self.params
-
-        df = pd.DataFrame(d, column_names)
-        return df
-
     def pick_batch(self, ds):
         """Return one entry from batch 
         Args:
@@ -112,8 +103,8 @@ class Trainer():
             test_ds (PrefetchDataset): dataset for testing
         """
         # picking random batch from dataset
-        test_ds = test_ds_og#self.pick_batch(test_ds_og)
-        train_ds =  train_ds_og#self.pick_batch(train_ds_og)
+        test_ds = self.pick_batch(test_ds_og)
+        train_ds =  self.pick_batch(train_ds_og)
         validation_ds = self.pick_batch(validation_ds_og)
 
         # run model on test_ds to keep track of progress during training
@@ -138,8 +129,8 @@ class Trainer():
             train loss {self.train_losses[-1]}')
 
             # in each epoch, pick a random batch
-          #  test_ds =  self.pick_batch(test_ds_og)
-           # train_ds =  self.pick_batch(train_ds_og)
+            test_ds =  self.pick_batch(test_ds_og)
+            train_ds =  self.pick_batch(train_ds_og)
 
             # train and keep track
             epoch_loss_agg = []
@@ -293,3 +284,9 @@ class Trainer():
         completeName = os.path.join(save_path, file_name)
         plt.savefig(completeName)
         plt.clf()
+
+    def summary(self):
+        column_names = ['n_epochs', 'learning_rate', 'loss_func', 'optimizer_func']
+        d = self.params
+        df = pd.DataFrame(d, column_names)
+        return df

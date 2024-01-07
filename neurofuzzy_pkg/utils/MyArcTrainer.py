@@ -40,13 +40,13 @@ class MyArcTrainer(Trainer):
         """
 
 
-        utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="before_training", func="inputMFs", names=self.feature_names, means=self.inputs_mean)
+        utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="before_training", func="inputMFs", names=self.feature_names)
        
         # train
         self.training_loop(train_ds, test_ds, validation_ds)
 
         # saving figs after training
-        utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="after_training", func="inputMFs", names=self.feature_names, means=self.inputs_mean)
+        utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="after_training", func="inputMFs", names=self.feature_names)
 
         self.visualize_training(self.arc.Name)
 
@@ -152,7 +152,7 @@ class MyArcTrainer(Trainer):
                 sample_test_loss = self.error_function(prediction, target)
                # print("sample_test_loss",sample_test_loss)
                 # get accuracy
-                sample_test_accuracy =  target == np.round(prediction, 0)
+                sample_test_accuracy =  target == np.round(prediction, 1)
               #  sample_test_accuracy = ones - self.error_function(prediction, target)
                 sample_test_accuracy = np.mean(sample_test_accuracy)
                 test_loss_aggregator.append(sample_test_loss)
@@ -239,6 +239,7 @@ class MyArcTrainer(Trainer):
             out_row = prediction[cidx] # in order to slice [:,idx]
             for idx, number in enumerate(classweight):
                 if bool(number)==True:
+
                  #   print("idx", idx)
                   #  print("tar",targets[idx]  )
                    # print("out_row[:,idx]", out_row[idx])
@@ -342,27 +343,27 @@ class MyArcTrainer(Trainer):
                 # print("D", gradients)
                 # print("c", layer.centers[xID1][mfID1])
                 # print("w", layer.widths[xID1][mfID1])
-                if xID1+1 == n_rows: 
-                    return 0 
-                else:
-                    other_mu = self.arc.RuleAntecedentLayer.inputs[xID1+1,mfID1] 
 
-                delta = float32(gradients[i])
-                delta *= other_mu
-                gradient_center = delta* centers_derived[xID1][mfID1]
-                gradient_width = delta* widths_der[xID1][mfID1]
+                mu1 = self.arc.RuleAntecedentLayer.inputs[xID1,mfID1] 
 
-                layer.centers[xID1][mfID1] -=  np.multiply(gradient_center, self.learning_rate)
-                layer.widths[xID1][mfID1] -= np.multiply(gradient_width, self.learning_rate)
-                
 
                 # get second participant
                 # by looping over the rest of rows
                 for xID2 in range(xID1+1, n_rows):
                     for mfID2 in range(n_cols):  
-                        other_mu = self.arc.RuleAntecedentLayer.inputs[xID1,mfID1]
+                        mu2 = self.arc.RuleAntecedentLayer.inputs[xID2,mfID2]
+
+                        # adapt mu1
                         delta = float32(gradients[i])
-                        delta *= other_mu
+                        delta *= mu2
+                        gradient_center = delta* centers_derived[xID1][mfID1]
+                        gradient_width = delta* widths_der[xID1][mfID1]
+                        layer.centers[xID1][mfID1] -=  np.multiply(gradient_center, self.learning_rate)
+                        layer.widths[xID1][mfID1] -= np.multiply(gradient_width, self.learning_rate)
+                        
+                        # adapt mu2
+                        delta = float32(gradients[i])
+                        delta *= mu1
                         gradient_center = delta* centers_derived[xID2][mfID2]
                         gradient_width = delta * widths_der[xID2][mfID2]
                         layer.centers[xID2][mfID2] -= np.multiply(gradient_center, self.learning_rate)
