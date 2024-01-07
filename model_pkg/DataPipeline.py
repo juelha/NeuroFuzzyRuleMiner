@@ -19,7 +19,7 @@ class DataPipeline():
     ___________________________________________________________
     """
 
-    def __init__(self, n_batches=3, online=False):
+    def __init__(self, n_batches=3, online=False, batch_size=64):
         """Initializes DataPipeline()-Object
         Args:
             n_batches (int): number of batches of a dataset
@@ -34,7 +34,7 @@ class DataPipeline():
 
         self.n_batches = n_batches
         self.params = [self.n_batches]
-        self.batch_size = 64 # hc
+        self.batch_size = batch_size
         
         self.online = online
 

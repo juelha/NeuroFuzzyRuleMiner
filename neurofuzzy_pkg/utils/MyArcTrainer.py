@@ -23,10 +23,12 @@ class MyArcTrainer(Trainer):
     ___________________________________________________________
     """
 
-    def __init__(self):#, ite = 10):# loss_func=None, optimizer_func=Adam):
+    def __init__(self, n_epochs, learning_rate):#, ite = 10):# loss_func=None, optimizer_func=Adam):
         """Initializing neurofuzzyTrainer by inheriting from Trainer
         """
-        super().__init__(MyArcTrainer)#, ite)#, iters, learning_rate )
+        super().__init__(Trainer(n_epochs=n_epochs))#, ite)#, iters, learning_rate )
+        self.n_epochs = n_epochs
+        self.learning_rate = learning_rate
 
 
     def __call__(self, train_ds, test_ds, validation_ds):
@@ -37,12 +39,9 @@ class MyArcTrainer(Trainer):
             test_ds (PrefetchDataset): dataset for testing
         """
 
-        self.n_epochs = 100
-        self.learning_rate = 1.5
 
         utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="before_training", func="inputMFs", names=self.feature_names, means=self.inputs_mean)
-
-        
+       
         # train
         self.training_loop(train_ds, test_ds, validation_ds)
 
@@ -101,11 +100,6 @@ class MyArcTrainer(Trainer):
             train_ds =  self.pick_batch(train_ds_og)
             validation_ds = self.pick_batch(validation_ds_og)
 
-            # test_ds =  test_ds_og
-            # train_ds = train_ds_og
-            # validation_ds = validation_ds_og
-
-
             # train and keep track
             epoch_loss_agg = []
             for input,target in train_ds:
@@ -150,13 +144,16 @@ class MyArcTrainer(Trainer):
                 prediction = self.arc(inputs)
 
                 target = np.resize(target, prediction.shape)
+                ones = np.ones(shape=prediction.shape)
 
                 # get loss
               #  print(prediction)
                # print(target)
                 sample_test_loss = self.error_function(prediction, target)
+               # print("sample_test_loss",sample_test_loss)
                 # get accuracy
                 sample_test_accuracy =  target == np.round(prediction, 0)
+              #  sample_test_accuracy = ones - self.error_function(prediction, target)
                 sample_test_accuracy = np.mean(sample_test_accuracy)
                 test_loss_aggregator.append(sample_test_loss)
 #                test_loss_aggregator.append(sample_test_loss.numpy())
@@ -247,8 +244,8 @@ class MyArcTrainer(Trainer):
                    # print("out_row[:,idx]", out_row[idx])
                     error =  0.5*(targets[idx] - out_row[idx])**2
                     error_term.append(error)
-                else:
-                    error_term.append(0) # for weights that are 0 0
+                # else:
+                #     error_term.append(0) # for weights that are 0 0
         #error_term = tf.reduce_mean(0.5*(prediction - targets)**2)
         return error_term
 
@@ -281,8 +278,8 @@ class MyArcTrainer(Trainer):
                     error =  -1*(targets[idx] - out_row[idx])
                     error_term.append(error)
                     assigned = True
-            if assigned==False:        
-                error_term.append(0) # for weights that are 0 0
+            # if assigned==False:        
+            #     error_term.append(0) # for weights that are 0 0
         return error_term
 
     def calc_mf_derv_widths(self):
@@ -297,10 +294,10 @@ class MyArcTrainer(Trainer):
             for mfID in range(self.arc.FuzzificationLayer.n_mfs):
 
                 # calling MF 
-                mu = MF_tri_prime_b(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
+                mu = MF_gaussian_prime_b(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
                 mus_per_x.append(mu)
 
-            print("here", mus_per_x)
+           # print("here", mus_per_x)
             # write to TensorArray
             fuzzified_inputs = fuzzified_inputs.write(fuzzified_inputs.size(), mus_per_x)
 
@@ -320,7 +317,7 @@ class MyArcTrainer(Trainer):
             for mfID in range(self.arc.FuzzificationLayer.n_mfs):
 
                 # calling MF 
-                mu = MF_tri_prime_a(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
+                mu = MF_gaussian_prime_a(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
                 mus_per_x.append(mu)
         
             # write to TensorArray
@@ -338,8 +335,6 @@ class MyArcTrainer(Trainer):
 
         # picking first participant of a rule 
         # by looping over rows of input 
-        
-        #  print("delt", gradients)
         i = 0
         for xID1 in range(n_rows):
             for mfID1 in range(n_cols):
@@ -348,11 +343,9 @@ class MyArcTrainer(Trainer):
                 # print("c", layer.centers[xID1][mfID1])
                 # print("w", layer.widths[xID1][mfID1])
                 if xID1+1 == n_rows: 
-                #    print("I", i)
-
                     return 0 
                 else:
-                    other_mu = self.arc.RuleAntecedentLayer.inputs[xID1+1,mfID1] # get tghe other mu errror
+                    other_mu = self.arc.RuleAntecedentLayer.inputs[xID1+1,mfID1] 
 
                 delta = float32(gradients[i])
                 delta *= other_mu
@@ -372,7 +365,6 @@ class MyArcTrainer(Trainer):
                         delta *= other_mu
                         gradient_center = delta* centers_derived[xID2][mfID2]
                         gradient_width = delta * widths_der[xID2][mfID2]
-                        # print("delta," ,)
                         layer.centers[xID2][mfID2] -= np.multiply(gradient_center, self.learning_rate)
                         layer.widths[xID2][mfID2] -= np.multiply(gradient_width, self.learning_rate)
                         i += 1

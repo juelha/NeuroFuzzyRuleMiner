@@ -69,7 +69,7 @@ class MyArc():
         done = False
         #inputs = inputs[0]
         print("MARK", inputs)
-        for i in range(9): #hc
+        for i in range(9):
             self.RuleConsequentLayer.dictrules[i] = []
             self.RuleConsequentLayer.tars[i] = []
 
@@ -81,16 +81,14 @@ class MyArc():
                     x = layer.build(x, weirdtar)
                 else:
                     x = layer.build(x)
-        print("dict", self.RuleConsequentLayer.dictrules)
+      #  print("dict", self.RuleConsequentLayer.dictrules)
         # class weights 
         for ruleID in self.RuleConsequentLayer.dictrules:
-           # print("ruleID",ruleID)
             l = self.RuleConsequentLayer.dictrules[ruleID]
-           # print("l", l)
-
             max_val = max(l)
             idx_max = l.index(max_val)
-            #print("max", max_val)
+          # print("l", l)
+           # print("max", max_val)
             
             tar = self.RuleConsequentLayer.tars[ruleID][idx_max]
             #print("tar", tar)

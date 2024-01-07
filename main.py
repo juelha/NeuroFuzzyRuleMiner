@@ -35,14 +35,18 @@ def main():
    # SugenoModel.run()
   
     # My Model
-    MyModel = Model(DataPipeline(), MyArc(), MyArcTrainer())
-    MyModel.build_MyArc() # works 
-    MyModel.trainMyArc()
+    batch_size = 64
+    learning_rate = 3
+    n_epochs = 25 
+
+    MyModel = Model(DataPipeline(batch_size=batch_size), MyArc(), MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate))
+   # MyModel.build_MyArc() # works 
+    #MyModel.trainMyArc()
 
     ## Model with MLP arc
-    # MLPModel = Model(DataPipeline(),  MLP((4,32),2),  Trainer())
+    MLPModel = Model(DataPipeline(),  MLP((4,32),2),  Trainer())
 
-    # MLPModel.train()
+    MLPModel.train()
     # print(MLPModel.summary()) 
 
 
