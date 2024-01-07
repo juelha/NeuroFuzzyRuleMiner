@@ -35,7 +35,7 @@ class MyArcTrainer(Trainer):
             test_ds (PrefetchDataset): dataset for testing
         """
 
-      #  self.n_epochs = 10
+        self.n_epochs = 10
         self.learning_rate = 1
         
         # train
@@ -55,9 +55,12 @@ class MyArcTrainer(Trainer):
             test_ds (PrefetchDataset): dataset for testing
         """
         # picking random batch from dataset
-        test_ds = self.pick_batch(test_ds_og)
-        train_ds =  self.pick_batch(train_ds_og)
-        validation_ds = self.pick_batch(validation_ds_og)
+        # test_ds = self.pick_batch(test_ds_og)
+        # train_ds =  self.pick_batch(train_ds_og)
+        # validation_ds = self.pick_batch(validation_ds_og)
+        test_ds =  test_ds_og
+        train_ds = train_ds_og
+        validation_ds = validation_ds_og
 
         # run model on test_ds to keep track of progress during training
         test_loss, test_accuracy = self.test(test_ds)
@@ -89,9 +92,13 @@ class MyArcTrainer(Trainer):
             #validation_ds = tf.random.shuffle(validation_ds)
 
             # in each epoch, pick a random batch
-            test_ds =  self.pick_batch(test_ds_og)
-            train_ds =  self.pick_batch(train_ds_og)
-            validation_ds = self.pick_batch(validation_ds_og)
+            # test_ds =  self.pick_batch(test_ds_og)
+            # train_ds =  self.pick_batch(train_ds_og)
+            # validation_ds = self.pick_batch(validation_ds_og)
+
+            test_ds =  test_ds_og
+            train_ds = train_ds_og
+            validation_ds = validation_ds_og
 
 
             # train and keep track
@@ -285,7 +292,7 @@ class MyArcTrainer(Trainer):
             for mfID in range(self.arc.FuzzificationLayer.n_mfs):
 
                 # calling MF 
-                mu = MF_gaussian_prime_a(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
+                mu = MF_gaussian_prime_b(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
                 mus_per_x.append(mu)
         
             # write to TensorArray
@@ -307,7 +314,7 @@ class MyArcTrainer(Trainer):
             for mfID in range(self.arc.FuzzificationLayer.n_mfs):
 
                 # calling MF 
-                mu = MF_gaussian_prime_b(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
+                mu = MF_gaussian_prime_a(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
                 mus_per_x.append(mu)
         
             # write to TensorArray

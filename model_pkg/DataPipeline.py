@@ -34,7 +34,7 @@ class DataPipeline():
 
         self.n_batches = n_batches
         self.params = [self.n_batches]
-        self.batch_size = 32 # hc
+        self.batch_size = 500 # hc
         
         self.online = online
 

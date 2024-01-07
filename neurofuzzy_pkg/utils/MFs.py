@@ -143,10 +143,16 @@ def MF_tri(x, a, b):
         AssertionError; if output is outside bounds
     """
     mu = 1- ((2*abs(x-a)/b))
-    assert (mu <= 1 )& (mu >= 0), 'Degree of membership is outside bounds, \
-                                    refer to formal def of mf: µA:X → [0,1]'
+    # assert (mu <= 1 )& (mu >= 0), 'Degree of membership is outside bounds, \
+    #                                 refer to formal def of mf: µA:X → [0,1]'
     return mu
 
+def MF_tri_prime_a(x,a,b):
+    mu = (2*(x-a))/(b*abs(x-a))
+    return mu
+
+def MF_tri_prime_b(x, a, b):
+    mu = (2*abs(a-x)/b**2)
 
 def visuMFs(layer, dir, func,names, means):
     """Visualizing the current MFs
