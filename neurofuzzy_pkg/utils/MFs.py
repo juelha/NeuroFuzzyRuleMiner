@@ -153,6 +153,7 @@ def MF_tri_prime_a(x,a,b):
 
 def MF_tri_prime_b(x, a, b):
     mu = (2*abs(a-x)/b**2)
+    return mu
 
 def visuMFs(layer, dir, func,names, means):
     """Visualizing the current MFs

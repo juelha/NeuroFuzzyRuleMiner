@@ -5,9 +5,11 @@ import numpy as np
 
 # custom
 from model_pkg import Trainer
-from neurofuzzy_pkg.fuzzyLayers import MF_gaussian_prime_a
+#from neurofuzzy_pkg.fuzzyLayers import MF_gaussian_prime_a
 from neurofuzzy_pkg import utils
 from neurofuzzy_pkg.utils.MFs import MF_gaussian,MF_gaussian_prime_a, MF_gaussian_prime_b
+from neurofuzzy_pkg.utils.MFs import MF_tri,MF_tri_prime_a, MF_tri_prime_b
+
 
 from tqdm import tqdm 
 #from neurofuzzy_pkg.fuzzyLayers.RuleConsequentLayer import RuleConsequentLayer
@@ -35,8 +37,11 @@ class MyArcTrainer(Trainer):
             test_ds (PrefetchDataset): dataset for testing
         """
 
-        self.n_epochs = 10
-        self.learning_rate = 1
+        self.n_epochs = 100
+        self.learning_rate = 1.5
+
+        utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="before_training", func="inputMFs", names=self.feature_names, means=self.inputs_mean)
+
         
         # train
         self.training_loop(train_ds, test_ds, validation_ds)
@@ -55,12 +60,12 @@ class MyArcTrainer(Trainer):
             test_ds (PrefetchDataset): dataset for testing
         """
         # picking random batch from dataset
-        # test_ds = self.pick_batch(test_ds_og)
-        # train_ds =  self.pick_batch(train_ds_og)
-        # validation_ds = self.pick_batch(validation_ds_og)
-        test_ds =  test_ds_og
-        train_ds = train_ds_og
-        validation_ds = validation_ds_og
+        test_ds = self.pick_batch(test_ds_og)
+        train_ds =  self.pick_batch(train_ds_og)
+        validation_ds = self.pick_batch(validation_ds_og)
+        # test_ds =  test_ds_og
+        # train_ds = train_ds_og
+        # validation_ds = validation_ds_og
 
         # run model on test_ds to keep track of progress during training
         test_loss, test_accuracy = self.test(test_ds)
@@ -87,18 +92,18 @@ class MyArcTrainer(Trainer):
 
 
             # shuffle
-           # train_ds = tf.random.shuffle(train_ds)
-            #test_ds = tf.random.shuffle(test_ds)
-            #validation_ds = tf.random.shuffle(validation_ds)
+            # train_ds = tf.random.shuffle(train_ds)
+            # test_ds = tf.random.shuffle(test_ds)
+            # validation_ds = tf.random.shuffle(validation_ds)
 
             # in each epoch, pick a random batch
-            # test_ds =  self.pick_batch(test_ds_og)
-            # train_ds =  self.pick_batch(train_ds_og)
-            # validation_ds = self.pick_batch(validation_ds_og)
+            test_ds =  self.pick_batch(test_ds_og)
+            train_ds =  self.pick_batch(train_ds_og)
+            validation_ds = self.pick_batch(validation_ds_og)
 
-            test_ds =  test_ds_og
-            train_ds = train_ds_og
-            validation_ds = validation_ds_og
+            # test_ds =  test_ds_og
+            # train_ds = train_ds_og
+            # validation_ds = validation_ds_og
 
 
             # train and keep track
@@ -292,9 +297,10 @@ class MyArcTrainer(Trainer):
             for mfID in range(self.arc.FuzzificationLayer.n_mfs):
 
                 # calling MF 
-                mu = MF_gaussian_prime_b(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
+                mu = MF_tri_prime_b(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
                 mus_per_x.append(mu)
-        
+
+            print("here", mus_per_x)
             # write to TensorArray
             fuzzified_inputs = fuzzified_inputs.write(fuzzified_inputs.size(), mus_per_x)
 
@@ -314,7 +320,7 @@ class MyArcTrainer(Trainer):
             for mfID in range(self.arc.FuzzificationLayer.n_mfs):
 
                 # calling MF 
-                mu = MF_gaussian_prime_a(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
+                mu = MF_tri_prime_a(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
                 mus_per_x.append(mu)
         
             # write to TensorArray
