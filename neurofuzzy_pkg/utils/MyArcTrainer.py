@@ -230,6 +230,8 @@ class MyArcTrainer(Trainer):
         """
         error_term = []
         targets = targets[0]
+       # print("pred", prediction)
+        #print("tar", targets)
         for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
           #  print("tar", targets.numpy)
             
@@ -241,8 +243,8 @@ class MyArcTrainer(Trainer):
                 if bool(number)==True:
 
                  #   print("idx", idx)
-                  #  print("tar",targets[idx]  )
-                   # print("out_row[:,idx]", out_row[idx])
+                   # print("tar",targets[idx]  )
+                  #  print("out_row[:,idx]", out_row[idx])
                     error =  0.5*(targets[idx] - out_row[idx])**2
                     error_term.append(error)
                 # else:

@@ -91,21 +91,22 @@ class RuleConsequentLayer():
             # Converts yaml document to python object
             config =yaml.load(config_file, Loader=UnsafeLoader)
             weights = np.array(config)
-          #  print(type(weights))
-          # print(weights)
+            print(type(weights))
+            print(weights)
         
         # opt 2: np.save
-        file_name = "config_weights"
-        other_name = os.path.join(save_path, file_name)
-        loaded_weights = np.load(other_name+'.npy')
-        print("sucessfully loaded weights")
-       # print(loaded_weights)
-       # return weights
+    #     file_name = "config_weights"
+    #     other_name = os.path.join(save_path, file_name)
+    #     loaded_weights = np.load(other_name+'.npy')
+    #     print("sucessfully loaded weights")
+    #    # print(loaded_weights)
+    #    # return weights
+        
+        self.weights = weights
         self.train_params = {'weights': self.weights}
-        self.weights = loaded_weights
        
         self.built = True
-        return loaded_weights
+        return weights
 
 
     def build(self, inputs, one_hot_tar):
@@ -190,8 +191,10 @@ class RuleConsequentLayer():
             out = out.write(out.size(), output)
 
             ruleID += 1
-
+       # print("w", self.weights)
+    
         out = out.stack()       
+        #print("out", out)
         self.outputs = out #     saved for training   
 
        # print("out", out)  

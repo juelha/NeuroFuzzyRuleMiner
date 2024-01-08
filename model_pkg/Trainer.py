@@ -242,7 +242,11 @@ class Trainer():
             error_term (float): output of derived error function
         """
 
-        error_term = tf.reduce_mean(0.5*(prediction - targets)**2)
+        #error_term = tf.reduce_mean(0.5*(prediction - targets)**2)
+
+        print("pred", prediction)
+        print("tar", targets)
+        error_term = 0.5*(prediction - targets)**2
         return error_term
 
 

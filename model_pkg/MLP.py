@@ -7,11 +7,9 @@ from tensorflow.keras.regularizers import *
 from tensorflow.keras.optimizers import *
 
 class MLP(tf.keras.Model):
-    """
-    The MLP()-Class is inherited from tf.keras.Model and responsible for:
+    """Inherited from tf.keras.Model and responsible for:
     - describing architecture of NN  
     - forward pass of information  
-    ___________________________________________________________
     """
 
     def __init__(self, dim_hidden, perceptrons_out, activation=tf.sigmoid, k_r='l1_l2', a_r='l2'):
@@ -36,13 +34,16 @@ class MLP(tf.keras.Model):
         # initalizing hidden layers
         n_layers, n_perceptrons = dim_hidden
 
-        self.hidden = [Dense(
-            n_perceptrons,
-            activation=activation,
-            kernel_regularizer=k_r,
-            activity_regularizer=a_r
-            ) for _ in range(n_layers)]
+        self.hidden = [Dense(3)]
 
+        # self.hidden = [Dense(
+        #     n_perceptrons,
+        #     activation=activation,
+        #     kernel_regularizer=k_r,
+        #     activity_regularizer=a_r
+        #     ) for _ in range(n_layers)]
+
+        perceptrons_out = 2
         self.out = Dense(perceptrons_out, activation=tf.sigmoid)
 
 
@@ -85,6 +86,7 @@ class MLP(tf.keras.Model):
 
         for layer in self.hidden:
               inputs = layer(inputs)
+        print("in", inputs)
         inputs = self.out(inputs)
 
         return inputs

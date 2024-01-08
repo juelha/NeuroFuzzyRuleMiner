@@ -164,6 +164,8 @@ class DataPipeline():
         # make targets binary 
         treshhold = np.mean(targets)        
         targets = targets.apply(lambda x: int(x >= treshhold))
+        print(type(targets))
+        print(targets.head())
         
         self.feature_names = list(df.columns)
 
