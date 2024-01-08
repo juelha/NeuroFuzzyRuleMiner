@@ -152,7 +152,7 @@ class MyArcTrainer(Trainer):
                 sample_test_loss = self.error_function(prediction, target)
                # print("sample_test_loss",sample_test_loss)
                 # get accuracy
-                sample_test_accuracy =  target == np.round(prediction, 1)
+                sample_test_accuracy =  target == np.round(prediction, 0)
               #  sample_test_accuracy = ones - self.error_function(prediction, target)
                 sample_test_accuracy = np.mean(sample_test_accuracy)
                 test_loss_aggregator.append(sample_test_loss)
