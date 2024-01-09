@@ -148,7 +148,7 @@ class MyArcTrainer(Trainer):
 
                 # get loss
               #  print(prediction)
-               # print(target)
+              #  print(target)
                 sample_test_loss = self.error_function(prediction, target)
                # print("sample_test_loss",sample_test_loss)
                 # get accuracy
@@ -157,7 +157,7 @@ class MyArcTrainer(Trainer):
                 sample_test_accuracy = np.mean(sample_test_accuracy)
                 test_loss_aggregator.append(sample_test_loss)
 #                test_loss_aggregator.append(sample_test_loss.numpy())
-                test_accuracy_aggregator.append(np.mean(sample_test_accuracy))  
+                test_accuracy_aggregator.append(sample_test_accuracy)
 
         # return averages per batch
         test_loss = tf.reduce_mean(test_loss_aggregator)
@@ -230,8 +230,8 @@ class MyArcTrainer(Trainer):
         """
         error_term = []
         targets = targets[0]
-       # print("pred", prediction)
-        #print("tar", targets)
+     #   print("pred", prediction)
+      #  print("tar", targets)
         for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
           #  print("tar", targets.numpy)
             
@@ -246,10 +246,12 @@ class MyArcTrainer(Trainer):
                    # print("tar",targets[idx]  )
                   #  print("out_row[:,idx]", out_row[idx])
                     error =  0.5*(targets[idx] - out_row[idx])**2
+                    
                     error_term.append(error)
                 # else:
                 #     error_term.append(0) # for weights that are 0 0
-        #error_term = tf.reduce_mean(0.5*(prediction - targets)**2)
+        #error_term = tf.reduce_mean(0.5*(prediction - targets)**2)#
+      #  print("error", error_term)
         return error_term
 
 
@@ -265,6 +267,9 @@ class MyArcTrainer(Trainer):
         """
         error_term = []
         targets = targets[0]
+      #  print("tar", targets)
+      #  print("pre", prediction)
+
         for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
          #   print("tar", targets.numpy)
             
@@ -283,6 +288,7 @@ class MyArcTrainer(Trainer):
                     assigned = True
             # if assigned==False:        
             #     error_term.append(0) # for weights that are 0 0
+       # print("error", error_term)
         return error_term
 
     def calc_mf_derv_widths(self):

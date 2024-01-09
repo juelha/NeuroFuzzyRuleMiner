@@ -65,7 +65,7 @@ class MLP(tf.keras.Model):
         """
         encaps_inputs = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
         for input in inputs:
-            print("in", input)
+           # print("in", input)
             encaps_inputs = encaps_inputs.write(encaps_inputs.size(), [input])
         return encaps_inputs.stack()
 
@@ -86,7 +86,7 @@ class MLP(tf.keras.Model):
 
         for layer in self.hidden:
               inputs = layer(inputs)
-        print("in", inputs)
+      #  print("in", inputs)
         inputs = self.out(inputs)
 
         return inputs

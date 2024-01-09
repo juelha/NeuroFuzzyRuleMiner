@@ -97,7 +97,10 @@ class DataPipeline():
         df = df.sample(frac=1)
         # separate into input and targets 
         targets = df.pop('out')
+        print("df", df)
         self.feature_names = list(df.columns)
+        print("feature", self.feature_names)
+
         # get mean of all cols
         self.inputs_mean = np.mean(df, axis=0)      
         return df, targets

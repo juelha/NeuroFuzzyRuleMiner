@@ -37,7 +37,7 @@ def main():
     # My Model
     batch_size = 64
     learning_rate = 1
-    n_epochs = 100 
+    n_epochs = 10 
 
     MyModel = Model(DataPipeline(batch_size=batch_size), MyArc(), MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate))
    # MyModel.build_MyArc() # works 
@@ -47,11 +47,11 @@ def main():
     ## Model with MLP arc
     MLPModel = Model(DataPipeline(),  MLP((2,6),2),  Trainer())
 
-   # MLPModel.train()
+    MLPModel.train()
     # print(MLPModel.summary()) 
 
 
-    # rules = ruleExtractor(MamdaniModel, MLPModel)
+    rules = ruleExtractor(MyModel, MLPModel)
     # rules.print_results()
     
     return 0

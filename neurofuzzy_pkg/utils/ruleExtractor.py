@@ -3,6 +3,7 @@ import tensorflow as tf
 import pandas as pd
 import os.path
 from numpy import nan
+import numpy as np
 
 # custom
 from model_pkg import *
@@ -26,14 +27,16 @@ class ruleExtractor():
         """
 
         # arcs used
-        self.mamdaniArc = neuro_fuzzy_model.arc
+        self.arc = neuro_fuzzy_model.arc
         self.classifier = mlp_model 
 
         # for final Dict of rules
         self.rulesDict = {}
         self.feature_names = neuro_fuzzy_model.feature_names
         self.linguistic_mf = ["low","medium","high"]
-        self.n_outputs = neuro_fuzzy_model.arc.RuleConsequentLayer.n_mfs 
+        self.lingusitic_output = ["bad", "good"]
+        
+        self.n_outputs = 2# hc neuro_fuzzy_model.arc.RuleConsequentLayer.n_mfs 
 
         # calling functions
         self.extractRules()
@@ -43,83 +46,82 @@ class ruleExtractor():
         """Function used for extracting rules from the dicts in the model
         """
 
-        rulesIF = self.mamdaniArc.RuleAntecedentLayer.rulesIF # 1-90
+        rulesIF = self.arc.RuleAntecedentLayer.rulesIF # 1-90
         # dict that looks like
         # rulesIF {1: [{'xID': 0, 'mfID': 0}, {'xID': 1, 'mfID': 0}], 2: [{'xID': 0, 'mfID': 0}, {'xID': 1, 'mfID': 1}], ...
 
-        rulesTHEN = self.mamdaniArc.RuleConsequentLayer.rulesTHEN
+        rulesTHEN = self.arc.RuleConsequentLayer.rulesTHEN
         # dict that looks like
-        # rulesTHEN {0: [1, 3, ...], 1: [36, 54, ...]
+        ## old:  rulesTHEN {0: [1, 3, ...], 1: [36, 54, ...]
+        # {'RS': x, 'target': self.weights}
+        # {0: {'RS': x, 'target': self.weights}
 
-      #  print("rulesIF",rulesIF)
-       # print("rulesTHEN",rulesTHEN)
+        print("rulesIF",rulesIF)
+        print("rulesTHEN",rulesTHEN)
 
         # going through rules for respective outcome 
         # -> per outcome on output mf & one entry final rules Dict
         # good yield -> outmfID = 1 
         # bad yield -> outmfID = 0
 
-        # iterating over rules that are sorted by mf from RuleConsequentLayer
-        for outmfID in range(self.n_outputs):
-
-            # setting up ruleDict
-            self.rulesDict[outmfID] = {}
-            self.rulesDict[outmfID]["ruleID"] = []
-
-            # setting up cols of ruleDict
-            for para in self.feature_names:
-                self.rulesDict[outmfID][para] = []
-
-            # iterate over rules per mf 
-            for ruleID in rulesTHEN[outmfID]:
-                
-                # keeping track of which parameters have been used
-                # usedNames is needed to fill up the rest of cols with nans
-                usedNames = []
-
-                # getting information on participating elements of a rule  
-                elements_from_rule = []
-                for element in rulesIF[ruleID]:
-                    elements_from_rule.append(element)
-
-                # validate rule with classifier 
-                if self.checkRule(elements_from_rule, outmfID):
-                    # adding ruleID from from validated rule from rulesTHEN to rulesDict
-                    self.rulesDict[outmfID]["ruleID"].append(ruleID)
-
-                    for element in elements_from_rule:
-                        # get parameter name
-                        name = self.feature_names[element['xID']]
-                        # add value of mf under parameter name
-                        self.rulesDict[outmfID][name].append(self.linguistic_mf[element['mfID']])
-                        usedNames.append(name)
-                
-                    # determine which parameters to fill with nan
-                    missingNames = list(set(self.feature_names) - set(usedNames)) 
-                    for name in missingNames:
-                        self.rulesDict[outmfID][name].append(nan)
-
-                # if rule was not validated, do not add 
-                else:
-                    continue
             
+        # setting up cols of ruleDict
+        for para in self.feature_names:
+            self.rulesDict[para] = []
+        self.rulesDict['Output'] = []
+
+        # iterating over rules 
+        for ruleID in rulesIF:
+            
+                
+            # keeping track of which parameters have been used
+            # usedNames is needed to fill up the rest of cols with nans
+            usedNames = []
+
+            # validate rule with classifier 
+            ruleAcc =  self.checkRule(rulesIF[ruleID], rulesTHEN[ruleID])
+          #  self.rulesDict[ruleID] = [rulesIF[ruleID], {"then": rulesTHEN[ruleID], 'acc': ruleAcc}]
+                    
+             
+            for participant in rulesIF[ruleID]:
+                # get parameter name
+                name = self.feature_names[participant['xID']]
+                # add value of mf under parameter name
+                self.rulesDict[name].append(self.linguistic_mf[participant['mfID']])
+                
+                usedNames.append(name)
+        
+            # determine which parameters to fill with nan
+            missingNames = list(set(self.feature_names) - set(usedNames)) 
+            for name in missingNames:
+                self.rulesDict[name].append(nan)
+            
+            self.rulesDict['Output'].append(rulesTHEN[ruleID])
+            # if rulesTHEN[ruleID] == [1,0]:
+            #     self.rulesDict['Output'].append(self.lingusitic_output[0])
+            # if rulesTHEN[ruleID] == [0,1]:
+            #     self.rulesDict['Output'].append(self.lingusitic_output[1])
+        
+
+        print("/n dict", self.rulesDict)
         # save results to csv files
         save_path = os.path.dirname(__file__) +  '/../../results'
 
         ## good yield 
-        file_name = "good_yield.csv"
+        file_name = "dummy_rules.csv"
         completeName = os.path.join(save_path, file_name)
-        df_good = pd.DataFrame(self.rulesDict[1])
+
+        df_good = pd.DataFrame(self.rulesDict)
         df_good.to_csv(completeName)
 
         ## bad yield 
-        file_name = "bad_yield.csv"
-        completeName = os.path.join(save_path, file_name)
-        df_bad = pd.DataFrame(self.rulesDict[0])
-        df_bad.to_csv(completeName)
+        # file_name = "bad_yield.csv"
+        # completeName = os.path.join(save_path, file_name)
+        # df_bad = pd.DataFrame(self.rulesDict[0])
+        # df_bad.to_csv(completeName)
 
-        self.df_bad = df_bad
-        self.df_good = df_good
+       # self.df_bad = df_bad
+       # self.df_good = df_good
 
         return 0
 
@@ -142,19 +144,19 @@ class ruleExtractor():
         for element in elements:
             xIDs.append(element['xID'])
             # get crisp value of x (use center of mf)
-            crisp_xs.append(self.mamdaniArc.FuzzificationLayer.centers[element['xID']][element['mfID']])
+            crisp_xs.append(self.arc.FuzzificationLayer.centers[element['xID']][element['mfID']])
 
-        # construct vector of zeros
-        crisp_inputs = []
-        for i in range(len(self.feature_names)):
-            crisp_inputs.append(0)
-            # if xID is reached replace zero with crisp value 
-            for index, xID in enumerate(xIDs):
-                if i == xID:
-                    crisp_inputs[i] = crisp_xs[index]
+        # # construct vector of zeros
+        # crisp_inputs = []
+        # for i in range(len(self.feature_names)):
+        #     crisp_inputs.append(0)
+        #     # if xID is reached replace zero with crisp value 
+        #     for index, xID in enumerate(xIDs):
+        #         if i == xID:
+        #             crisp_inputs[i] = crisp_xs[index]
 
         # construct dataset
-        test_seq = tf.convert_to_tensor(([crisp_inputs]),dtype=tf.float32)
+        test_seq = tf.convert_to_tensor(([crisp_xs]),dtype=tf.float32)
         test_tar = tf.convert_to_tensor(([target]),dtype=tf.float32) 
         ds = tf.data.Dataset.from_tensor_slices((test_seq, test_tar))
         ds = ds.apply(self.pipeline)

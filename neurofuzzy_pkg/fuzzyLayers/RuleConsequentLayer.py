@@ -185,8 +185,8 @@ class RuleConsequentLayer():
             #       0.8 * [0 1] = [0 0.8]
             output = x * self.weights[ruleID]
 
-            self.rulesTHEN[ruleID] = []
-            self.rulesTHEN[ruleID].append({'RS': x, 'target': self.weights})             
+            self.rulesTHEN[ruleID] = self.weights[ruleID] # []
+           # self.rulesTHEN[ruleID].append({'RS': x, 'target': self.weights})             
 
             out = out.write(out.size(), output)
 

@@ -32,12 +32,9 @@ class Model():
         # data
         self.data = data
 
-        # get feature_names names 
-        self.feature_names = data.feature_names
-
         # architecture
         self.arc = arc
-        self.arc.feature_names = self.feature_names
+        
 
         # trainer
         self.trainer = trainer
@@ -52,12 +49,16 @@ class Model():
     def build_MyArc(self):
         # load data for building my arc
         self.data.load_data_for_building()
+        self.feature_names = self.data.feature_names
+        self.arc.feature_names = self.feature_names
         self.arc.build(self.data.inputs, self.data.targets, self.data.inputs_mean)
         print("Build done")
 
     def build_MyArc_MF(self):
         # load data for building my arc
         self.data.load_data_for_building()
+        self.feature_names = self.data.feature_names
+        self.arc.feature_names = self.feature_names
         self.arc.build_MFs(self.data.inputs, self.data.targets, self.data.inputs_mean)
         print("Build done")
 
@@ -66,12 +67,17 @@ class Model():
         """
         # todo just do example datastet
         print("self.inputs_mean", self.inputs_mean)
+        # get feature_names names 
+        self.feature_names = self.data.feature_names
+        self.arc.feature_names = self.feature_names
         self.arc.build(self.inputs_mean, self.feature_names)
        # self.trainer.test(self.inputs_mean)
         self.built = True
         return True
 
     def trainMyArc(self):
+        # get feature_names names 
+        
         self.arc.FuzzificationLayer.load_weights()
         self.arc.RuleConsequentLayer.load_weights()
         self.train()
@@ -86,12 +92,39 @@ class Model():
         self.train_ds = self.data.train_ds
         self.test_ds = self.data.test_ds
         self.validation_ds = self.data.validation_ds
+        self.feature_names = self.data.feature_names
         # passing parameter names onto trainer
         self.trainer.feature_names = self.data.feature_names 
-
+        print("here", self.data.feature_names)
         tf.keras.backend.clear_session()
         # trainig model
         self.trainer(self.train_ds,  self.test_ds, self.validation_ds)
+
+    
+
+    def validate_input(self, rule_ds):
+        """Validate an input obtained by a rule in ruleExtractor()
+
+        Args: 
+            rule_ds (PrefetchDataset): input dataset, created in ruleExtractor()
+
+        Returns:
+            (boolean): if a rule has been validated by producing the target
+            that was given by the rule
+        """
+        bias = 0.5
+        for (input, targets) in rule_ds:
+            input = tf.reshape(input,(len(self.feature_names),))
+
+            # pass forwards
+            prediction = self.arc(input)
+
+            # get accuracy
+            sample_test_accuracy =  targets == np.round(prediction, 0)
+            sample_test_accuracy = np.mean(sample_test_accuracy)
+            if sample_test_accuracy < bias:
+                return False
+            return sample_test_accuracy
 
 
     def evalutate(self):
