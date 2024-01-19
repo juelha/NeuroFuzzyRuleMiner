@@ -5,8 +5,6 @@ import pandas as pd
 # custom
 from neurofuzzy_pkg.fuzzyLayers import *
 from neurofuzzy_pkg.utils.math_funcs import coefficient
-import neurofuzzy_pkg.utils.WeightArchiver as WeightArchiver
-
 
 from tqdm import tqdm 
 
@@ -114,10 +112,10 @@ class MyArc():
         #     else:
         #         x = layer(x)
         
-        WeightArchiver.save_weights("mf_paras", df_name)
-        WeightArchiver.load_weights("mf_paras", df_name)
-        WeightArchiver.save_weights("class_weights", df_name)
-        WeightArchiver.load_weights("class_weights", df_name)
+        self.FuzzificationLayer.save_weights(df_name)
+        self.FuzzificationLayer.load_weights(df_name)
+        self.RuleConsequentLayer.save_weights(df_name)
+        self.RuleConsequentLayer.load_weights(df_name)
         print("building done")
         done = True
         return done       
@@ -129,8 +127,9 @@ class MyArc():
 
 
         self.FuzzificationLayer.build(feature_ranges)
-        WeightArchiver.save_weights("mf_paras", df_name)
-        WeightArchiver.load_weights("mf_paras", df_name)
+               
+        self.FuzzificationLayer.save_weights(df_name)
+        self.FuzzificationLayer.load_weights(df_name)
 
         print("building done")
         done = True
