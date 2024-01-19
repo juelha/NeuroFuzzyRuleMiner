@@ -7,4 +7,5 @@ from neurofuzzy_pkg.utils.MyArcTrainer import MyArcTrainer
 from neurofuzzy_pkg.utils.neurofuzzyTrainer import neurofuzzyTrainer
 from neurofuzzy_pkg.utils.ruleExtractor import ruleExtractor
 from neurofuzzy_pkg.utils.math_funcs import coefficient
+from neurofuzzy_pkg.utils.WeightArchiver import WeightArchiver
 

@@ -10,6 +10,7 @@ import neurofuzzy_pkg.utils.MFs as MFs
 import neurofuzzy_pkg.utils.math_funcs as math_funcs
 
 
+
 class FuzzificationLayer():
     """Fuzzifying the crisp inputs by calculating their degree of membership 
     Fuzzification-Neurons for the MFs Low, Medium, High:
@@ -124,65 +125,3 @@ class FuzzificationLayer():
         return fuzzified_inputs
     
     
-    def save_weights(self, df_name):
-        """saves weights to yaml file
-        
-        Args:
-            dataset_name (str): name of datasets weights have been built on
-        """
-        # save
-        # opt 1: yaml
-        relative_path = f"/weights/{df_name}"
-        save_path = os.path.dirname(__file__) + relative_path
-        if not os.path.exists(save_path):
-            os.mkdir(save_path)
-            print(f'Directory {df_name} created') 
-
-        assert  os.path.exists(save_path), f'save_path {save_path} not found'
-
-        file_name = f"config_mf.yaml"
-        full_path = os.path.join(save_path, file_name)
-        with open(full_path, 'w') as yaml_file:
-            yaml.dump(self.train_params, yaml_file, default_flow_style=False)
-
-        # opt 2: np.save
-        # file_name = "config_weights"
-        # other_name = os.path.join(save_path, file_name)
-        # np.save(other_name, self.class_weights)
-        print("saved successfully")
-    
-    def load_weights(self, df_name):
-        """load weights from yaml file
-        
-        Args:
-            filename etc
-        Returns:
-            loaded_weights (numpy.ndarray): 
-        """
-        # opt 1: yaml
-        file_name = f"config_mf.yaml"
-        relative_path =  f"/weights/{df_name}"
-        save_path = os.path.dirname(__file__) +  relative_path
-        full_path = os.path.join(save_path, file_name)
-        assert os.path.exists(full_path), f'File {file_name} not found'
-        with open(full_path, 'r') as config_file:
-            # Converts yaml document to python object
-            config = yaml.load(config_file, Loader=UnsafeLoader)
-            config = dict(config)
-            self.centers = config["centers"]
-            self.widths = config["widths"]
-          #  print(type(weights))
-          # print(weights)
-        
-        # # opt 2: np.save
-        # file_name = "config_weights"
-        # other_name = os.path.join(save_path, file_name)
-        # loaded_weights = np.load(other_name+'.npy')
-        #print("self.centers")
-        #print(self.centers)
-                # save params for training 
-        self.train_params = {'centers': self.centers, 'widths': self.widths}
-        print("sucessfully loaded weights")
-        self.built = True
-       # return weights
-        return 0
