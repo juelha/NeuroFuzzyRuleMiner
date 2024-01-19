@@ -4,6 +4,10 @@ import pandas as pd
 
 # custom
 from neurofuzzy_pkg.fuzzyLayers import *
+from neurofuzzy_pkg.utils.math_funcs import coefficient
+
+from tqdm import tqdm 
+
 
 
 class MyArc():
@@ -52,7 +56,7 @@ class MyArc():
             x = layer(x)
         return x        
 
-    def build(self, inputs, targets, inputs_mean, df=None):
+    def build(self, inputs, targets, feature_ranges, df_name =None):
         """Forward propagating the inputs through the network
 
         Args: 
@@ -62,24 +66,37 @@ class MyArc():
             done (boolean): if built
         """
         done = False
-        #inputs = inputs[0]
-        print("MARK", inputs)
-        n_rules = 9
+
+
+        # calc of amount of rules
+        ## HOT FIX ##
+        # inputs = <MapDataset element_spec=TensorSpec(shape=(11,), dtype=tf.float64, name=None)>
+        # problem: cant get to the shape in the MapDataset element 
+        for features in inputs.take(1):
+          n_inputs = int(features.shape[0])
+          print(n_inputs)
+
+        n_mfs = self.FuzzificationLayer.n_mfs
+        n = n_mfs * n_inputs
+        k = self.RuleAntecedentLayer.n_participants 
+        n_rules = int(coefficient(n, k) - n)
+
         for i in range(n_rules):
             self.RuleConsequentLayer.dictrules[i] = []
             self.RuleConsequentLayer.tars[i] = []
 
-        for weird_thingy, weirdtar in zip(inputs,targets): 
+        for weird_thingy, weirdtar in (zip(tqdm(inputs, desc='building'), targets)):
             for layer in self.internal_layers:
                 if type(layer) == type(self.FuzzificationLayer):
-                    x = layer.build(inputs_mean, weird_thingy)
+                    layer.build(feature_ranges)
+                    x = layer(weird_thingy)
                 elif type(layer) == type(self.RuleConsequentLayer):
                     x = layer.build(x, weirdtar)
                 else:
                     x = layer.build(x)
       #  print("dict", self.RuleConsequentLayer.dictrules)
         # class weights 
-        for ruleID in self.RuleConsequentLayer.dictrules:
+        for ruleID in tqdm(self.RuleConsequentLayer.dictrules, desc="selecting"):
             l = self.RuleConsequentLayer.dictrules[ruleID]
             max_val = max(l)
             idx_max = l.index(max_val)
@@ -95,29 +112,24 @@ class MyArc():
         #     else:
         #         x = layer(x)
         
-        self.FuzzificationLayer.save_weights()
-        self.FuzzificationLayer.load_weights()
-        self.RuleConsequentLayer.save_weights()
-        self.RuleConsequentLayer.load_weights()
+        self.FuzzificationLayer.save_weights(df_name)
+        self.FuzzificationLayer.load_weights(df_name)
+        self.RuleConsequentLayer.save_weights(df_name)
+        self.RuleConsequentLayer.load_weights(df_name)
         print("building done")
         done = True
         return done       
 
 
 
-    def build_MFs(self, inputs, targets, inputs_mean, df=None):
+    def build_MFs(self, feature_ranges, df_name=None):
         done = False
-        #inputs = inputs[0]
-        print("MARK", inputs)
-        n_rules = 9
-       
-        for weird_thingy, weirdtar in zip(inputs,targets): 
-            for layer in self.internal_layers:
-                if type(layer) == type(self.FuzzificationLayer):
-                    x = layer.build(inputs_mean, weird_thingy)
+
+
+        self.FuzzificationLayer.build(feature_ranges)
                
-        self.FuzzificationLayer.save_weights()
-        self.FuzzificationLayer.load_weights()
+        self.FuzzificationLayer.save_weights(df_name)
+        self.FuzzificationLayer.load_weights(df_name)
 
         print("building done")
         done = True

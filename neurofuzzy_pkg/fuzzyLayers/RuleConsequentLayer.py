@@ -54,19 +54,28 @@ class RuleConsequentLayer():
         # for rule extraction
         self.rulesTHEN = {}
 
-    def save_weights(self, df_name="dummy"):
+    def save_weights(self, df_name):
         """saves weights to yaml file
         
         Args:
-            dataset_name (str): name of datasets weights have been built on
+            df_name (str): name of dataframe that weights have been built on
+        
+        Raises:
+            AssertionError: Save path for weights could not be found. 
         """
         # save
         # opt 1: yaml
-        file_name = f"config_weights.yaml"
         relative_path = f"/weights/{df_name}"
-        save_path = os.path.dirname(__file__) +  relative_path
-        completeName = os.path.join(save_path, file_name)
-        with open(completeName, 'w') as yaml_file:
+        save_path = os.path.dirname(__file__) + relative_path
+        if not os.path.exists(save_path):
+            os.mkdir(save_path)
+            print(f'Directory {df_name} created') 
+
+        assert  os.path.exists(save_path), f'save_path {save_path} not found'
+
+        file_name = f"config_weights.yaml"
+        full_path = os.path.join(save_path, file_name)
+        with open(full_path, 'w') as yaml_file:
             yaml.dump(self.weights.tolist(), yaml_file, default_flow_style=False)
 
         # opt 2: np.save
@@ -74,20 +83,26 @@ class RuleConsequentLayer():
         other_name = os.path.join(save_path, file_name)
         np.save(other_name, self.weights)
     
-    def load_weights(self, df_name="dummy"):
+
+    def load_weights(self, df_name):
         """load weights from yaml file
         
         Args:
-            filename etc
+            df_name 
+            
         Returns:
             loaded_weights (numpy.ndarray): 
+
+        Raises:
+            AssertionError: Save path for weights could not be found. 
         """
         # opt 1: yaml
         file_name = f"config_weights.yaml"
         relative_path =  f"/weights/{df_name}"
         save_path = os.path.dirname(__file__) +  relative_path
-        completeName = os.path.join(save_path, file_name)
-        with open(completeName, 'r') as config_file:
+        full_path = os.path.join(save_path, file_name)
+        assert  os.path.exists(full_path), f'File {file_name} not found'
+        with open(full_path, 'r') as config_file:
             # Converts yaml document to python object
             config =yaml.load(config_file, Loader=UnsafeLoader)
             weights = np.array(config)

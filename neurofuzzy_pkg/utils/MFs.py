@@ -9,7 +9,7 @@ Collection of
 - the functions needed for the initialization of their parameters
 """
 
-def center_init_con(n_mfs, mean_input, domain=10):
+def center_init_con(n_mfs, feature_ranges):
     """Calculating the centers of the MFs by dividing domain of input equally
     Args:
         n_mfs (int): number of MFs
@@ -20,10 +20,10 @@ def center_init_con(n_mfs, mean_input, domain=10):
     centers = []
     
     for i in range(n_mfs):
-        centers.append((domain/(n_mfs+1))*(i+1))
+        centers.append((feature_ranges/(n_mfs+1))*(i+1))
     return centers
 
-def center_init(n_mfs, inputs, domain=10):
+def center_init(n_mfs, feature_ranges):
     """Calculating the centers of the MFs by dividing domain of input equally
     Args:
         n_mfs (int): number of MFs
@@ -36,11 +36,12 @@ def center_init(n_mfs, inputs, domain=10):
     centers = []
    # print("inputs", inputs)
 
-    for x in inputs:
+    for x in feature_ranges:
+        print("X", x)
         centers_per_x = []
        # print("\n")
         for i in range(n_mfs):
-            center = (domain/(n_mfs+1))*(i+1)
+            center = (x/(n_mfs+1))*(i+1)
            # print("center", center)
             centers_per_x.append(center)
         centers.append(centers_per_x)
@@ -155,7 +156,7 @@ def MF_tri_prime_b(x, a, b):
     mu = (2*abs(a-x)/b**2)
     return mu
 
-def visuMFs(layer, dir, func, names):
+def visuMFs(layer, dir, func, max_vals):
     """Visualizing the current MFs
 visuMFs(inputMFs, self.arc, dir="before_training", func="inputMFs")
 inputMFs.mf_type, inputMFs.n_mfs, inputMFs.centers, inputMFs.widths, inputMFs.domain_input, 
@@ -168,13 +169,14 @@ Args:
         file_name (str): name of plot that will be saved in analysis folder 
     """
     
-
+    feature_names = max_vals.keys().values.tolist()
+    print(layer.centers)
   #  length_inputs = tf.shape(layer.centers)[0]
     # for each input see what the mfs mean -> domain input might be diff
-    for xID, name in enumerate(names):
+    for xID, max_value in enumerate(max_vals):
     #for name, input in zip(names,layer.inputs):
 #        x = np.arange(0, means[xID] , (means[xID]*0.01))
-        x = np.arange(0, 10,0.01)
+        x = np.arange(0, max_value, 0.01)
         y = {}
 
         for mfID in range(layer.n_mfs):
@@ -193,11 +195,11 @@ Args:
 
         plt.title('Membership Functions')
         plt.ylabel('Degree of Membership')
-        plt.xlabel(name)
+        plt.xlabel(feature_names[xID])
 
         
         # get save path 
-        file_name = func + '_MFs_' + name + '.png'
+        file_name = func + '_MFs_' + feature_names[xID] + '.png'
         save_path = os.path.dirname(__file__) +  '/../../results/figs/' + dir
         completeName = os.path.join(save_path, file_name)
 

@@ -51,16 +51,18 @@ class Model():
         self.data.load_data_for_building()
         self.feature_names = self.data.feature_names
         self.arc.feature_names = self.feature_names
-        self.arc.build(self.data.inputs, self.data.targets, self.data.inputs_mean)
+        self.arc.self.feature_ranges = self.data.feature_ranges
+        self.arc.build(self.data.inputs, self.data.targets, self.data.inputs_mean, self.data.df_name)
         print("Build done")
 
     def build_MyArc_MF(self):
         # load data for building my arc
         self.data.load_data_for_building()
-        self.feature_names = self.data.feature_names
-        self.arc.feature_names = self.feature_names
-        self.arc.build_MFs(self.data.inputs, self.data.targets, self.data.inputs_mean)
+        self.arc.build_MFs(self.data.feature_ranges, self.data.df_name)
         print("Build done")
+
+
+
 
     def build(self):
         """
@@ -78,24 +80,24 @@ class Model():
     def trainMyArc(self):
         # get feature_names names 
         
-        self.arc.FuzzificationLayer.load_weights()
-        self.arc.RuleConsequentLayer.load_weights()
+        self.arc.FuzzificationLayer.load_weights(self.data.df_name)
+        self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
+        
         self.train()
 
     def train(self):
         """Calling trainer
         """
         # loading data, performing datapipeline and getting datasets
-        self.trainer.arc = self.arc
-
         self.data.load_data_for_training()
         self.train_ds = self.data.train_ds
         self.test_ds = self.data.test_ds
         self.validation_ds = self.data.validation_ds
         self.feature_names = self.data.feature_names
         # passing parameter names onto trainer
-        self.trainer.feature_names = self.data.feature_names 
-        print("here", self.data.feature_names)
+        self.trainer.arc = self.arc
+        self.trainer.feature_ranges = self.data.feature_ranges 
+        print("here", self.data.feature_ranges)
         tf.keras.backend.clear_session()
         # trainig model
         self.trainer(self.train_ds,  self.test_ds, self.validation_ds)

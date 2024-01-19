@@ -44,18 +44,18 @@ class FuzzificationLayer():
         self.outputs = []
 
  
-    def build(self, inputs_mean, inputs=None):
+    def build(self, feature_ranges, inputs=None):
         """Initializes trainable parameters
 
         Args:
             inputs (tf.Tensor): inputs
         """
 
-        feature_names = inputs_mean.keys().values.tolist()
-        n_inputs = tf.shape(inputs_mean)[0]
+        feature_names = feature_ranges.keys().values.tolist()
+        n_inputs = tf.shape(feature_ranges)[0]
 
         # build centers and widths of MFs
-        self.centers = np.asarray(MFs.center_init(self.n_mfs, inputs_mean),dtype=np.float32)
+        self.centers = np.asarray(MFs.center_init(self.n_mfs, feature_ranges),dtype=np.float32)
         self.widths = np.asarray(MFs.widths_init(self.n_mfs, self.centers, n_inputs), dtype=np.float32)
 
 
@@ -64,15 +64,13 @@ class FuzzificationLayer():
         # print("weights in fu", self.weights)
 
 
-        MFs.visuMFs(self, dir="after_building", func="InputMFs", names=feature_names)
+        MFs.visuMFs(self, dir="after_building", func="InputMFs", max_vals=feature_ranges)
 
         # save params for training 
         self.train_params = {'centers': self.centers, 'widths': self.widths}#, 'weights':self.weights}#, 'biases':self.biases}
         
         self.built = True
 
-        # call self
-        return self(inputs)
 
 
     def __call__(self, inputs):
@@ -126,7 +124,7 @@ class FuzzificationLayer():
         return fuzzified_inputs
     
     
-    def save_weights(self, df_name="dummy"):
+    def save_weights(self, df_name):
         """saves weights to yaml file
         
         Args:
@@ -134,11 +132,17 @@ class FuzzificationLayer():
         """
         # save
         # opt 1: yaml
-        file_name = f"config_mf.yaml"
         relative_path = f"/weights/{df_name}"
-        save_path = os.path.dirname(__file__) +  relative_path
-        completeName = os.path.join(save_path, file_name)
-        with open(completeName, 'w') as yaml_file:
+        save_path = os.path.dirname(__file__) + relative_path
+        if not os.path.exists(save_path):
+            os.mkdir(save_path)
+            print(f'Directory {df_name} created') 
+
+        assert  os.path.exists(save_path), f'save_path {save_path} not found'
+
+        file_name = f"config_mf.yaml"
+        full_path = os.path.join(save_path, file_name)
+        with open(full_path, 'w') as yaml_file:
             yaml.dump(self.train_params, yaml_file, default_flow_style=False)
 
         # opt 2: np.save
@@ -147,7 +151,7 @@ class FuzzificationLayer():
         # np.save(other_name, self.class_weights)
         print("saved successfully")
     
-    def load_weights(self, df_name="dummy"):
+    def load_weights(self, df_name):
         """load weights from yaml file
         
         Args:
@@ -159,10 +163,11 @@ class FuzzificationLayer():
         file_name = f"config_mf.yaml"
         relative_path =  f"/weights/{df_name}"
         save_path = os.path.dirname(__file__) +  relative_path
-        completeName = os.path.join(save_path, file_name)
-        with open(completeName, 'r') as config_file:
+        full_path = os.path.join(save_path, file_name)
+        assert os.path.exists(full_path), f'File {file_name} not found'
+        with open(full_path, 'r') as config_file:
             # Converts yaml document to python object
-            config =yaml.load(config_file, Loader=UnsafeLoader)
+            config = yaml.load(config_file, Loader=UnsafeLoader)
             config = dict(config)
             self.centers = config["centers"]
             self.widths = config["widths"]

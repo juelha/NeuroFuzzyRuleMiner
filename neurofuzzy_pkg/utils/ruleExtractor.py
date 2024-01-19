@@ -18,7 +18,7 @@ class ruleExtractor():
     ___________________________________________________________
     """
 
-    def __init__(self, neuro_fuzzy_model, mlp_model):
+    def __init__(self, neuro_fuzzy_model, mlp_model, df_name):
         """Init ruleExtractor and calling extractRules()
 
         Args:
@@ -37,6 +37,7 @@ class ruleExtractor():
         self.lingusitic_output = ["bad", "good"]
         
         self.n_outputs = 2# hc neuro_fuzzy_model.arc.RuleConsequentLayer.n_mfs 
+        self.df_name = df_name
 
         # calling functions
         self.extractRules()
@@ -104,15 +105,8 @@ class ruleExtractor():
         
 
         print("/n dict", self.rulesDict)
-        # save results to csv files
-        save_path = os.path.dirname(__file__) +  '/../../results'
-
-        ## good yield 
-        file_name = "dummy_rules.csv"
-        completeName = os.path.join(save_path, file_name)
-
-        df_good = pd.DataFrame(self.rulesDict)
-        df_good.to_csv(completeName)
+        self.save_results()
+        self.print_results()
 
         ## bad yield 
         # file_name = "bad_yield.csv"
@@ -189,6 +183,19 @@ class ruleExtractor():
             if sample_test_accuracy < bias:
                 return False
             return True
+
+    def save_results(self):
+        # save results to csv files
+        save_path = os.path.dirname(__file__) +  '/../../results'
+
+        ## good yield 
+        file_name = f"{self.df_name}_rules.csv"
+        completeName = os.path.join(save_path, file_name)
+
+        df_good = pd.DataFrame(self.rulesDict)
+        df_good.to_csv(completeName)
+        return 0 
+
 
     def print_results(self,):
         """Printing results of rule extraction to console

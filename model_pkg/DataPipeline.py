@@ -81,6 +81,13 @@ class DataPipeline():
         df = df.sample(frac=1)
         # separate into input and targets 
         targets = df.pop('quality')
+        self.feature_names = list(df.columns)
+        # get max value of each feature <- center init
+        self.feature_ranges = df.max()
+        print(df.max())
+
+        print("feature", self.feature_names)
+
         return df, targets
 
     def load_dummy(self):

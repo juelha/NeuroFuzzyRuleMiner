@@ -8,7 +8,8 @@ from model_pkg import Trainer
 #from neurofuzzy_pkg.fuzzyLayers import MF_gaussian_prime_a
 from neurofuzzy_pkg import utils
 from neurofuzzy_pkg.utils.MFs import MF_gaussian,MF_gaussian_prime_a, MF_gaussian_prime_b
-from neurofuzzy_pkg.utils.MFs import MF_tri,MF_tri_prime_a, MF_tri_prime_b
+from neurofuzzy_pkg.utils.MFs import MF_tri, MF_tri_prime_a, MF_tri_prime_b
+from neurofuzzy_pkg.utils.math_funcs import coefficient
 
 
 from tqdm import tqdm 
@@ -29,6 +30,7 @@ class MyArcTrainer(Trainer):
         super().__init__(Trainer(n_epochs=n_epochs))#, ite)#, iters, learning_rate )
         self.n_epochs = n_epochs
         self.learning_rate = learning_rate
+        self.feature_ranges = None
 
 
     def __call__(self, train_ds, test_ds, validation_ds):
@@ -40,13 +42,13 @@ class MyArcTrainer(Trainer):
         """
 
 
-        utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="before_training", func="inputMFs", names=self.feature_names)
+        utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="before_training", func="inputMFs", max_vals=self.feature_ranges)
        
         # train
         self.training_loop(train_ds, test_ds, validation_ds)
 
         # saving figs after training
-        utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="after_training", func="inputMFs", names=self.feature_names)
+        utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="after_training", func="inputMFs", max_vals=self.feature_ranges)
 
         self.visualize_training(self.arc.Name)
 
@@ -65,6 +67,7 @@ class MyArcTrainer(Trainer):
         # test_ds =  test_ds_og
         # train_ds = train_ds_og
         # validation_ds = validation_ds_og
+
 
         # run model on test_ds to keep track of progress during training
         test_loss, test_accuracy = self.test(test_ds)
@@ -196,8 +199,8 @@ class MyArcTrainer(Trainer):
             # print(targets)
             delta = np.array(errorterm)
             #n_rules = 495
-            n_rules = 9
-            delta = np.reshape(delta, (n_rules,1))
+          #  print(delta.shape[0])
+            delta = np.reshape(delta, ( int(delta.shape[0]),1))
             if assigned == False: 
                 deltas_avg = delta
                 assigned = True
