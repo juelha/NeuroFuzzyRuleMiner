@@ -106,7 +106,7 @@ class ruleExtractor():
 
         print("/n dict", self.rulesDict)
         self.save_results()
-        self.print_results()
+      #  self.print_results()
 
         ## bad yield 
         # file_name = "bad_yield.csv"

@@ -37,7 +37,7 @@ def center_init(n_mfs, feature_ranges):
    # print("inputs", inputs)
 
     for x in feature_ranges:
-        print("X", x)
+       # print("X", x)
         centers_per_x = []
        # print("\n")
         for i in range(n_mfs):

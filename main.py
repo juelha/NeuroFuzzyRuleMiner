@@ -39,24 +39,26 @@ def main():
     learning_rate = 1
     n_epochs = 10 
 
-    # DataPipline
-    df_name = "wine" 
+    df_name = "dummy"
 
-    MyModel = Model(DataPipeline(df_name = "wine", batch_size=batch_size), 
+    MyModel = Model(DataPipeline(df_name, batch_size=batch_size), 
                     MyArc(), 
                     MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate))
     
    # MyModel.build_MyArc() # works 
-    MyModel.build_MyArc_MF()
+   # MyModel.build_MyArc_MF()
     MyModel.trainMyArc()
+    MyModel.build_MyArc_CW()
+    
+
 
     ## Model with MLP arc
-    MLPModel = Model(DataPipeline(),  MLP((2,6),2),  Trainer())
-    MLPModel.train()
+    #MLPModel = Model(DataPipeline(),  MLP((2,6),2),  Trainer())
+    #MLPModel.train()
     # print(MLPModel.summary()) 
 
 
-    rules = ruleExtractor(MyModel, MLPModel, df_name)
+   # rules = ruleExtractor(MyModel, MLPModel, df_name)
     # rules.print_results()
     
     return 0

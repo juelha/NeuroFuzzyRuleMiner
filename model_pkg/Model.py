@@ -51,8 +51,17 @@ class Model():
         self.data.load_data_for_building()
         self.feature_names = self.data.feature_names
         self.arc.feature_names = self.feature_names
-        self.arc.self.feature_ranges = self.data.feature_ranges
-        self.arc.build(self.data.inputs, self.data.targets, self.data.inputs_mean, self.data.df_name)
+        self.arc.feature_ranges = self.data.feature_ranges
+        self.arc.build(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name)
+        print("Build done")
+
+    def build_MyArc_CW(self):
+        # load data for building my arc
+        self.data.load_data_for_building()
+        self.feature_names = self.data.feature_names
+        self.arc.feature_names = self.feature_names
+        self.arc.feature_ranges = self.data.feature_ranges
+        self.arc.build_classweights(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name)
         print("Build done")
 
     def build_MyArc_MF(self):
@@ -68,7 +77,7 @@ class Model():
         """
         """
         # todo just do example datastet
-        print("self.inputs_mean", self.inputs_mean)
+        #print("self.inputs_mean", self.inputs_mean)
         # get feature_names names 
         self.feature_names = self.data.feature_names
         self.arc.feature_names = self.feature_names
@@ -97,7 +106,7 @@ class Model():
         # passing parameter names onto trainer
         self.trainer.arc = self.arc
         self.trainer.feature_ranges = self.data.feature_ranges 
-        print("here", self.data.feature_ranges)
+       # print("here", self.data.feature_ranges)
         tf.keras.backend.clear_session()
         # trainig model
         self.trainer(self.train_ds,  self.test_ds, self.validation_ds)
