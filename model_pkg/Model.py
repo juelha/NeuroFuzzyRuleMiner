@@ -8,6 +8,7 @@ import os.path
 
 # custom
 from model_pkg import *
+import neurofuzzy_pkg.utils.MFs as MFs
 
 
 class Model():
@@ -91,7 +92,7 @@ class Model():
         
         self.arc.FuzzificationLayer.load_weights(self.data.df_name)
         self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
-        
+
         self.train()
 
     def train(self):

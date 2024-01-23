@@ -48,7 +48,7 @@ def main():
    # MyModel.build_MyArc() # works 
    # MyModel.build_MyArc_MF()
     MyModel.trainMyArc()
-    MyModel.build_MyArc_CW()
+    #MyModel.build_MyArc_CW()
     
 
 

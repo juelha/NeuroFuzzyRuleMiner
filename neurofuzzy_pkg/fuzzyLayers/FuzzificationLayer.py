@@ -64,7 +64,7 @@ class FuzzificationLayer():
         # print("weights in fu", self.weights)
 
 
-        MFs.visuMFs(self, dir="after_building", func="InputMFs", max_vals=feature_ranges)
+        
 
         # save params for training 
         self.train_params = {'centers': self.centers, 'widths': self.widths}#, 'weights':self.weights}#, 'biases':self.biases}

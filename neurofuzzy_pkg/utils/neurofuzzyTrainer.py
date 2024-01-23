@@ -49,6 +49,8 @@ class neurofuzzyTrainer(Trainer):
 
         # saving figs before training 
        # utils.MFs.visuMFs(outputMFs, dir="after_building", func="outputMFs", names=self.feature_names, means=self.inputs_mean)
+       # utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="after_building", func="InputMFs", max_vals=[10,10])
+        utils.MFs.visuMFs(inputMFs, dir="before_training", max_vals=self.feature_ranges )
 
         # train
       #  super().__call__(train_ds, test_ds)
@@ -56,9 +58,10 @@ class neurofuzzyTrainer(Trainer):
 
 
         # saving figs after training
-        utils.MFs.visuMFs(inputMFs, dir="after_training", func="inputMFs", names=self.feature_names, means=self.inputs_mean)
-        #utils.MFs.visuMFs(outputMFs, dir="after_training", func="outputMFs", names=self.feature_names, means=self.inputs_mean)
+       # self.arc.FuzzificationLayer.load_weights(self.data.df_name)
 
+        #utils.MFs.visuMFs(outputMFs, dir="after_training", func="outputMFs", names=self.feature_names, means=self.inputs_mean)
+        utils.MFs.visuMFs(inputMFs, dir="after_training", max_vals=self.feature_ranges )
         self.visualize_training(self.arc.Name)
 
 

@@ -5,6 +5,8 @@ import pandas as pd
 # custom
 from neurofuzzy_pkg.fuzzyLayers import *
 from neurofuzzy_pkg.utils.math_funcs import coefficient
+import neurofuzzy_pkg.utils.MFs as MFs
+
 
 from tqdm import tqdm 
 
@@ -182,7 +184,7 @@ class MyArc():
                
         self.FuzzificationLayer.save_weights(df_name)
         self.FuzzificationLayer.load_weights(df_name)
-
+        MFs.visuMFs(self.FuzzificationLayer, dir="after_building", func="InputMFs", max_vals=feature_ranges)
         print("building done")
         done = True
         return done       
