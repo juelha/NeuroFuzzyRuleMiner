@@ -264,7 +264,7 @@ class Trainer():
         return error_term
 
 
-    def visualize_training(self, type_model="so... hows it going?"):
+    def visualize_training(self, df_name, type_model="so... hows it going?"):
         """ Visualize accuracy and loss for training and test data.
         Args:
             type_model (str): type of model that has been trained
@@ -284,7 +284,7 @@ class Trainer():
        
         # get save path 
         file_name = 'Performance' + str(type_model) + '.png'
-        save_path = os.path.dirname(__file__) +  '/../results/figs'
+        save_path = os.path.dirname(__file__) +  f'/../results/{df_name}/figures'
         completeName = os.path.join(save_path, file_name)
         plt.savefig(completeName)
         plt.clf()

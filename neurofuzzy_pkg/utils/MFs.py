@@ -156,7 +156,7 @@ def MF_tri_prime_b(x, a, b):
     mu = (2*abs(a-x)/b**2)
     return mu
 
-def visuMFs(layer, dir, max_vals):
+def visuMFs(layer, dir, df_name, max_vals):
     """Visualizing the current MFs
 visuMFs(inputMFs, self.arc, dir="before_training", func="inputMFs")
 inputMFs.mf_type, inputMFs.n_mfs, inputMFs.centers, inputMFs.widths, inputMFs.domain_input, 
@@ -199,8 +199,8 @@ Args:
 
         
         # get save path 
-        file_name = func + '_MFs_' + feature_names[xID] + '.png'
-        save_path = os.path.dirname(__file__) +  '/../../results/figs/' + dir
+        file_name =  '_MFs_' + feature_names[xID] + '.png'
+        save_path = os.path.dirname(__file__) +  f'/../../results/{df_name}/figures/' + dir
         completeName = os.path.join(save_path, file_name)
 
         plt.savefig(completeName)

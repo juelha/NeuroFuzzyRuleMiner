@@ -4,6 +4,7 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 import os
+#from neurofuzzy_pkg.utils.DirStructManger import generate_folders
 
 
 class DataPipeline():
@@ -121,7 +122,8 @@ class DataPipeline():
         """
         
         df, targets = self.loader()
-    
+        self.generate_folders(self.df_name) 
+
         
 
         # Split the dataset into a train, test and validation split
@@ -172,7 +174,7 @@ class DataPipeline():
         """
 
         df, targets = self.loader()
-        
+        self.generate_folders(self.df_name) 
         # make targets binary 
         treshhold = np.mean(targets)        
         targets = targets.apply(lambda x: int(x >= treshhold))
@@ -220,3 +222,44 @@ class DataPipeline():
         # note: casting to integers lowers accuracy
         return(tf.expand_dims(int(target >= self.treshhold), -1))
         #return(tf.expand_dims(target >= self.treshhold, -1))
+    
+    def generate_folders(self, df_name):
+        self.generate_folders_config(df_name)
+        self.generate_folders_results(df_name)
+
+    def generate_folders_config(self, df_name):
+        """
+        Args: 
+            df_name (str): name of loaded dataset
+        
+        ├── config 
+        |   ├── [df_name]       <- name of given dataframe
+        │           └── weights <- where weights of Fuzzification- and ConsequentLayer will be saved
+        """
+        relative_path = f"/../config/{df_name}/weights/"
+        save_path = os.path.dirname(__file__) + relative_path
+        if not os.path.exists(save_path):
+            os.mkdir(save_path)
+        print("f'Directory {df_name} created in config, full path is {save_path}'") 
+
+
+    def generate_folders_results(self, df_name):
+        """
+        Args: 
+            df_name (str): name of loaded dataframe
+        
+        ├── results 
+        |   ├── [df_name]       <- name of given dataframe
+        │           └── figures <- MFs before and after training and performance of arc
+        """
+        relative_path = f"/../results/{df_name}"
+        save_path = os.path.dirname(__file__) + relative_path
+        if not os.path.exists(save_path):
+            os.mkdir(save_path)
+            save_path += "/figures"
+            os.mkdir(save_path)
+            save_path_fig_1 = save_path + "/before_training"
+            os.mkdir(save_path_fig_1)
+            save_path_fig2 = save_path + "/after_training"
+            os.mkdir(save_path_fig2)
+        print("f'Directory {df_name} created, full path is {save_path}'") 

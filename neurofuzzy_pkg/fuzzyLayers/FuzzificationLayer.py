@@ -132,11 +132,9 @@ class FuzzificationLayer():
         """
         # save
         # opt 1: yaml
-        relative_path = f"/weights/{df_name}"
+        relative_path = f"/../../config/{df_name}/weights/"
         save_path = os.path.dirname(__file__) + relative_path
-        if not os.path.exists(save_path):
-            os.mkdir(save_path)
-            print(f'Directory {df_name} created') 
+       
 
         assert  os.path.exists(save_path), f'save_path {save_path} not found'
 
@@ -161,7 +159,7 @@ class FuzzificationLayer():
         """
         # opt 1: yaml
         file_name = f"config_mf.yaml"
-        relative_path =  f"/weights/{df_name}"
+        relative_path = f"/../../config/{df_name}/weights/"
         save_path = os.path.dirname(__file__) +  relative_path
         full_path = os.path.join(save_path, file_name)
         assert os.path.exists(full_path), f'File {file_name} not found'

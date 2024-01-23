@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 
 # custom
-from model_pkg import Trainer
+from model_pkg.Trainer import Trainer
 #from neurofuzzy_pkg.fuzzyLayers import MF_gaussian_prime_a
 from neurofuzzy_pkg import utils
 from neurofuzzy_pkg.utils.MFs import MF_gaussian,MF_gaussian_prime_a, MF_gaussian_prime_b
@@ -41,16 +41,9 @@ class MyArcTrainer(Trainer):
             test_ds (PrefetchDataset): dataset for testing
         """
 
-
-        utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="before_training", func="inputMFs", max_vals=self.feature_ranges)
-       
         # train
         self.training_loop(train_ds, test_ds, validation_ds)
-
-        # saving figs after training
-        utils.MFs.visuMFs(self.arc.FuzzificationLayer, dir="after_training", func="inputMFs", max_vals=self.feature_ranges)
-
-        self.visualize_training(self.arc.Name)
+        
 
 
 
