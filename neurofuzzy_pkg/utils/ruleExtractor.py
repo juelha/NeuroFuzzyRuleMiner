@@ -32,7 +32,7 @@ class ruleExtractor():
 
         # for final Dict of rules
         self.rulesDict = {}
-        self.feature_names = neuro_fuzzy_model.feature_names
+        self.feature_names = neuro_fuzzy_model.data.feature_names
         self.linguistic_mf = ["low","medium","high"]
         self.lingusitic_output = ["bad", "good"]
         

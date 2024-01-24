@@ -66,7 +66,7 @@ class Trainer():
             class neurofuzzyTrainer() 
         """
         self.training_loop(train_ds,  test_ds, validation_ds)
-        self.visualize_training(self.df_name, self.arc.Name)
+      #  self.visualize_training(self.df_name, self.arc.Name)
 
     def pick_batch(self, ds):
         """Return one entry from batch 

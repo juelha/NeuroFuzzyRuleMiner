@@ -176,7 +176,7 @@ class MyArc():
         done = True
 
 
-    def build_MFs(self, feature_ranges, df_name=None):
+    def build_MFs(self, feature_ranges, df_name):
         done = False
 
 

@@ -35,7 +35,6 @@ class Model():
 
         # architecture
         self.arc = arc
-        
 
         # trainer
         self.trainer = trainer
@@ -50,18 +49,18 @@ class Model():
     def build_MyArc(self):
         # load data for building my arc
         self.data.load_data_for_building()
-        self.feature_names = self.data.feature_names
-        self.arc.feature_names = self.feature_names
-        self.arc.feature_ranges = self.data.feature_ranges
+      #  self.feature_names = self.data.feature_names
+       # self.arc.feature_names = self.feature_names
+       # self.arc.feature_ranges = self.data.feature_ranges
         self.arc.build(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name)
         print("Build done")
 
     def build_MyArc_CW(self):
         # load data for building my arc
         self.data.load_data_for_building()
-        self.feature_names = self.data.feature_names
-        self.arc.feature_names = self.feature_names
-        self.arc.feature_ranges = self.data.feature_ranges
+       # self.feature_names = self.data.feature_names
+        #self.arc.feature_names = self.feature_names
+        #self.arc.feature_ranges = self.data.feature_ranges
         self.arc.build_classweights(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name)
         print("Build done")
 
@@ -74,18 +73,15 @@ class Model():
 
 
 
-    def build(self):
-        """
-        """
-        # todo just do example datastet
-        #print("self.inputs_mean", self.inputs_mean)
-        # get feature_names names 
-        self.feature_names = self.data.feature_names
-        self.arc.feature_names = self.feature_names
-        self.arc.build(self.inputs_mean, self.feature_names)
-       # self.trainer.test(self.inputs_mean)
-        self.built = True
-        return True
+    # def build(self):
+    #     """
+    #     """
+    #    # self.feature_names = self.data.feature_names
+    #   #  self.arc.feature_names = self.feature_names
+    #     self.arc.build(self.inputs_mean, self.feature_names)
+    #    # self.trainer.test(self.inputs_mean)
+    #     self.built = True
+    #     return True
 
     def trainMyArc(self):
         # get feature_names names 
@@ -94,7 +90,6 @@ class Model():
         self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
         self.data.load_data_for_training() # doubled ! hc
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
-
         self.train()
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_ranges )
 
@@ -104,20 +99,20 @@ class Model():
         """
         # loading data, performing datapipeline and getting datasets
         self.data.load_data_for_training()
-        self.train_ds = self.data.train_ds
-        self.test_ds = self.data.test_ds
-        self.validation_ds = self.data.validation_ds
-        self.feature_names = self.data.feature_names
+       # self.train_ds = self.data.train_ds
+        #self.test_ds = self.data.test_ds
+        #self.validation_ds = self.data.validation_ds
+        #self.feature_names = self.data.feature_names
         # passing parameter names onto trainer
         self.trainer.arc = self.arc
-        self.trainer.feature_ranges = self.data.feature_ranges 
-        self.trainer.df_name = self.data.df_name
+      #  self.trainer.feature_ranges = self.data.feature_ranges # for visuali
+       # self.trainer.df_name = self.data.df_name # for saving pictures of training
        # print("here", self.data.feature_ranges)
         tf.keras.backend.clear_session()
         # trainig model
-        self.trainer(self.train_ds,  self.test_ds, self.validation_ds)
+        self.trainer(self.data.train_ds,  self.data.test_ds, self.data.validation_ds)
         # saving figs after training
-        self.trainer.visualize_training( df_name=self.data.df_name, type_model=self.arc.Name)
+        self.trainer.visualize_training(df_name=self.data.df_name, type_model=self.arc.Name)
 
     
 
@@ -133,7 +128,7 @@ class Model():
         """
         bias = 0.5
         for (input, targets) in rule_ds:
-            input = tf.reshape(input,(len(self.feature_names),))
+            input = tf.reshape(input,(len(self.data.feature_names),))
 
             # pass forwards
             prediction = self.arc(input)
