@@ -186,7 +186,7 @@ class ruleExtractor():
 
     def save_results(self):
         # save results to csv files
-        save_path = os.path.dirname(__file__) +  '/../../results'
+        save_path = os.path.dirname(__file__) +  f'/../../results/{self.df_name}'
 
         ## good yield 
         file_name = f"{self.df_name}_rules.csv"

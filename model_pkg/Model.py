@@ -92,8 +92,12 @@ class Model():
         
         self.arc.FuzzificationLayer.load_weights(self.data.df_name)
         self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
+        self.data.load_data_for_training() # doubled ! hc
+        MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
 
         self.train()
+        MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_ranges )
+
 
     def train(self):
         """Calling trainer
@@ -107,14 +111,13 @@ class Model():
         # passing parameter names onto trainer
         self.trainer.arc = self.arc
         self.trainer.feature_ranges = self.data.feature_ranges 
+        self.trainer.df_name = self.data.df_name
        # print("here", self.data.feature_ranges)
         tf.keras.backend.clear_session()
-        MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
         # trainig model
         self.trainer(self.train_ds,  self.test_ds, self.validation_ds)
         # saving figs after training
         self.trainer.visualize_training( df_name=self.data.df_name, type_model=self.arc.Name)
-        MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_ranges )
 
     
 

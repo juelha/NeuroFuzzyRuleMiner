@@ -10,6 +10,7 @@ from neurofuzzy_pkg import utils
 from neurofuzzy_pkg.utils.MFs import MF_gaussian,MF_gaussian_prime_a, MF_gaussian_prime_b
 from neurofuzzy_pkg.utils.MFs import MF_tri, MF_tri_prime_a, MF_tri_prime_b
 from neurofuzzy_pkg.utils.math_funcs import coefficient
+import neurofuzzy_pkg.utils.MFs as MFs
 
 
 from tqdm import tqdm 
@@ -31,6 +32,8 @@ class MyArcTrainer(Trainer):
         self.n_epochs = n_epochs
         self.learning_rate = learning_rate
         self.feature_ranges = None
+      #  self.df_name = None
+       # self.feature_ranges = None 
 
 
     def __call__(self, train_ds, test_ds, validation_ds):
@@ -40,9 +43,10 @@ class MyArcTrainer(Trainer):
             train_ds (PrefetchDataset): dataset for training
             test_ds (PrefetchDataset): dataset for testing
         """
-
         # train
         self.training_loop(train_ds, test_ds, validation_ds)
+        
+
         
 
 

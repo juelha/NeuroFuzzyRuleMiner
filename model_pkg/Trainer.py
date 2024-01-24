@@ -66,7 +66,7 @@ class Trainer():
             class neurofuzzyTrainer() 
         """
         self.training_loop(train_ds,  test_ds, validation_ds)
-        self.visualize_training(self.arc.Name)
+        self.visualize_training(self.df_name, self.arc.Name)
 
     def pick_batch(self, ds):
         """Return one entry from batch 
@@ -264,7 +264,7 @@ class Trainer():
         return error_term
 
 
-    def visualize_training(self, df_name, type_model="so... hows it going?"):
+    def visualize_training(self, df_name, type_model):
         """ Visualize accuracy and loss for training and test data.
         Args:
             type_model (str): type of model that has been trained
