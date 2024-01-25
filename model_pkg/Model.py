@@ -55,7 +55,7 @@ class Model():
        # self.feature_names = self.data.feature_names
         #self.arc.feature_names = self.feature_names
         #self.arc.feature_ranges = self.data.feature_ranges
-        self.arc.build_classweights(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name)
+        self.arc.build_classweights(self.data.inputs, self.data.targets, self.data.df_name)
         print("Build done")
 
     def build_MyArc_MF(self):

@@ -105,9 +105,9 @@ class DataPipeline():
         df = df.sample(frac=1) # do we need to shuffle here? 
         # separate into input and targets 
         targets = df.pop('out')
-        print("df", df)
+       # print("df", df)
         self.feature_names = list(df.columns)
-        print("feature", self.feature_names)
+        #print("feature", self.feature_names)
          # get max value of each feature <- center init
         self.feature_ranges = df.max()
 
