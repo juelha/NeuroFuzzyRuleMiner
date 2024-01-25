@@ -102,7 +102,7 @@ class DataPipeline():
         assert  os.path.exists(full_path), f'File {file_name} not found'
         df = pd.read_csv(full_path)
         # shuffle first so inputs and targets stay on same row
-        df = df.sample(frac=1)
+        df = df.sample(frac=1) # do we need to shuffle here? 
         # separate into input and targets 
         targets = df.pop('out')
         print("df", df)
@@ -197,7 +197,7 @@ class DataPipeline():
 
         self.inputs = df.map(lambda x,y: x)
         self.targets = df.map(lambda x,y: y) # doing weird shit  
-        print("over here", df)
+       # print("over here", df)
 
         return 0#self.inputs, self.targets
 
@@ -209,7 +209,7 @@ class DataPipeline():
         #df = df.map(lambda features, target: (features, self.make_binary(target)))
         # note: perfomance is better without converting to one_hot
         df = df.map(lambda inputs, target: (inputs, tf.one_hot(target,2)))
-        df = df.shuffle(50)
+       # df = df.shuffle(50)
 
         return df
     

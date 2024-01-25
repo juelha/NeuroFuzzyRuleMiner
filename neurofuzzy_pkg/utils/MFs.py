@@ -39,6 +39,7 @@ def center_init(n_mfs, feature_ranges):
     for x in feature_ranges:
        # print("X", x)
         centers_per_x = []
+        print("x", x)
        # print("\n")
         for i in range(n_mfs):
             center = (x/(n_mfs+1))*(i+1)
@@ -156,7 +157,7 @@ def MF_tri_prime_b(x, a, b):
     mu = (2*abs(a-x)/b**2)
     return mu
 
-def visuMFs(layer, dir, df_name, max_vals):
+def visuMFs(layer, dir, df_name, max_vals, mf_names=["low", "middle", "high"]):
     """Visualizing the current MFs
 visuMFs(inputMFs, self.arc, dir="before_training", func="inputMFs")
 inputMFs.mf_type, inputMFs.n_mfs, inputMFs.centers, inputMFs.widths, inputMFs.domain_input, 
@@ -186,12 +187,15 @@ Args:
             for bleh in x:
                 y[mfID].append(layer.mf_type(bleh,layer.centers[xID][mfID],layer.widths[xID][mfID]))
 
-            plt.plot(x, y[mfID])
+            plt.plot(x, y[mfID], label=mf_names[mfID])
+
             plt.axvline(layer.centers[xID][mfID],0,1, c=plt.gca().lines[-1].get_color(), ls='--')
 
 
 
  
+        
+        plt.legend()
 
         plt.title('Membership Functions')
         plt.ylabel('Degree of Membership')

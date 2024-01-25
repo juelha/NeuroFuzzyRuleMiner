@@ -45,31 +45,12 @@ def main():
                      MyArc(), 
                      MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate))
     
-   # MyModel.build_MyArc() # works 
+    MyModel.build_MyArc() # works 
    # MyModel.build_MyArc_MF()
-    MyModel.trainMyArc()
-    MyModel.build_MyArc_CW()
+    # for i in range(15):
+    #     MyModel.trainMyArc()
+    #     MyModel.build_MyArc_CW()
 
-    MyModel.trainMyArc()
-    MyModel.build_MyArc_CW()
-
-    MyModel.trainMyArc()
-    MyModel.build_MyArc_CW()
-
-    MyModel.trainMyArc()
-    MyModel.build_MyArc_CW()
-
-    MyModel.trainMyArc()
-    MyModel.build_MyArc_CW()
-    
-    MyModel.trainMyArc()
-    MyModel.build_MyArc_CW()
-    
-    MyModel.trainMyArc()
-    MyModel.build_MyArc_CW()
-    
-    MyModel.trainMyArc()
-    MyModel.build_MyArc_CW()
     ## Model with MLP arc
     # MLPModel = Model(DataPipeline(df_name),  
     #                  MLP((2,6),2),  

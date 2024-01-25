@@ -108,6 +108,8 @@ class FuzzificationLayer():
 
                 # calling MF 
                 mu = self.mf_type(x, self.centers[xID][mfID], self.widths[xID][mfID])    
+               # mus_per_x.append(mu)
+               # print("inputs[0]",inputs[0])
                 mus_per_x.append(mu)
         
             # write to TensorArray
