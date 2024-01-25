@@ -29,14 +29,8 @@ class Model():
             validation_ds (tf.PrefetchDataset): validating dataset
             parameter_names (list(str)): column names of dataset, needed for extracting rules later
         """
-
-        # data
         self.data = data
-
-        # architecture
         self.arc = arc
-
-        # trainer
         self.trainer = trainer
 
     def run(self):
@@ -92,6 +86,7 @@ class Model():
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
         self.train()
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_ranges )
+        self.arc.FuzzificationLayer.save_weights(self.data.df_name)
 
 
     def train(self):

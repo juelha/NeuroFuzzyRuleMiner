@@ -48,19 +48,37 @@ def main():
    # MyModel.build_MyArc() # works 
    # MyModel.build_MyArc_MF()
     MyModel.trainMyArc()
-    #MyModel.build_MyArc_CW()
+    MyModel.build_MyArc_CW()
+
+    MyModel.trainMyArc()
+    MyModel.build_MyArc_CW()
+
+    MyModel.trainMyArc()
+    MyModel.build_MyArc_CW()
+
+    MyModel.trainMyArc()
+    MyModel.build_MyArc_CW()
+
+    MyModel.trainMyArc()
+    MyModel.build_MyArc_CW()
     
-
-
+    MyModel.trainMyArc()
+    MyModel.build_MyArc_CW()
+    
+    MyModel.trainMyArc()
+    MyModel.build_MyArc_CW()
+    
+    MyModel.trainMyArc()
+    MyModel.build_MyArc_CW()
     ## Model with MLP arc
-    MLPModel = Model(DataPipeline(df_name),  
-                     MLP((2,6),2),  
-                     Trainer())
-    MLPModel.train()
+    # MLPModel = Model(DataPipeline(df_name),  
+    #                  MLP((2,6),2),  
+    #                  Trainer())
+ #   MLPModel.train()
     # print(MLPModel.summary()) 
 
 
-    rules = ruleExtractor(MyModel, MLPModel, df_name)
+ #   rules = ruleExtractor(MyModel, MLPModel, df_name)
     # rules.print_results()
     
     return 0
