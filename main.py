@@ -45,7 +45,7 @@ def main():
                      MyArc(), 
                      MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate))
     
-   # MyModel.build_MyArc() # works 
+    MyModel.build_MyArc() # works 
    # MyModel.build_MyArc_MF()
     for i in range(100):
         MyModel.trainMyArc()

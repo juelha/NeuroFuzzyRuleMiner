@@ -7,6 +7,7 @@ import os
 
 # custom
 import neurofuzzy_pkg.utils.MFs as MFs
+
 import neurofuzzy_pkg.utils.math_funcs as math_funcs
 
 
@@ -43,41 +44,35 @@ class FuzzificationLayer():
         self.inputs = []
         self.outputs = []
 
+    
+    def preprocess_x(self, x):
+        """
+        makes it possible to utilize np vectorization 
+
+        turns [1,2] into [1,1,1,2,2,2] for n_mfs = 3
+        """
+        return np.repeat(x, self.n_mfs)
+
  
-    def build(self, feature_ranges, inputs=None):
+    def build(self, x):
         """Initializes trainable parameters
 
         Args:
-            inputs (tf.Tensor): inputs
+            x (tf.Tensor): inputs
         """
-
-        feature_names = feature_ranges.keys().values.tolist()
-        n_inputs = tf.shape(feature_ranges)[0]
-
+        x = self.preprocess_x(x)
         # build centers and widths of MFs
-        self.centers = np.asarray(MFs.center_init(self.n_mfs, feature_ranges),dtype=np.float32)
-        self.widths = np.asarray(MFs.widths_init(self.n_mfs, self.centers, n_inputs), dtype=np.float32)
+        self.centers = MFs.center_init(x, self.n_mfs)
+        self.widths = MFs.widths_init(x, self.n_mfs)
 
-
-        # build weights 
-        # self.weights = np.ones((self.n_mfs , n_inputs), dtype=np.float32)
-        # print("weights in fu", self.weights)
-
-
-        
-
-        # save params for training 
-        self.train_params = {'centers': self.centers, 'widths': self.widths}#, 'weights':self.weights}#, 'biases':self.biases}
-        
         self.built = True
 
 
-
-    def __call__(self, inputs):
-        """Calculates the degree of membership of the crisp inputs 
-            -> Fuzzification
+    def __call__(self, x):
+        """Calculates degree of membership of the crisp features 
+            
         Args:
-            inputs (tf.Tensor): crisp inputs to be fuzzified
+            x (tf.Tensor): crisp inputs to be fuzzified
         
         Returns:
             fuzzified_x (tf.Tensor): the fuzzified input, 
@@ -94,36 +89,19 @@ class FuzzificationLayer():
         # check if trainable params have been built
         assert self.built, f'Layer {type(self)} is not built yet'
 
-        self.inputs = inputs # saved for training 
+        x = self.preprocess_x(x)
+        self.inputs = x # saved for training 
 
-        # to output
-        fuzzified_inputs  = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
-
-        # calculating the MF values μ "mus" per input
-        for xID, x in enumerate(inputs):
-
-            # there will be n_mfs mus per input
-            mus_per_x = []
-            for mfID in range(self.n_mfs):
-
-                # calling MF 
-                mu = self.mf_type(x, self.centers[xID][mfID], self.widths[xID][mfID])    
-               # mus_per_x.append(mu)
-               # print("inputs[0]",inputs[0])
-                mus_per_x.append(mu)
+    
+        fuzzy_x = self.mf_type(x, self.centers, self.widths)
+            
         
-            # write to TensorArray
-            fuzzified_inputs = fuzzified_inputs.write(fuzzified_inputs.size(), mus_per_x)
-
-        # return the values in the TensorArray as a stacked tensor
-        fuzzified_inputs = fuzzified_inputs.stack()
-
         # check if resulting tensor has the correct shape
-        assert fuzzified_inputs.shape == (inputs.shape[0], self.n_mfs), f'Output of FuzzificationLayer has wrong shape \n \
-        should have shape {inputs.shape[0], self.n_mfs} but has shape {fuzzified_inputs.shape}'        
+        # assert fuzzy_x.shape == (fuzzy_x.shape[0], self.n_mfs), f'Output of FuzzificationLayer has wrong shape \n \
+        # should have shape {inputs.shape[0], self.n_mfs} but has shape {fuzzified_inputs.shape}'        
   
-        self.outputs = fuzzified_inputs # saved for training 
-        return fuzzified_inputs
+        self.outputs = fuzzy_x # saved for training 
+        return fuzzy_x
     
     
     def save_weights(self, df_name):
@@ -140,10 +118,15 @@ class FuzzificationLayer():
 
         assert  os.path.exists(save_path), f'save_path {save_path} not found'
 
-        file_name = f"config_mf.yaml"
+        file_name = f"config_centers.yaml"
         full_path = os.path.join(save_path, file_name)
         with open(full_path, 'w') as yaml_file:
-            yaml.dump(self.train_params, yaml_file, default_flow_style=False)
+            yaml.dump(self.centers.tolist(), yaml_file)
+
+        file_name = f"config_widths.yaml"
+        full_path = os.path.join(save_path, file_name)
+        with open(full_path, 'w') as yaml_file:
+            yaml.dump(self.widths.tolist(), yaml_file)
 
         # opt 2: np.save
         # file_name = "config_weights"
@@ -160,17 +143,26 @@ class FuzzificationLayer():
             loaded_weights (numpy.ndarray): 
         """
         # opt 1: yaml
-        file_name = f"config_mf.yaml"
+        file_name = f"config_centers.yaml"
         relative_path = f"/../../config/{df_name}/weights/"
         save_path = os.path.dirname(__file__) +  relative_path
         full_path = os.path.join(save_path, file_name)
         assert os.path.exists(full_path), f'File {file_name} not found'
         with open(full_path, 'r') as config_file:
-            # Converts yaml document to python object
+            # Converts yaml document to np array object
             config = yaml.load(config_file, Loader=UnsafeLoader)
-            config = dict(config)
-            self.centers = config["centers"]
-            self.widths = config["widths"]
+            self.centers = np.array(config)
+
+        file_name = f"config_widths.yaml"
+        relative_path = f"/../../config/{df_name}/weights/"
+        save_path = os.path.dirname(__file__) +  relative_path
+        full_path = os.path.join(save_path, file_name)
+        assert os.path.exists(full_path), f'File {file_name} not found'
+        with open(full_path, 'r') as config_file:
+            # Converts yaml document to np array object
+            config = yaml.load(config_file, Loader=UnsafeLoader)
+            self.widths = np.array(config)
+
           #  print(type(weights))
           # print(weights)
         
@@ -181,7 +173,7 @@ class FuzzificationLayer():
         #print("self.centers")
         #print(self.centers)
                 # save params for training 
-        self.train_params = {'centers': self.centers, 'widths': self.widths}
+        
         print("sucessfully loaded weights")
         self.built = True
        # return weights

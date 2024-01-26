@@ -121,7 +121,10 @@ class MyArc():
         done = False
 
 
+        print("sdjkdfg", feature_ranges)
         self.FuzzificationLayer.build(feature_ranges)
+
+        print("here",self.FuzzificationLayer.centers)
                
         self.FuzzificationLayer.save_weights(df_name)
         self.FuzzificationLayer.load_weights(df_name)

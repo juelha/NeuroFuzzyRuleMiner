@@ -9,96 +9,57 @@ Collection of
 - the functions needed for the initialization of their parameters
 """
 
-def center_init_con(n_mfs, feature_ranges):
-    """Calculating the centers of the MFs by dividing domain of input equally
+
+
+def center_init(x, n_mfs):
+    """Initializes the centers of MFs by partitioning the domain of the features
+
     Args:
-        n_mfs (int): number of MFs
-        domain_input (int): upper boundary of the domain of the input 
-    Returns:
-        centers (list(float)): the centers for the respective MFs
+        x (numpy.ndarray): the max values for each feature, i.e. the domain
+        n_mfs (int): number of MFs in Fuzzification Layer
+        
+    Returns: 
+        numpy.ndarray: initalized widths with the shape (x.size,)
     """
-    centers = []
-    
-    for i in range(n_mfs):
-        centers.append((feature_ranges/(n_mfs+1))*(i+1))
-    return centers
+    n_inputs = x.size // n_mfs
+    multiplicator = np.tile(np.arange(1, n_mfs + 1), n_inputs)
+    cetnters = (x / (n_mfs + 1)) * multiplicator
+    print(cetnters)
+    return cetnters
 
-def center_init(n_mfs, feature_ranges):
-    """Calculating the centers of the MFs by dividing domain of input equally
+
+def widths_init(x, n_mfs):
+    """Initializes the widths of MFs by partitioning the domain of the features
+
     Args:
-        n_mfs (int): number of MFs
-        domain_input (int): upper boundary of the domain of the input 
-        inputs (tf.Tensor): per input one mf
-    Returns:
-        centers (list(float)): the centers for the respective MFs
+        x (numpy.ndarray): the max values for each feature, i.e. the feature's domain
+        n_mfs (int): number of MFs in Fuzzification Layer
+
+    Returns: 
+        numpy.ndarray: initalized widths with the shape (x.size,)
     """
-   # print("\n")
-    centers = []
-   # print("inputs", inputs)
-
-    for x in feature_ranges:
-       # print("X", x)
-        centers_per_x = []
-        print("x", x)
-       # print("\n")
-        for i in range(n_mfs):
-            center = (x/(n_mfs+1))*(i+1)
-           # print("center", center)
-            centers_per_x.append(center)
-        centers.append(centers_per_x)
-
-    # centers = np.asarray(centers, dtype=np.float32)
-
-    # centers = centers.T # get shape (n_mfs, n_inputs)
-
-    return centers
+    return x/(n_mfs+1)
 
 
-
-def widths_init(n_mfs, centers, n_inputs):
-    """
-    """
-    widths = []
-    counter = 0
-   # print("c", centers)
-
-    for xID in range(n_inputs):
-        widths_per_x = []
-       # print("\n")
-        for i in range(n_mfs):
-            
-            widths_per_x.append(centers[xID][0])
-           # print("center", center)
-
-        widths.append(widths_per_x)
-
-    # widths = np.asarray(widths, dtype=np.float32)
-
-    # widths = widths.T # get shape (n_mfs, n_inputs)
-    
- #   print("hE",widths)
-    
-    return widths
-
-def MF_gaussian(x, a, b):
+def MF_gaussian(x, center, width):
     """ Gaussian membership function
     Args:
         x (tensor): input to fuzzify, shape=() 
-        a (float): center of MF
-        b (float): width of MF
+        center (numpy.ndarray): centers of MF
+        width (numpy.ndarray): widths of MF
+
     Returns:
-        mu (float): degree of membership of x
+        mu (numpy.ndarray): degrees of membership of x 
         
     Raises:
-        AssertionError; if output is outside bounds
-    """    
-    expo = -0.5*(((x-a)/b)**2)
-    mu = np.exp(expo)
-
-    # assert (mu <= 1 ) & (mu >= 0), f'Degree of membership is outside bounds, \n\
-    # refer to formal def of mf: µA:X → [0,1] \n\
-    # inputs: x: {x}; a: {a}; b: {b}; mu: {mu}'
+        AssertionError: if output is outside bounds
+    """   
+    mu = np.exp(-0.5*(((x-center)/width)**2))
+    assert (mu.any() <= 1 ) & (mu.any() >= 0), f'Degree of membership is outside bounds, \n\
+    refer to formal def of mf: µA:X → [0,1] \n\
+    inputs: x: {x}; center: {center}; width: {width}; mu: {mu}'
     return mu
+
 
 
 def MF_gaussian_prime_a(x, a, b):

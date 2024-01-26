@@ -84,6 +84,7 @@ class DataPipeline():
         targets = df.pop('quality')
         self.feature_names = list(df.columns)
         # get max value of each feature <- center init
+  
         self.feature_ranges = df.max()
         print(df.max())
 
@@ -109,7 +110,9 @@ class DataPipeline():
         self.feature_names = list(df.columns)
         #print("feature", self.feature_names)
          # get max value of each feature <- center init
-        self.feature_ranges = df.max()
+       # print("HELLO", df.max().to_numpy())
+        
+        self.feature_ranges = df.max().to_numpy()
 
         # get mean of all cols
         self.inputs_mean = np.mean(df, axis=0)      
@@ -240,7 +243,7 @@ class DataPipeline():
         save_path = os.path.dirname(__file__) + relative_path
         if not os.path.exists(save_path):
             os.mkdir(save_path)
-        print("f'Directory {df_name} created in config, full path is {save_path}'") 
+        print(f"Directory {df_name} created in config, full path is {save_path}") 
 
 
     def generate_folders_results(self, df_name):
@@ -262,4 +265,4 @@ class DataPipeline():
             os.mkdir(save_path_fig_1)
             save_path_fig2 = save_path + "/after_training"
             os.mkdir(save_path_fig2)
-        print("f'Directory {df_name} created, full path is {save_path}'") 
+        print(f'Directory {df_name} created, full path is {save_path}') 

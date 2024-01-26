@@ -8,11 +8,10 @@ centers: !!python/object/apply:numpy.core.multiarray._reconstruct
   state: !!python/tuple
   - 1
   - !!python/tuple
-    - 2
-    - 3
+    - 6
   - &id002 !!python/object/apply:numpy.dtype
     args:
-    - f4
+    - f8
     - false
     - true
     state: !!python/tuple
@@ -26,7 +25,7 @@ centers: !!python/object/apply:numpy.core.multiarray._reconstruct
     - 0
   - false
   - !!binary |
-    o93uv8KZokDUVt1A/GgfQOjOkkBE/zxB
+    6ztM0frbA0DrO0zR+tsTQOBZ8jn4yR1AX/Hf8o3+A0Bf8d/yjf4TQA7qT+zU/R1A
 widths: !!python/object/apply:numpy.core.multiarray._reconstruct
   args:
   - *id001
@@ -37,9 +36,8 @@ widths: !!python/object/apply:numpy.core.multiarray._reconstruct
   state: !!python/tuple
   - 1
   - !!python/tuple
-    - 2
-    - 3
+    - 6
   - *id002
   - false
   - !!binary |
-    I+rvQJ1ylj1LZMg8HqAIPKgEFT803/NA
+    6ztM0frbA0DrO0zR+tsDQOs7TNH62wNAX/Hf8o3+A0Bf8d/yjf4DQF/x3/KN/gNA
