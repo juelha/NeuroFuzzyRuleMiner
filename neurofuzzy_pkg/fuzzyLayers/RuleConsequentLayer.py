@@ -134,26 +134,19 @@ class RuleConsequentLayer():
 
       #  print("inputs_inputs_og_zip", inputs_inputs_og_zip)
         
-        load =0
-        
-        
-        if load==0:
-            
-            #print("In", inputs)
-            # # build weights     
-            self.weights = np.zeros((inputs.shape[0], 2), dtype=np.float32) # danger output classes hc 
-        # print("weights", self.class_weights)
 
-            for ruleID, firingStrength in enumerate(inputs):  
-                self.dictrules[ruleID].append(firingStrength)
-                self.tars[ruleID].append(one_hot_tar)
-              #  print("ruleID",ruleID)
-               # print("firingStrength", firingStrength)
+        #print("In", inputs)
+        # # build weights     
+        self.weights = np.zeros((inputs.shape[0], 2), dtype=np.float32) # danger output classes hc 
+    # print("weights", self.class_weights)
+
+        for ruleID, firingStrength in enumerate(inputs):  
+            self.dictrules[ruleID].append(firingStrength)
+            self.tars[ruleID].append(one_hot_tar)
+            #  print("ruleID",ruleID)
+            # print("firingStrength", firingStrength)
             
 
-
-        if load:
-            self.weights = self.load_weights()
       #  print("weights after", self.class_weights)
 
         # self.weights = np.ones((inputs.shape[0], inputs_og.shape[0] ), dtype=np.float32)
@@ -168,7 +161,7 @@ class RuleConsequentLayer():
         return self(inputs)
 
 
-    def __call__(self, inputs):
+    def __call__(self, x):
         """Assigns rules per firing strength to a class 
 
         Args:
@@ -181,38 +174,14 @@ class RuleConsequentLayer():
         # check if built
         assert self.built, f'Layer {type(self)} is not built yet'
 
-        self.inputs = inputs
+        self.inputs = x
 
-        out  = tf.TensorArray(tf.float32, size=0, dynamic_size=True)# []
+        print(x)
 
-        # for rule extraction
-        self.rulesTHEN = {}
-
-        ruleID = 0      
-   
-        # iterate over i    nputs (here rules  
-        for ruleID, x in enumerate(inputs):     
-
-
-            #       0.8 * [0 1] = [0 0.8]
-            output = x * self.weights[ruleID]
-
-            self.rulesTHEN[ruleID] = self.weights[ruleID] # []
-           # self.rulesTHEN[ruleID].append({'RS': x, 'target': self.weights})             
-
-            out = out.write(out.size(), output)
-
-            ruleID += 1
-       # print("w", self.weights)
+        print(self.weights)
+        x = x[:, np.newaxis] * self.weights
     
-        out = out.stack()       
-        #print("out", out)
-        self.outputs = out #     saved for training   
-
-       # print("out", out)  
-      #
-      #   self.save_weights()
-       # self.load_weights()
-        return out # returning layer as well for defuzzication  
+       
+        return x # returning layer as well for defuzzication  
 
     

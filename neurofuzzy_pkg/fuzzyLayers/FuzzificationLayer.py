@@ -61,6 +61,7 @@ class FuzzificationLayer():
             x (tf.Tensor): inputs
         """
         x = self.preprocess_x(x)
+        x = x.to_numpy()
         # build centers and widths of MFs
         self.centers = MFs.center_init(x, self.n_mfs)
         self.widths = MFs.widths_init(x, self.n_mfs)
@@ -95,7 +96,6 @@ class FuzzificationLayer():
     
         fuzzy_x = self.mf_type(x, self.centers, self.widths)
             
-        
         # check if resulting tensor has the correct shape
         # assert fuzzy_x.shape == (fuzzy_x.shape[0], self.n_mfs), f'Output of FuzzificationLayer has wrong shape \n \
         # should have shape {inputs.shape[0], self.n_mfs} but has shape {fuzzified_inputs.shape}'        

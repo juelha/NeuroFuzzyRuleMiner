@@ -88,7 +88,6 @@ class RuleAntecedentLayer():
         x =  np.meshgrid(x[0], x[1]) # hc
         x = (x[0] * x[1]).ravel() # hc
 
-
         assert self.n_rules == x.size, f'the number of rules generated: {x.size} has to equal: {self.n_rules} -> coefficient(n_cols * n_rows, k) - n_cols * n_rows' 
 
         return x

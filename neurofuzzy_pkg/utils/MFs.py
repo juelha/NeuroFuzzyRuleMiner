@@ -55,7 +55,7 @@ def MF_gaussian(x, center, width):
         AssertionError: if output is outside bounds
     """   
     mu = np.exp(-0.5*(((x-center)/width)**2))
-    assert (mu.any() <= 1 ) & (mu.any() >= 0), f'Degree of membership is outside bounds, \n\
+    assert (mu.any() <= 1) & (mu.any() >= 0), f'Degree of membership is outside bounds, \n\
     refer to formal def of mf: µA:X → [0,1] \n\
     inputs: x: {x}; center: {center}; width: {width}; mu: {mu}'
     return mu
@@ -130,9 +130,16 @@ Args:
         domain_input (int): upper boundary of the domain of the input 
         file_name (str): name of plot that will be saved in analysis folder 
     """
+    n_mfs = 3
     
     feature_names = max_vals.keys().values.tolist()
-    print(layer.centers)
+    c = np.array_split(layer.centers, 2)
+    c = np.array_split(c, range(n_mfs, len(c), n_mfs))
+    w = np.array_split(layer.widths,2)
+    w = np.array_split(w, range(n_mfs, len(w), n_mfs))
+   
+    print("c", c)
+    print("w", w)
   #  length_inputs = tf.shape(layer.centers)[0]
     # for each input see what the mfs mean -> domain input might be diff
     for xID, max_value in enumerate(max_vals):
@@ -144,18 +151,13 @@ Args:
         for mfID in range(layer.n_mfs):
 
 #            print(layer.centers[j+i*layer.n_mfs])
-            y[mfID] = []
-            for bleh in x:
-                y[mfID].append(layer.mf_type(bleh,layer.centers[xID][mfID],layer.widths[xID][mfID]))
+            y = layer.mf_type(x,c[xID][mfID],w[xID][mfID])
 
             plt.plot(x, y[mfID], label=mf_names[mfID])
 
-            plt.axvline(layer.centers[xID][mfID],0,1, c=plt.gca().lines[-1].get_color(), ls='--')
+            plt.axvline(c[xID][mfID],0,1, c=plt.gca().lines[-1].get_color(), ls='--')
 
 
-
- 
-        
         plt.legend()
 
         plt.title('Membership Functions')

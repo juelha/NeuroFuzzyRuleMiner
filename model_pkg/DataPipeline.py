@@ -112,7 +112,7 @@ class DataPipeline():
          # get max value of each feature <- center init
        # print("HELLO", df.max().to_numpy())
         
-        self.feature_ranges = df.max().to_numpy()
+        self.feature_ranges = df.max()
 
         # get mean of all cols
         self.inputs_mean = np.mean(df, axis=0)      
