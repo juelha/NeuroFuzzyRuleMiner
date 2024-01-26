@@ -137,6 +137,9 @@ Args:
     c = np.array_split(c, range(n_mfs, len(c), n_mfs))
     w = np.array_split(layer.widths,2)
     w = np.array_split(w, range(n_mfs, len(w), n_mfs))
+
+    c = c[0]
+    w = w[0]
    
     print("c", c)
     print("w", w)
@@ -149,12 +152,15 @@ Args:
         y = {}
 
         for mfID in range(layer.n_mfs):
+            y[mfID] = []
 
 #            print(layer.centers[j+i*layer.n_mfs])
-            y = layer.mf_type(x,c[xID][mfID],w[xID][mfID])
+            for bleh in x:
+                y[mfID].append(layer.mf_type(bleh,c[xID][mfID],w[xID][mfID]))
 
             plt.plot(x, y[mfID], label=mf_names[mfID])
 
+            print("hui", c[xID][mfID])
             plt.axvline(c[xID][mfID],0,1, c=plt.gca().lines[-1].get_color(), ls='--')
 
 
