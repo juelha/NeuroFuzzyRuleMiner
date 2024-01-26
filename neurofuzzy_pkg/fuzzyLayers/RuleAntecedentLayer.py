@@ -37,7 +37,8 @@ class RuleAntecedentLayer():
         # for rule extraction
         self.rulesIF = {}   
         self.n_rules = 0     
-        self.n_participants = 2 # two participants in a rule
+        self.n_participants = 2 # two participants in a rule #hc
+        self.n_mfs = 3 # hc
 
 
     def build(self, inputs):
@@ -55,11 +56,12 @@ class RuleAntecedentLayer():
         # self.built = True
 
         # call self
+        
         return self(inputs)
 
 
 
-    def __call__(self, inputs):
+    def __call__(self, x):
         """Combines the fuzzified inputs to form rules and calculates its firing strength 
         -> fuzzy intersection
 
@@ -75,58 +77,21 @@ class RuleAntecedentLayer():
         # check if trainable params have been built
        # assert self.built, f'Layer {type(self)} is not built yet'
 
-        self.inputs = inputs # saved for training
+        self.inputs = x # saved for training
 
-        # to output
-        TNorms = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
-
-        # for rule extraction
-        n_inputs, n_mfs = inputs.shape
-        self.rulesIF = {}     
-        ruleID = 0
-        
-        # picking first participant of a rule 
-        # by looping over rows of input 
-        for xID1 in range(n_inputs):
-            for mfID1 in range(n_mfs):
-                mu1 = inputs[xID1][mfID1]
-                
-                # weighting the input
-                weighted_mu1 =  mu1 #* self.weights[xID1][mfID1] *
-
-                # get second participant
-                # by looping over the rest of rows
-                for xID2 in range(xID1+1, n_inputs):
-                    for mfID2 in range(n_mfs):  
-                        mu2 = inputs[xID2][mfID2]
-
-                        # weighting the input
-                        weighted_mu2 =  mu2 # self.weights[xID2][mfID2] *
-
-                        # calculating TNorm with min() or mul
-                        # TNorm = min(weighted_mu1,weighted_mu2)
-                        TNorm = weighted_mu1 * weighted_mu2
-                        TNorms = TNorms.write(TNorms.size(),TNorm)
-                        
-                        # adding information to ruleIF dict
-                        self.rulesIF[ruleID] = []
-                        self.rulesIF[ruleID].append({'xID': xID1, 'mfID': mfID1})
-                        self.rulesIF[ruleID].append({'xID': xID2, 'mfID': mfID2})
-                        ruleID += 1
-
-        # validate shape of output
-        n = n_mfs * n_inputs
+    
+        n = x.size 
         k = self.n_participants 
         self.n_rules = int(coefficient(n, k) - n)
-        # print("in", inputs)
-        # print("n", n)
-        # print("k", k)
-        # print("n rules", self.n_rules)
-        # print(ruleID)
 
-        assert self.n_rules == ruleID, f'the number of rules generated in IF-Part: {ruleID} has to equal: {self.n_rules} -> coefficient(n_cols * n_rows, k) - n_cols * n_rows' 
+        x = np.array_split(x, range(self.n_mfs, len(x), self.n_mfs))
+        x =  np.meshgrid(x[0], x[1]) # hc
+        x = (x[0] * x[1]).ravel() # hc
 
-        return TNorms.stack()
+
+        assert self.n_rules == x.size, f'the number of rules generated: {x.size} has to equal: {self.n_rules} -> coefficient(n_cols * n_rows, k) - n_cols * n_rows' 
+
+        return x
 
 
 
