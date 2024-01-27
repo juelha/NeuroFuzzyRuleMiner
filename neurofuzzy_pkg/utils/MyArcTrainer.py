@@ -218,7 +218,7 @@ class MyArcTrainer(Trainer):
         return train_loss
 
 
-    def error_function(self, prediction, targets):
+    def error_function(self, prediction, target):
         """Derived error function:  
             error function: tf.reduce_mean(0.5*(prediction - targets)**2)
         
@@ -228,34 +228,25 @@ class MyArcTrainer(Trainer):
         Returns:
             error_term (float): output of derived error function
         """
+
         error_term = []
-        targets = targets[0]
-     #   print("pred", prediction)
-      #  print("tar", targets)
+        target = target[0]
         for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
-          #  print("tar", targets.numpy)
-            
-         #   print("cd", cidx)
-          #  print("out", prediction)
-          #  tar_row = targets[cidx] # would need to blow up targets to vectoize 
+        
             out_row = prediction[cidx] # in order to slice [:,idx]
             for idx, number in enumerate(classweight):
                 if bool(number)==True:
 
-                 #   print("idx", idx)
-                   # print("tar",targets[idx]  )
-                  #  print("out_row[:,idx]", out_row[idx])
-                    error =  0.5*(targets[idx] - out_row[idx])**2
+                
+                    error =  0.5*(target[idx] - out_row[idx])**2
                     
                     error_term.append(error)
-                # else:
-                #     error_term.append(0) # for weights that are 0 0
-        #error_term = tf.reduce_mean(0.5*(prediction - targets)**2)#
-      #  print("error", error_term)
+                
         return error_term
 
 
-    def error_function_derived(self, prediction, targets):
+
+    def error_function_derived(self, prediction, target):
         """Derived error function:  
             derived error function: (prediction - targets)
         
@@ -266,115 +257,77 @@ class MyArcTrainer(Trainer):
             error_term (float): output of derived error function
         """
         error_term = []
-        targets = targets[0]
-      #  print("tar", targets)
-      #  print("pre", prediction)
-
+        target = target[0]
         for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
-         #   print("tar", targets.numpy)
-            
-           # print("cd", cidx)
-            #print("out", prediction)
-            assigned = False
-          #  tar_row = targets[cidx] # would need to blow up targets to vectoize 
+        
             out_row = prediction[cidx] # in order to slice [:,idx]
             for idx, number in enumerate(classweight):
                 if bool(number)==True:
-                    #print("idx", idx)
-                   # print("tar",targets[idx]  )
-                   # print("out_row[:,idx]", out_row[idx])
-                    error =  -1*(targets[idx] - out_row[idx])
+
+                
+                    error =  (target[idx] - out_row[idx])
+                    
                     error_term.append(error)
-                    assigned = True
-            # if assigned==False:        
-            #     error_term.append(0) # for weights that are 0 0
-       # print("error", error_term)
+                
         return error_term
 
-    def calc_mf_derv_widths(self):
-         # to output
-        fuzzified_inputs  = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
 
-        # calculating the MF values μ "mus" per input
-        for xID, x in enumerate(self.arc.FuzzificationLayer.inputs):
-
-            # there will be n_mfs mus per input
-            mus_per_x = []
-            for mfID in range(self.arc.FuzzificationLayer.n_mfs):
-
-                # calling MF 
-                mu = MF_gaussian_prime_b(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
-                mus_per_x.append(mu)
-
-           # print("here", mus_per_x)
-            # write to TensorArray
-            fuzzified_inputs = fuzzified_inputs.write(fuzzified_inputs.size(), mus_per_x)
-
-        # return the values in the TensorArray as a stacked tensor
-        fuzzified_inputs = fuzzified_inputs.stack()
-        return fuzzified_inputs
 
     def calc_mf_derv_center(self):
-            # to output
-        fuzzified_inputs  = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
-
-        # calculating the MF values μ "mus" per input
-        for xID, x in enumerate(self.arc.FuzzificationLayer.inputs):
-
-            # there will be n_mfs mus per input
-            mus_per_x = []
-            for mfID in range(self.arc.FuzzificationLayer.n_mfs):
-
-                # calling MF 
-                mu = MF_gaussian_prime_a(x, self.arc.FuzzificationLayer.centers[xID][mfID], self.arc.FuzzificationLayer.widths[xID][mfID])    
-                mus_per_x.append(mu)
-        
-            # write to TensorArray
-            fuzzified_inputs = fuzzified_inputs.write(fuzzified_inputs.size(), mus_per_x)
-
-        # return the values in the TensorArray as a stacked tensor
-        fuzzified_inputs = fuzzified_inputs.stack()
-        return fuzzified_inputs
+        calc = MF_gaussian_prime_a(self.arc.FuzzificationLayer.inputs, self.arc.FuzzificationLayer.centers, self.arc.FuzzificationLayer.widths)
+        return calc
  
+    def calc_mf_derv_widths(self):
+        calc = MF_gaussian_prime_b(self.arc.FuzzificationLayer.inputs, self.arc.FuzzificationLayer.centers, self.arc.FuzzificationLayer.widths)
+        return calc
 
 
-    def adapt(self, layer, gradients, centers_derived, widths_der):
+
+
+    def adapt(self, layer, error, centers_prime, widths_prime):
         
-        n_rows, n_cols = layer.centers.shape
+        
 
-        # picking first participant of a rule 
-        # by looping over rows of input 
-        i = 0
-        for xID1 in range(n_rows):
-            for mfID1 in range(n_cols):
+        # get those directly from antecedent layer with inputs attribute
+        mus = self.arc.RuleAntecedentLayer.inputs
+        
+        # reshape error to match each mu 
+        error = np.reshape(error, mus[0].shape)
+        delta = [mu * error for mu in mus]
+        delta.reverse() # the other mu for each x
+        
+        # x = np.array_split(centers_prime, range(3, len(centers_prime), 3))
+        # centers_grided = np.meshgrid(x[0], x[1]) 
+        # delta_centers = [d * c for d,c in zip(delta,centers_grided)]
+        # c_delta_x1 = np.sum(delta_centers[0], axis=0)
+        # c_delta_x2 = np.sum(delta_centers[1], axis=1)
+        # deltas_centers = np.concatenate((c_delta_x1, c_delta_x2))
+        # self.arc.FuzzificationLayer.centers =  self.arc.FuzzificationLayer.centers   + deltas_centers  * self.learning_rate
 
-                # print("D", gradients)
-                # print("c", layer.centers[xID1][mfID1])
-                # print("w", layer.widths[xID1][mfID1])
 
-                mu1 = self.arc.RuleAntecedentLayer.inputs[xID1,mfID1] 
+        # x = np.array_split(widths_prime, range(3, len(centers_prime), 3))
+        # centers_grided = np.meshgrid(x[0], x[1]) 
+        # delta_centers = [d * c for d,c in zip(delta,centers_grided)]
+        # c_delta_x1 = np.sum(delta_centers[0], axis=0)
+        # c_delta_x2 = np.sum(delta_centers[1], axis=1)
+        # deltas_centers = np.concatenate((c_delta_x1, c_delta_x2))
+        # self.arc.FuzzificationLayer.widths =  self.arc.FuzzificationLayer.widths   + deltas_centers  * self.learning_rate
+        self.adapt_parameter('centers', layer, delta, centers_prime)
+        self.adapt_parameter('widths', layer, delta, widths_prime)
 
-
-                # get second participant
-                # by looping over the rest of rows
-                for xID2 in range(xID1+1, n_rows):
-                    for mfID2 in range(n_cols):  
-                        mu2 = self.arc.RuleAntecedentLayer.inputs[xID2,mfID2]
-
-                        # adapt mu1
-                        delta = float32(gradients[i])
-                        delta *= mu2
-                        gradient_center = delta* centers_derived[xID1][mfID1]
-                        gradient_width = delta* widths_der[xID1][mfID1]
-                        layer.centers[xID1][mfID1] -=  np.multiply(gradient_center, self.learning_rate)
-                        layer.widths[xID1][mfID1] -= np.multiply(gradient_width, self.learning_rate)
-                        
-                        # adapt mu2
-                        delta = float32(gradients[i])
-                        delta *= mu1
-                        gradient_center = delta* centers_derived[xID2][mfID2]
-                        gradient_width = delta * widths_der[xID2][mfID2]
-                        layer.centers[xID2][mfID2] -= np.multiply(gradient_center, self.learning_rate)
-                        layer.widths[xID2][mfID2] -= np.multiply(gradient_width, self.learning_rate)
-                        i += 1
         return 0
+    
+    def adapt_parameter(self, param, layer, delta, para_prime):
+        
+        # imitate the whole meshgrid process like in antecedent layer
+        x = np.array_split(para_prime, range(3, len(para_prime), 3))
+        para_gridded = np.meshgrid(x[0], x[1]) 
+        delta = [d * p for d,p in zip(delta, para_gridded)]
+        delta_x1 = np.sum(delta[0], axis=0)
+        delta_x2 = np.sum(delta[1], axis=1)
+        delta = np.concatenate((delta_x1, delta_x2))
+
+        # self.fuzzi ...
+        param_to_tune = getattr(layer, param)
+        param_to_tune =  param_to_tune  + delta * self.learning_rate
+        setattr(layer, param, param_to_tune)

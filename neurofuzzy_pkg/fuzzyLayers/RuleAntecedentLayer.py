@@ -77,7 +77,7 @@ class RuleAntecedentLayer():
         # check if trainable params have been built
        # assert self.built, f'Layer {type(self)} is not built yet'
 
-        self.inputs = x # saved for training
+       # self.inputs = x # saved for training
 
     
         n = x.size 
@@ -86,6 +86,7 @@ class RuleAntecedentLayer():
 
         x = np.array_split(x, range(self.n_mfs, len(x), self.n_mfs))
         x =  np.meshgrid(x[0], x[1]) # hc
+        self.inputs = x #  need meshgrid for training
         x = (x[0] * x[1]).ravel() # hc
 
         assert self.n_rules == x.size, f'the number of rules generated: {x.size} has to equal: {self.n_rules} -> coefficient(n_cols * n_rows, k) - n_cols * n_rows' 

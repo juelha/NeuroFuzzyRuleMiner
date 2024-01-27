@@ -47,7 +47,7 @@ def main():
     
     MyModel.build_MyArc() # works 
    # MyModel.build_MyArc_MF()
-    for i in range(100):
+    for i in range(1):
         MyModel.trainMyArc()
         MyModel.build_MyArc_CW()
         MyModel.arc.RuleConsequentLayer.save_weights(df_name)
