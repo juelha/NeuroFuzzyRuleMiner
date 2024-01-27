@@ -61,7 +61,7 @@ class FuzzificationLayer():
             x (tf.Tensor): inputs
         """
         x = self.preprocess_x(x)
-        x = x.to_numpy()
+        x = x.to_numpy() # drops names from max value, either do this or give names of features directly to visualizer
         # build centers and widths of MFs
         self.centers = MFs.center_init(x, self.n_mfs)
         self.widths = MFs.widths_init(x, self.n_mfs)

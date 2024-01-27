@@ -103,8 +103,8 @@ class RuleConsequentLayer():
             # Converts yaml document to python object
             config =yaml.load(config_file, Loader=UnsafeLoader)
             weights = np.array(config)
-            print(type(weights))
-            print(weights)
+           # print(type(weights))
+            #print(weights)
         
         # opt 2: np.save
     #     file_name = "config_weights"
@@ -176,9 +176,7 @@ class RuleConsequentLayer():
 
         self.inputs = x
 
-        print(x)
 
-        print(self.weights)
         x = x[:, np.newaxis] * self.weights
     
        

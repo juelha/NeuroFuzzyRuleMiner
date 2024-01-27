@@ -265,7 +265,7 @@ class MyArcTrainer(Trainer):
                 if bool(number)==True:
 
                 
-                    error =  (target[idx] - out_row[idx])
+                    error =  -1*(target[idx] - out_row[idx])
                     
                     error_term.append(error)
                 
@@ -329,5 +329,5 @@ class MyArcTrainer(Trainer):
 
         # self.fuzzi ...
         param_to_tune = getattr(layer, param)
-        param_to_tune =  param_to_tune  + delta * self.learning_rate
+        param_to_tune -= np.multiply(delta, self.learning_rate)
         setattr(layer, param, param_to_tune)

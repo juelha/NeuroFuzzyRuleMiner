@@ -24,7 +24,7 @@ def center_init(x, n_mfs):
     n_inputs = x.size // n_mfs
     multiplicator = np.tile(np.arange(1, n_mfs + 1), n_inputs)
     cetnters = (x / (n_mfs + 1)) * multiplicator
-    print(cetnters)
+  #  print(cetnters)
     return cetnters
 
 
@@ -141,8 +141,8 @@ Args:
     c = c[0]
     w = w[0]
    
-    print("c", c)
-    print("w", w)
+   # print("c", c)
+    #print("w", w)
   #  length_inputs = tf.shape(layer.centers)[0]
     # for each input see what the mfs mean -> domain input might be diff
     for xID, max_value in enumerate(max_vals):
@@ -160,7 +160,7 @@ Args:
 
             plt.plot(x, y[mfID], label=mf_names[mfID])
 
-            print("hui", c[xID][mfID])
+          #  print("hui", c[xID][mfID])
             plt.axvline(c[xID][mfID],0,1, c=plt.gca().lines[-1].get_color(), ls='--')
 
 
