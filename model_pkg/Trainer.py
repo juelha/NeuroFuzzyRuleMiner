@@ -34,13 +34,15 @@ class Trainer():
             train_losses (list(float)): keeping track of train losses during training
         """
 
+
         self.arc = arc
 
         # hyperparamers
-        self.n_epochs = n_epochs
+        self.n_epochs = int(n_epochs)
         self.learning_rate = learning_rate
         self.loss_func = self.error_function
         self.optimizer_func = optimizer_func(learning_rate)
+        self.batch_size = 32
 
         # get params
         self.params = [
@@ -48,6 +50,7 @@ class Trainer():
         ]
         
         # for visualization of training
+        self.train_accuracies = []
         self.test_accuracies = []
         self.test_losses = []
         self.train_losses = []
@@ -82,21 +85,37 @@ class Trainer():
             had to work around bc cannot iterate 'for batch in batches'
         """
 
-        max = ds.cardinality().numpy()
+    #     max = ds.cardinality().numpy()
     
-       # randI = np.random.randint(0, high=max)
-        randI = tf.random.uniform(shape=[], minval=0, maxval=max, dtype=tf.int64)
-        print("max", max)
-        print("rand", randI)
+    #    # randI = np.random.randint(0, high=max)
+    #     randI = tf.random.uniform(shape=[], minval=0, maxval=max, dtype=tf.int64)
+    #     print("max", max)
+    #     print("rand", randI)
         
-        i = 0
-        for input,target in ds:
-            if i == randI:
-                # return current batch
-                batch = tf.data.Dataset.from_tensor_slices(([input],[target]))
-                return batch
-            i += 1
+    #     i = 0
+    #     for input,target in ds:
+    #         if i == randI:
+    #             # return current batch
+    #             batch = tf.data.Dataset.from_tensor_slices(([input],[target]))
+    #             return batch
+    #         i += 1
+        print(type(ds))
+        num_rows = ds[0].shape[0]
+        sample_size = self.batch_size 
+        # Generate random indices to select rows
+        random_indices = np.random.choice(num_rows, size=sample_size, replace=False)
 
+        print(ds[0])
+        print(type(random_indices))
+        print(random_indices)
+        indices = np.arange(sample_size)
+
+        # Use the random indices to extract the sampled rows
+        batch_in = ds[0][random_indices, :]
+        batch_out = ds[1][random_indices, :]
+        print("batch_out")
+        print(batch_in)
+        return batch_in, batch_out
 
     def training_loop(self, train_ds_og, test_ds_og, validation_ds_og):
         """Training of the model
@@ -105,11 +124,14 @@ class Trainer():
             test_ds (PrefetchDataset): dataset for testing
         """
         # picking random batch from dataset
-        test_batch = self.pick_batch(test_ds_og)
-        train_batch =  self.pick_batch(train_ds_og)
+        test_batch = test_ds_og
+        train_batch =  train_ds_og
+       # test_batch = self.pick_batch(test_ds_og)
+       # train_batch =  self.pick_batch(train_ds_og)
        # validation_batch = self.pick_batch(validation_ds_og)
 
         # run model on test_ds to keep track of progress during training
+        print("test_batch",test_batch)
         test_loss, test_accuracy = self.test(test_batch)
         self.test_losses.append(test_loss)
         self.test_accuracies.append(test_accuracy)
@@ -131,17 +153,14 @@ class Trainer():
             train loss {self.train_losses[-1]}')
 
             # in each epoch, pick a random batch
-            test_batch =  self.pick_batch(test_ds_og)
-            train_batch =  self.pick_batch(train_ds_og)
+          #  test_batch =  self.pick_batch(test_ds_og)
+          #  train_batch =  self.pick_batch(train_ds_og)
 
             # train and keep track
-            epoch_loss_agg = []
-            for input,target in train_batch:
-                train_loss = self.train_step(input, target)
-                epoch_loss_agg.append(train_loss)
-
-            #track training loss
-            self.train_losses.append(tf.reduce_mean(epoch_loss_agg))
+            train_loss, train_acc = self.train_step(train_batch)
+            self.train_accuracies.append(train_acc)
+            self.train_losses.append(train_loss)
+            
 
             #testing, so we can track accuracy and test loss
             test_loss, test_accuracy = self.test(test_batch)
@@ -169,34 +188,38 @@ class Trainer():
         test_accuracy_aggregator = []
         test_loss_aggregator = []
 
+        print(ds)
+
+        print(type(ds))
         # iterate over batch
-        for (inputs_batch, targets_batch) in ds:
+        inputs_batch, targets_batch = ds
+
             
-            for input, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
-                
-              #  print("INPUT", input)
-                # forward pass to get prediction
-                prediction = self.arc(input)
-              #  print("Pred", prediction)
+        for input, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
+            
+            #  print("INPUT", input)
+            # forward pass to get prediction
+            prediction = self.arc(input)
+            #  print("Pred", prediction)
 
-               # print("tar", target)
+            # print("tar", target)
 
-                # get loss
-                sample_test_loss = self.loss_func(prediction, target)
-                # get accuracy
-                sample_test_accuracy =  target == np.round(prediction, 0)
+            # get loss
+            sample_test_loss = self.loss_func(prediction, target)
+            # get accuracy
+            sample_test_accuracy =  target == np.round(prediction, 0)
 
-              #  print("sample_test_accuracy", sample_test_accuracy)
-                sample_test_accuracy = np.mean(sample_test_accuracy)
+            #  print("sample_test_accuracy", sample_test_accuracy)
+            sample_test_accuracy = np.mean(sample_test_accuracy)
 
-               # print("sample_test_accuracy np mean" , sample_test_accuracy)
+            # print("sample_test_accuracy np mean" , sample_test_accuracy)
 
-                test_loss_aggregator.append(sample_test_loss)
+            test_loss_aggregator.append(sample_test_loss)
 #                test_loss_aggregator.append(sample_test_loss.numpy())
 
 
-               # print("np.mean(sample_test_accuracy", np.mean(sample_test_accuracy))
-                test_accuracy_aggregator.append(np.mean(sample_test_accuracy))  
+            # print("np.mean(sample_test_accuracy", np.mean(sample_test_accuracy))
+            test_accuracy_aggregator.append(np.mean(sample_test_accuracy))  
 
         # return averages per batch
         test_loss = tf.reduce_mean(test_loss_aggregator)
@@ -204,7 +227,7 @@ class Trainer():
         return test_loss, test_accuracy
 
 
-    def train_step(self, inputs_batch, targets_batch):
+    def train_step(self, train_batch):
         """Implements train step for batch of datasamples
         Args:
             input (tf.Tensor): input sequence of a batch of dataset
@@ -214,14 +237,26 @@ class Trainer():
         """
         # list for losses per batch
         losses_aggregator = []
+        accuracy_aggregator = []
         # iterate over the batch
-        for input, target in zip(inputs_batch, targets_batch):
+        print("inputs_batch", train_batch)
+        inputs_batch, targets_batch = train_batch
+        for inp, target in zip(inputs_batch, targets_batch):
+            print("input", inp)
             with tf.GradientTape() as tape:
                 # forward pass to get prediction
-                prediction = self.arc(input)
+                prediction = self.arc(inp)
                 # get loss
                 loss = self.loss_func(prediction, target)
                 losses_aggregator.append(loss)
+
+                # calculating accuracy
+                accuracy =  target == np.round(prediction, 0)
+
+            #  print("sample_test_accuracy", sample_test_accuracy)
+                accuracy = np.mean(accuracy)
+                accuracy_aggregator.append(np.mean(accuracy))
+
                 # get gradients
                 gradients = tape.gradient(loss, self.arc.trainable_variables)
 
@@ -230,7 +265,9 @@ class Trainer():
 
         # return average loss
         loss = tf.reduce_mean(losses_aggregator)
-        return loss
+        acc = tf.reduce_mean(accuracy_aggregator)
+
+        return loss, acc
 
 
     def error_function(self, prediction, targets):
@@ -272,15 +309,18 @@ class Trainer():
             type_model (str): type of model that has been trained
         """
         plt.figure()
-        line1, = plt.plot(self.train_losses)
-        line2, = plt.plot(self.test_losses)
-        line3, = plt.plot(self.test_accuracies)
-        line4, = plt.plot(self.v_accuracies)
-        line5, = plt.plot(self.v_losses)
+        # accuracies
+        line1, = plt.plot(self.test_accuracies)
+        line2, = plt.plot(self.train_accuracies)
+       # line3, = plt.plot(self.val_accuracies)
+        # losses
+        line4, = plt.plot(self.test_losses)
+        line5, = plt.plot(self.train_losses)
+       # line5, = plt.plot(self.v_losses)
         plt.xlabel("Training steps")
         plt.ylabel("Loss/Accuracy")
-        plt.legend((line1, line2, line3, line4, line5),
-        ("training losses", "test losses", "test accuracy", "v_accuracies", "v_losses"))
+        plt.legend((line1, line2, line4, line5),
+        ("test accuracy", "training accuracy", "test losses", "training losses"))
         plt.title(f'{type_model}')
         plt.figure
        

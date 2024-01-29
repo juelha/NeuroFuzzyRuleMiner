@@ -191,7 +191,10 @@ class DataPipeline():
         b = b.numpy()
         #print(b)
         type(b)
-        targets = b.tolist()
+        targets = b#.tolist()
+
+        df = df.to_numpy()
+       # targets = targets.to_numpy()
 
         # Split the dataset into a train, test and validation split
         # ratio is 80:10:10
@@ -209,9 +212,9 @@ class DataPipeline():
        # validating_ds = tf.data.Dataset.from_tensor_slices((validation_ds, validation_tar))
 
         # pipeline and one-hot encoding target vector
-        # self.train_ds = train_ds.apply(self.pipeline_for_training)
-        # self.test_ds = test_ds.apply(self.pipeline_for_training)
-        # self.validation_ds = validation_ds.apply(self.pipeline_for_training)
+        self.train_ds = (train_ds, train_tar)
+        self.test_ds = (test_ds, test_tar)# test_ds.apply(self.pipeline_for_training)
+        self.validation_ds = (validation_ds, validation_tar)#validation_ds.apply(self.pipeline_for_training)
 
     def pipeline_for_training(self, df):
         """Performs the needed operations to prepare the datasets for training

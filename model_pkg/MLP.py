@@ -64,6 +64,8 @@ class MLP(tf.keras.Model):
             to check the rules  
         """
         encaps_inputs = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
+        print("Hereee")
+        print(inputs)
         for input in inputs:
            # print("in", input)
             encaps_inputs = encaps_inputs.write(encaps_inputs.size(), [input])
