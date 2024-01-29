@@ -80,8 +80,12 @@ class MyArc():
         ## HOT FIX ##
         # inputs = <MapDataset element_spec=TensorSpec(shape=(11,), dtype=tf.float64, name=None)>
         # problem: cant get to the shape in the MapDataset element 
-        for features in inputs.take(1):
-          n_inputs = int(features.shape[0])
+        # print("HEREREEEEE", inputs)
+        # print("HEREREEEEE", inputs.shape)
+        n_inputs = inputs.shape[1] # horizontal
+
+        # for features in inputs.take(1):
+        #   n_inputs = int(features.shape[0])
         #  print(n_inputs)
 
         n_mfs = self.FuzzificationLayer.n_mfs

@@ -38,25 +38,27 @@ def main():
     batch_size = 64
     learning_rate = 1
     n_epochs = 10 
-
     df_name = "dummy"
-
-    MyModel = Model(DataPipeline(df_name, batch_size=batch_size), 
-                     MyArc(), 
-                     MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate))
     
-    MyModel.build_MyArc() # works 
-   # MyModel.build_MyArc_MF()
-    for i in range(1):
-        MyModel.trainMyArc()
-        MyModel.build_MyArc_CW()
-        MyModel.arc.RuleConsequentLayer.save_weights(df_name)
+        # Model with MLP arc
+    MLPModel = Model(DataPipeline(df_name),  
+                     MLP((2,6),2),  
+                     Trainer())
+    MLPModel.train()
 
-    ## Model with MLP arc
-    # MLPModel = Model(DataPipeline(df_name),  
-    #                  MLP((2,6),2),  
-    #                  Trainer())
- #   MLPModel.train()
+
+    # MyModel = Model(DataPipeline(df_name, batch_size=batch_size), 
+    #                  MyArc(), 
+    #                  MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate))
+    
+    # MyModel.build_MyArc() # works 
+   # MyModel.build_MyArc_MF()
+    # for i in range(1):
+    #     MyModel.trainMyArc()
+    #     MyModel.build_MyArc_CW()
+    #     MyModel.arc.RuleConsequentLayer.save_weights(df_name)
+
+
     # print(MLPModel.summary()) 
 
 

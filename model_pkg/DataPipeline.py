@@ -95,6 +95,7 @@ class DataPipeline():
     def load_dummy(self):
         """Loads dummy dataset 
         
+        'pandas.core.frame.DataFrame'
         """
         # get save path 
         file_name = 'dummy_df.csv'
@@ -105,7 +106,7 @@ class DataPipeline():
         # shuffle first so inputs and targets stay on same row
         df = df.sample(frac=1) # do we need to shuffle here? 
         # separate into input and targets 
-        targets = df.pop('out')
+        targets = df.pop("out")
        # print("df", df)
         self.feature_names = list(df.columns)
         #print("feature", self.feature_names)
@@ -118,58 +119,6 @@ class DataPipeline():
         self.inputs_mean = np.mean(df, axis=0)      
         return df, targets
 
-    def load_data_for_training(self):
-        """Initializes the datasets: train_ds, test_ds, validation_ds,
-        which have been split from the original dataset using the ratio 
-        = 80:10:10
-        """
-        
-        df, targets = self.loader()
-        self.generate_folders(self.df_name) 
-
-        
-
-        # Split the dataset into a train, test and validation split
-        # ratio is 80:10:10
-        train_ds, test_ds, validation_ds = np.split(df, [int(.8*len(df)), int(.9*len(df))])
-        train_tar, test_tar, validation_tar = np.split(targets, [int(.8*len(targets)), int(.9*len(targets))])
-
-        # convert to tensor dataset
-        df = tf.data.Dataset.from_tensor_slices((df.values, targets.values))
-
-        # stitch inputs and targets back together
-        training_ds = tf.data.Dataset.from_tensor_slices((train_ds, train_tar))
-        testing_ds = tf.data.Dataset.from_tensor_slices((test_ds, test_tar))
-        validating_ds = tf.data.Dataset.from_tensor_slices((validation_ds, validation_tar))
-
-        # calculate treshhold
-        self.treshhold = np.mean(targets)    
-
-        # pipeline and one-hot encoding target vector
-        self.train_ds = training_ds.apply(self.pipeline_for_training)
-        self.test_ds = testing_ds.apply(self.pipeline_for_training)
-        self.validation_ds = validating_ds.apply(self.pipeline_for_training)
-
-    def pipeline_for_training(self, df):
-        """Performs the needed operations to prepare the datasets for training
-
-        Args:
-            df (tf.data.Dataset): dataset to prepare
-        
-        Returns: 
-            df (tf.PrefetchDataset): prepared dataset
-        """
-        # target is one-hot-encoded to have two outputs, representing two output perceptrons
-        df = df.map(lambda features, target: (features, self.make_binary(target)))
-        df = df.map(lambda inputs, target: (inputs, tf.one_hot(int(target), 2)))
-        # cache this progress in memory
-       # df = df.cache()
-        # shuffle, batch, prefetch
-        df = df.shuffle(50)
-        df = df.batch(self.batch_size)
-        df = df.prefetch(buffer_size=1)
-        return df
-    
     def load_data_for_building(self, df_name="dummy"):
         """
         one batch dataset, input and target 
@@ -180,26 +129,35 @@ class DataPipeline():
         self.generate_folders(self.df_name) 
         # make targets binary 
         treshhold = np.mean(targets)        
-        targets = targets.apply(lambda x: int(x >= treshhold))
-        print(type(targets))
-        print(targets.head())
+       # targets = targets.apply(lambda x: int(x >= treshhold))
+      ##  print(type(targets))
+        #print(targets.head())
         
         self.feature_names = list(df.columns)
 
         # get mean of all cols
-        self.inputs_mean = np.mean(df, axis=0)      
+        self.inputs_mean = np.mean(df, axis=0)     
 
+
+       # a = np.array(df["out"])
+        depth = 2
+        b = tf.one_hot(targets, depth)
+        b = b.numpy()
+        #print(b)
+        type(b)
+        targets = b.tolist()
+       
         # convert to tensor dataset
-        df = tf.data.Dataset.from_tensor_slices((df.values, targets.values))
+     #   df = tf.data.Dataset.from_tensor_slices((df.values, targets.values))
 
         # pipeline and one-hot encoding target vector
-        df = df.apply(self.pipeline_for_building)
+       # df = df.apply(self.pipeline_for_building)
 
-        for features, targets in df.take(5):
-          print ('Features: {}, Target: {}'.format(features, targets))
+        # for features, targets in df.take(5):
+        #   print ('Features: {}, Target: {}'.format(features, targets))
 
-        self.inputs = df.map(lambda x,y: x)
-        self.targets = df.map(lambda x,y: y) # doing weird shit  
+        self.inputs = df.to_numpy()# df.map(lambda x,y: x)
+        self.targets = targets #df.map(lambda x,y: y) # doing weird shit  
        # print("over here", df)
 
         return 0#self.inputs, self.targets
@@ -215,6 +173,67 @@ class DataPipeline():
        # df = df.shuffle(50)
 
         return df
+
+    def load_data_for_training(self):
+        """Initializes the datasets: train_ds, test_ds, validation_ds,
+        which have been split from the original dataset using the ratio 
+        = 80:10:10
+        """
+        
+        df, targets = self.loader()
+        # calculate treshhold
+        self.treshhold = np.mean(targets)  
+        self.generate_folders(self.df_name) 
+
+        # datapipeline at home
+        depth = 2
+        b = tf.one_hot(targets, depth)
+        b = b.numpy()
+        #print(b)
+        type(b)
+        targets = b.tolist()
+
+        # Split the dataset into a train, test and validation split
+        # ratio is 80:10:10
+        train_ds, test_ds, validation_ds = np.split(df, [int(.8*len(df)), int(.9*len(df))])
+        train_tar, test_tar, validation_tar = np.split(targets, [int(.8*len(targets)), int(.9*len(targets))])
+
+        print(type(train_ds))
+
+        # convert to tensor dataset
+       # df = tf.data.Dataset.from_tensor_slices((df.values, targets.values))
+
+        # stitch inputs and targets back together
+       # training_ds = tf.data.Dataset.from_tensor_slices((train_ds, train_tar))
+        #testing_ds = tf.data.Dataset.from_tensor_slices((test_ds, test_tar))
+       # validating_ds = tf.data.Dataset.from_tensor_slices((validation_ds, validation_tar))
+
+        # pipeline and one-hot encoding target vector
+        # self.train_ds = train_ds.apply(self.pipeline_for_training)
+        # self.test_ds = test_ds.apply(self.pipeline_for_training)
+        # self.validation_ds = validation_ds.apply(self.pipeline_for_training)
+
+    def pipeline_for_training(self, df):
+        """Performs the needed operations to prepare the datasets for training
+
+        Args:
+            df (tf.data.Dataset): dataset to prepare
+        
+        Returns: 
+            df (tf.PrefetchDataset): prepared dataset
+        """
+        # target is one-hot-encoded to have two outputs, representing two output perceptrons
+      #  df = df.map(lambda features, target: (features, self.make_binary(target)))
+       # df = df.map(lambda inputs, target: (inputs, tf.one_hot(int(target), 2)))
+        # cache this progress in memory
+       # df = df.cache()
+        # shuffle, batch, prefetch
+        df = df.shuffle(50)
+        df = df.batch(self.batch_size)
+        df = df.prefetch(buffer_size=1)
+        return df
+    
+    
     
     def make_binary(self,target):
         """

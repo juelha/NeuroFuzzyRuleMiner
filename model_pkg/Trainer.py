@@ -68,6 +68,8 @@ class Trainer():
         self.training_loop(train_ds,  test_ds, validation_ds)
       #  self.visualize_training(self.df_name, self.arc.Name)
 
+
+
     def pick_batch(self, ds):
         """Return one entry from batch 
         Args:
@@ -103,21 +105,21 @@ class Trainer():
             test_ds (PrefetchDataset): dataset for testing
         """
         # picking random batch from dataset
-        test_ds = self.pick_batch(test_ds_og)
-        train_ds =  self.pick_batch(train_ds_og)
-        validation_ds = self.pick_batch(validation_ds_og)
+        test_batch = self.pick_batch(test_ds_og)
+        train_batch =  self.pick_batch(train_ds_og)
+       # validation_batch = self.pick_batch(validation_ds_og)
 
         # run model on test_ds to keep track of progress during training
-        test_loss, test_accuracy = self.test(test_ds)
+        test_loss, test_accuracy = self.test(test_batch)
         self.test_losses.append(test_loss)
         self.test_accuracies.append(test_accuracy)
 
         # same thing for train_ds
-        train_loss, _ = self.test(train_ds)
+        train_loss, _ = self.test(train_batch)
         self.train_losses.append(train_loss)
 
         # same thing for validation ds
-        validation_ds_loss, validation_ds_accuracy = self.test(validation_ds)
+        validation_ds_loss, validation_ds_accuracy = self.test(validation_ds_og)
         self.v_losses.append(validation_ds_loss)
         self.v_accuracies.append(validation_ds_accuracy)
        
@@ -129,12 +131,12 @@ class Trainer():
             train loss {self.train_losses[-1]}')
 
             # in each epoch, pick a random batch
-            test_ds =  self.pick_batch(test_ds_og)
-            train_ds =  self.pick_batch(train_ds_og)
+            test_batch =  self.pick_batch(test_ds_og)
+            train_batch =  self.pick_batch(train_ds_og)
 
             # train and keep track
             epoch_loss_agg = []
-            for input,target in train_ds:
+            for input,target in train_batch:
                 train_loss = self.train_step(input, target)
                 epoch_loss_agg.append(train_loss)
 
@@ -142,12 +144,12 @@ class Trainer():
             self.train_losses.append(tf.reduce_mean(epoch_loss_agg))
 
             #testing, so we can track accuracy and test loss
-            test_loss, test_accuracy = self.test(test_ds)
+            test_loss, test_accuracy = self.test(test_batch)
             self.test_losses.append(test_loss)
             self.test_accuracies.append(test_accuracy)
 
             # same thing for validation ds
-            validation_ds_loss, validation_ds_accuracy = self.test(validation_ds)
+            validation_ds_loss, validation_ds_accuracy = self.test(validation_ds_og)
             self.v_losses.append(validation_ds_loss)
             self.v_accuracies.append(validation_ds_accuracy)
 
