@@ -132,16 +132,25 @@ class VanillaTrainer():
             test_loss (float): average loss from output to target
             test_accuracy (float): average accuracy of output
         """
-        
-        inputs, targets = ds
-        predictions = self.arc(inputs)
-        loss = self.loss_func(predictions, targets)
-        accuracy =  targets == np.round(predictions, 0)
-        accuracy = np.mean(accuracy)
 
-        loss_mean = np.mean(loss)  
-        acc_mean = np.mean(accuracy)
-        return loss_mean, acc_mean
+        accuracy_aggregator = []
+        loss_aggregator = []
+
+        inputs_batch, targets_batch = ds
+        
+        for input, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
+            prediction = self.arc(input)
+            loss = self.loss_func(prediction, target)
+            accuracy =  target == np.round(prediction, 0)
+            accuracy = np.mean(accuracy)
+
+            loss_aggregator.append(loss)
+            accuracy_aggregator.append(np.mean(accuracy))  
+
+        # return averages per batch
+        test_loss = np.mean(loss_aggregator)
+        test_accuracy =  np.mean(accuracy_aggregator)
+        return test_loss, test_accuracy
 
     def train_step(self, ds):
         """Implements train step for batch of datasamples
@@ -151,35 +160,33 @@ class VanillaTrainer():
         Returns:
             loss (float): average loss before after train step
         """
-        
         inputs, targets = ds    
-     
+        losses_aggregator = []
+        accuracy_aggregator = []
 
-        with tf.GradientTape() as tape:
-            # forward pass to get prediction
-            
-            prediction = self.arc(inputs)
-            # get loss
-            loss = self.loss_func(prediction, targets)
+        for input, target in zip(inputs, targets):
 
-            # losses_aggregator.append(loss)
-            print("help", np.round(prediction, 0))
-            accuracy =  targets == np.round(prediction, 0)
-            print(accuracy)
-            accuracy = np.mean(accuracy, axis=1)
-            print(accuracy)
-            # accuracy_aggregator.append(accuracy)
-            # get gradients
-            gradients = tape.gradient(loss, self.arc.trainable_variables)
+              with tf.GradientTape() as tape:
+                    # forward pass to get prediction
+                    prediction = self.arc(input)
+                    print("pred", prediction)
+                    # get loss
+                    print("tar", target)
+                    loss = self.loss_func(prediction, target)
+                    accuracy =  target == np.round(prediction, 0)
+                    accuracy = np.mean(accuracy)
+                    losses_aggregator.append(loss)
+                    accuracy_aggregator.append(accuracy)
+                    # get gradients
+                    gradients = tape.gradient(loss, self.arc.trainable_variables)
 
               # adapt the trainable variables with gradients 
-            self.optimizer_func.apply_gradients(zip(gradients, self.arc.trainable_variables))  
+              self.optimizer_func.apply_gradients(zip(gradients, self.arc.trainable_variables))  
 
-            # return average loss
-            loss = tf.reduce_mean(loss)
-            acc_mean = np.mean(accuracy)
-            print(acc_mean)
-            return loss, acc_mean
+        # return average loss
+        loss = np.mean(losses_aggregator)
+        acc_mean = np.mean(accuracy_aggregator)
+        return loss, acc_mean
 
 
     def error_function(self, prediction, targets):

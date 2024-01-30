@@ -84,7 +84,7 @@ class MLP(tf.keras.Model):
             (tf.Tensor): final prediction of model
         """
         # make input fit to layer dense
-       # inputs = self.manage_input(inputs)
+        inputs = self.manage_input(inputs)
       #  print("inputs",inputs)
 
         for layer in self.hidden:
