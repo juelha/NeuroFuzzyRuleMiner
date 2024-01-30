@@ -55,7 +55,8 @@ class DataPipeline():
         """Load specified dataset
         
         Args:
-            df_name (str): dataset to load
+            df_name (str): dataset to load 
+                           options: ["dummy", "wine"]
 
         Returns:
             df, targets
@@ -84,12 +85,7 @@ class DataPipeline():
         targets = df.pop('quality')
         self.feature_names = list(df.columns)
         # get max value of each feature <- center init
-  
         self.feature_ranges = df.max()
-        print(df.max())
-
-        print("feature", self.feature_names)
-
         return df, targets
 
     def load_dummy(self):
@@ -107,54 +103,28 @@ class DataPipeline():
         df = df.sample(frac=1) # do we need to shuffle here? 
         # separate into input and targets 
         targets = df.pop("out")
-       # print("df", df)
+        # get featuer names <- documenting MFs
         self.feature_names = list(df.columns)
-        #print("feature", self.feature_names)
-         # get max value of each feature <- center init
-       # print("HELLO", df.max().to_numpy())
-        
+        # get max value of each feature <- center init        
         self.feature_ranges = df.max()
-
-        # get mean of all cols
-        self.inputs_mean = np.mean(df, axis=0)      
+        print(f"Dataset {self.df_name} loaded: \n {df.head()} \n")
         return df, targets
 
-    def load_data_for_building(self, df_name="dummy"):
+    def load_data_for_building(self):
         """
         one batch dataset, input and target 
 
         """
-
         df, targets = self.loader()
         self.generate_folders(self.df_name) 
         # make targets binary 
         treshhold = np.mean(targets)        
        # targets = targets.apply(lambda x: int(x >= treshhold))
-      ##  print(type(targets))
-        #print(targets.head())
-        
-        self.feature_names = list(df.columns)
 
-        # get mean of all cols
-        self.inputs_mean = np.mean(df, axis=0)     
-
-
-       # a = np.array(df["out"])
+        # one hot encoding
         depth = 2
         b = tf.one_hot(targets, depth)
-        b = b.numpy()
-        #print(b)
-        type(b)
-        targets = b.tolist()
-       
-        # convert to tensor dataset
-     #   df = tf.data.Dataset.from_tensor_slices((df.values, targets.values))
-
-        # pipeline and one-hot encoding target vector
-       # df = df.apply(self.pipeline_for_building)
-
-        # for features, targets in df.take(5):
-        #   print ('Features: {}, Target: {}'.format(features, targets))
+        targets = b.numpy()
 
         self.inputs = df.to_numpy()# df.map(lambda x,y: x)
         self.targets = targets #df.map(lambda x,y: y) # doing weird shit  
@@ -162,56 +132,29 @@ class DataPipeline():
 
         return 0#self.inputs, self.targets
 
-    def pipeline_for_building(self, df):
-        """
-        input: tensorflow dataset
-        returns: preprocessed and prepared dataset
-        """
-        #df = df.map(lambda features, target: (features, self.make_binary(target)))
-        # note: perfomance is better without converting to one_hot
-        df = df.map(lambda inputs, target: (inputs, tf.one_hot(target,2)))
-       # df = df.shuffle(50)
-
-        return df
 
     def load_data_for_training(self):
         """Initializes the datasets: train_ds, test_ds, validation_ds,
         which have been split from the original dataset using the ratio 
         = 80:10:10
         """
-        
         df, targets = self.loader()
         # calculate treshhold
-        self.treshhold = np.mean(targets)  
+       # self.treshhold = np.mean(targets)  
         self.generate_folders(self.df_name) 
 
-        # datapipeline at home
+        # one hot encoding
         depth = 2
         b = tf.one_hot(targets, depth)
-        b = b.numpy()
-        #print(b)
-        type(b)
-        targets = b#.tolist()
+        targets = b.numpy()
 
         df = df.to_numpy()
-       # targets = targets.to_numpy()
 
         # Split the dataset into a train, test and validation split
         # ratio is 80:10:10
         train_ds, test_ds, validation_ds = np.split(df, [int(.8*len(df)), int(.9*len(df))])
         train_tar, test_tar, validation_tar = np.split(targets, [int(.8*len(targets)), int(.9*len(targets))])
 
-        print(type(train_ds))
-
-        # convert to tensor dataset
-       # df = tf.data.Dataset.from_tensor_slices((df.values, targets.values))
-
-        # stitch inputs and targets back together
-       # training_ds = tf.data.Dataset.from_tensor_slices((train_ds, train_tar))
-        #testing_ds = tf.data.Dataset.from_tensor_slices((test_ds, test_tar))
-       # validating_ds = tf.data.Dataset.from_tensor_slices((validation_ds, validation_tar))
-
-        # pipeline and one-hot encoding target vector
         self.train_ds = (train_ds, train_tar)
         self.test_ds = (test_ds, test_tar)# test_ds.apply(self.pipeline_for_training)
         self.validation_ds = (validation_ds, validation_tar)#validation_ds.apply(self.pipeline_for_training)
@@ -235,7 +178,6 @@ class DataPipeline():
         df = df.batch(self.batch_size)
         df = df.prefetch(buffer_size=1)
         return df
-    
     
     
     def make_binary(self,target):
@@ -265,7 +207,7 @@ class DataPipeline():
         save_path = os.path.dirname(__file__) + relative_path
         if not os.path.exists(save_path):
             os.mkdir(save_path)
-        print(f"Directory {df_name} created in config, full path is {save_path}") 
+        print(f"Directory {df_name} created in config, full path is {save_path}\n") 
 
 
     def generate_folders_results(self, df_name):
@@ -287,4 +229,4 @@ class DataPipeline():
             os.mkdir(save_path_fig_1)
             save_path_fig2 = save_path + "/after_training"
             os.mkdir(save_path_fig2)
-        print(f'Directory {df_name} created, full path is {save_path}') 
+        print(f'Directory {df_name} created, full path is {save_path}\n') 

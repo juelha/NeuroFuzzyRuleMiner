@@ -43,9 +43,6 @@ class Model():
     def build_MyArc(self):
         # load data for building my arc
         self.data.load_data_for_building()
-      #  self.feature_names = self.data.feature_names
-       # self.arc.feature_names = self.feature_names
-       # self.arc.feature_ranges = self.data.feature_ranges
         self.arc.build(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name)
         print("Build done")
 
@@ -86,7 +83,7 @@ class Model():
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
         self.train()
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_ranges )
-        self.arc.FuzzificationLayer.save_weights(self.data.df_name)
+        #self.arc.FuzzificationLayer.save_weights(self.data.df_name)
 
 
     def train(self):

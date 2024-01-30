@@ -33,8 +33,6 @@ class Trainer():
             test_losses (list(float)): keeping track of test losses during training
             train_losses (list(float)): keeping track of train losses during training
         """
-
-
         self.arc = arc
 
         # hyperparamers
@@ -42,7 +40,7 @@ class Trainer():
         self.learning_rate = learning_rate
         self.loss_func = self.error_function
         self.optimizer_func = optimizer_func(learning_rate)
-        self.batch_size = 32
+        self.batch_size = 50
 
         # get params
         self.params = [
@@ -113,8 +111,11 @@ class Trainer():
         # Use the random indices to extract the sampled rows
         batch_in = ds[0][random_indices, :]
         batch_out = ds[1][random_indices, :]
-        print("batch_out")
+        
+        print("batch_in")
         print(batch_in)
+        print("batch_out")
+        print(batch_out)
         return batch_in, batch_out
 
     def training_loop(self, train_ds_og, test_ds_og, validation_ds_og):
@@ -124,26 +125,27 @@ class Trainer():
             test_ds (PrefetchDataset): dataset for testing
         """
         # picking random batch from dataset
-        test_batch = test_ds_og
-        train_batch =  train_ds_og
-       # test_batch = self.pick_batch(test_ds_og)
-       # train_batch =  self.pick_batch(train_ds_og)
+        # test_batch = test_ds_og
+        # train_batch =  train_ds_og
+        test_batch = self.pick_batch(test_ds_og)
+        train_batch =  self.pick_batch(train_ds_og)
        # validation_batch = self.pick_batch(validation_ds_og)
 
         # run model on test_ds to keep track of progress during training
-        print("test_batch",test_batch)
+        #print("test_batch",test_batch)
         test_loss, test_accuracy = self.test(test_batch)
         self.test_losses.append(test_loss)
         self.test_accuracies.append(test_accuracy)
 
         # same thing for train_ds
-        train_loss, _ = self.test(train_batch)
+        train_loss, train_acc = self.test(train_batch)
         self.train_losses.append(train_loss)
+        self.train_accuracies.append(train_acc)
 
         # same thing for validation ds
-        validation_ds_loss, validation_ds_accuracy = self.test(validation_ds_og)
-        self.v_losses.append(validation_ds_loss)
-        self.v_accuracies.append(validation_ds_accuracy)
+        # validation_ds_loss, validation_ds_accuracy = self.test(validation_ds_og)
+        # self.v_losses.append(validation_ds_loss)
+        # self.v_accuracies.append(validation_ds_accuracy)
        
         # training loop until self.iters 
         for epoch in range(self.n_epochs):
@@ -153,8 +155,8 @@ class Trainer():
             train loss {self.train_losses[-1]}')
 
             # in each epoch, pick a random batch
-          #  test_batch =  self.pick_batch(test_ds_og)
-          #  train_batch =  self.pick_batch(train_ds_og)
+            test_batch =  self.pick_batch(test_ds_og)
+            train_batch =  self.pick_batch(train_ds_og)
 
             # train and keep track
             train_loss, train_acc = self.train_step(train_batch)
@@ -168,9 +170,9 @@ class Trainer():
             self.test_accuracies.append(test_accuracy)
 
             # same thing for validation ds
-            validation_ds_loss, validation_ds_accuracy = self.test(validation_ds_og)
-            self.v_losses.append(validation_ds_loss)
-            self.v_accuracies.append(validation_ds_accuracy)
+            # validation_ds_loss, validation_ds_accuracy = self.test(validation_ds_og)
+            # self.v_losses.append(validation_ds_loss)
+            # self.v_accuracies.append(validation_ds_accuracy)
 
         print("Training Loop completed")
         return 0
@@ -193,38 +195,15 @@ class Trainer():
         print(type(ds))
         # iterate over batch
         inputs_batch, targets_batch = ds
+        predictions = self.arc(inputs_batch)
+        sample_test_loss = self.loss_func(predictions, targets_batch)
+        sample_test_accuracy =  targets_batch == np.round(predictions, 0)
+        sample_test_accuracy = np.mean(sample_test_accuracy)
 
-            
-        for input, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
-            
-            #  print("INPUT", input)
-            # forward pass to get prediction
-            prediction = self.arc(input)
-            #  print("Pred", prediction)
-
-            # print("tar", target)
-
-            # get loss
-            sample_test_loss = self.loss_func(prediction, target)
-            # get accuracy
-            sample_test_accuracy =  target == np.round(prediction, 0)
-
-            #  print("sample_test_accuracy", sample_test_accuracy)
-            sample_test_accuracy = np.mean(sample_test_accuracy)
-
-            # print("sample_test_accuracy np mean" , sample_test_accuracy)
-
-            test_loss_aggregator.append(sample_test_loss)
-#                test_loss_aggregator.append(sample_test_loss.numpy())
-
-
-            # print("np.mean(sample_test_accuracy", np.mean(sample_test_accuracy))
-            test_accuracy_aggregator.append(np.mean(sample_test_accuracy))  
-
-        # return averages per batch
-        test_loss = tf.reduce_mean(test_loss_aggregator)
-        test_accuracy = tf.reduce_mean(test_accuracy_aggregator)
-        return test_loss, test_accuracy
+        loss_mean = np.mean(sample_test_loss)  
+        acc_mean = np.mean(sample_test_accuracy)
+        print("HERE",acc_mean)
+        return loss_mean, acc_mean
 
 
     def train_step(self, train_batch):
@@ -235,39 +214,31 @@ class Trainer():
         Returns:
             loss (float): average loss before after train step
         """
-        # list for losses per batch
-        losses_aggregator = []
-        accuracy_aggregator = []
+
         # iterate over the batch
         print("inputs_batch", train_batch)
         inputs_batch, targets_batch = train_batch
-        for inp, target in zip(inputs_batch, targets_batch):
-            print("input", inp)
-            with tf.GradientTape() as tape:
-                # forward pass to get prediction
-                prediction = self.arc(inp)
-                # get loss
-                loss = self.loss_func(prediction, target)
-                losses_aggregator.append(loss)
+    
+        with tf.GradientTape() as tape:
+            # forward pass to get prediction
+            predictions = self.arc(inputs_batch)
+            loss = self.error_function(predictions, targets_batch)
+            accuracy =  targets_batch == np.round(predictions, 0)
+            print("loss", loss)
+            loss_mean = np.mean(loss, axis=1)  
+            loss_mean = np.mean(loss, axis=0)  
+            print("loss_mean", loss_mean)
+            gradients = tape.gradient(loss, self.arc.trainable_variables)
 
-                # calculating accuracy
-                accuracy =  target == np.round(prediction, 0)
-
-            #  print("sample_test_accuracy", sample_test_accuracy)
-                accuracy = np.mean(accuracy)
-                accuracy_aggregator.append(np.mean(accuracy))
-
-                # get gradients
-                gradients = tape.gradient(loss, self.arc.trainable_variables)
-
-            # adapt the trainable variables with gradients 
-            self.optimizer_func.apply_gradients(zip(gradients, self.arc.trainable_variables))  
+        # adapt the trainable variables with gradients 
+        self.optimizer_func.apply_gradients(zip(gradients, self.arc.trainable_variables))  
 
         # return average loss
-        loss = tf.reduce_mean(losses_aggregator)
-        acc = tf.reduce_mean(accuracy_aggregator)
+        accuracy = np.mean(accuracy)
+        loss_mean = np.mean(loss)  
+        acc_mean = np.mean(accuracy)
 
-        return loss, acc
+        return loss_mean, acc_mean
 
 
     def error_function(self, prediction, targets):
@@ -281,10 +252,6 @@ class Trainer():
             error_term (float): output of derived error function
         """
 
-        #error_term = tf.reduce_mean(0.5*(prediction - targets)**2)
-
-       # print("pred", prediction)
-       # print("tar", targets)
         error_term = 0.5*(prediction - targets)**2
         return error_term
 
@@ -299,7 +266,7 @@ class Trainer():
         Returns:
             error_term (float): output of derived error function
         """
-        error_term = (prediction - targets)
+        error_term = prediction - targets
         return error_term
 
 

@@ -66,6 +66,7 @@ class neurofuzzyTrainer(Trainer):
 
 
 
+
     def training_loop(self, train_ds_og, test_ds_og, validation_ds_og):
         """Training of the model
         Args: 
