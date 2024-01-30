@@ -161,13 +161,13 @@ class VanillaTrainer():
             prediction = self.arc(inputs)
             # get loss
             loss = self.loss_func(prediction, targets)
-            print("FUCKOFF", inputs.shape)
-            # print("inputs", inputs.shape)
-            # print("targets", targets)
-            print("loss", loss)
+
             # losses_aggregator.append(loss)
+            print("help", np.round(prediction, 0))
             accuracy =  targets == np.round(prediction, 0)
-            accuracy = np.mean(accuracy)
+            print(accuracy)
+            accuracy = np.mean(accuracy, axis=1)
+            print(accuracy)
             # accuracy_aggregator.append(accuracy)
             # get gradients
             gradients = tape.gradient(loss, self.arc.trainable_variables)
@@ -178,6 +178,7 @@ class VanillaTrainer():
             # return average loss
             loss = tf.reduce_mean(loss)
             acc_mean = np.mean(accuracy)
+            print(acc_mean)
             return loss, acc_mean
 
 

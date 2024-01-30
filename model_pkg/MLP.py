@@ -84,13 +84,19 @@ class MLP(tf.keras.Model):
             (tf.Tensor): final prediction of model
         """
         # make input fit to layer dense
-        inputs = self.manage_input(inputs)
+       # inputs = self.manage_input(inputs)
       #  print("inputs",inputs)
 
         for layer in self.hidden:
               inputs = layer(inputs)
       #  print("in", inputs)
         inputs = self.out(inputs)
+
+        #inputs = inputs[0]
+       # numpy_array = inputs.numpy()
+      #  numpy_array = numpy_array.reshape((400, 2)) # hc
+         
+      # inputs =  tf.reshape(inputs,(400, 2) )
 
         return inputs
 
