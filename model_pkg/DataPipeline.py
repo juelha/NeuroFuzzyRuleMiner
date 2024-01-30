@@ -207,7 +207,7 @@ class DataPipeline():
         save_path = os.path.dirname(__file__) + relative_path
         if not os.path.exists(save_path):
             os.mkdir(save_path)
-        print(f"Directory {df_name} created in config, full path is {save_path}\n") 
+            print(f"Directory {df_name} created in config, full path is {save_path}\n") 
 
 
     def generate_folders_results(self, df_name):
@@ -229,4 +229,4 @@ class DataPipeline():
             os.mkdir(save_path_fig_1)
             save_path_fig2 = save_path + "/after_training"
             os.mkdir(save_path_fig2)
-        print(f'Directory {df_name} created, full path is {save_path}\n') 
+            print(f'Directory {df_name} created, full path is {save_path}\n') 
