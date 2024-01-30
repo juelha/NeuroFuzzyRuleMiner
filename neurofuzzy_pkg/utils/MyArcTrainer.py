@@ -44,11 +44,19 @@ class MyArcTrainer(Trainer):
             test_ds (PrefetchDataset): dataset for testing
         """
         # train
+        
         self.training_loop(train_ds, test_ds, validation_ds)
         
 
-        
-
+    def preprocess_target(self, target, prediction):
+        """
+        ds (tuple) = unzips into featuers, targets
+        since one target for nine rules -> resize target 
+        """
+        target = np.resize(target, prediction.shape) # the only difference to trainer
+        return target
+    
+    
     def test(self, ds):
         """Forward pass of test_data
         Args:
@@ -58,46 +66,25 @@ class MyArcTrainer(Trainer):
             test_accuracy (float): average accuracy of output
         """
 
-        test_accuracy_aggregator = []
-        test_loss_aggregator = []
+        accuracy_aggregator = []
+        loss_aggregator = []
 
-        print(ds)
-
-        print(type(ds))
-        # iterate over batch
         inputs_batch, targets_batch = ds
+        
+        for input, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
+            prediction = self.arc(input)
+            target = np.resize(target, prediction.shape) # the only difference to trainer !!!!!!!!!!!!!!!!!!!!!
+            loss = self.loss_func(prediction, target)
+            accuracy = self.accuracy_function(prediction, target)
+           # accuracy =  target == np.round(prediction, 0)
+            #accuracy = np.mean(accuracy)
 
-            
-        for inp, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
-            
-            #  print("INPUT", input)
-            # forward pass to get prediction
-            prediction = self.arc(inp)
-            #  print("Pred", prediction)
-
-            # print("tar", target)
-
-            # get loss
-            target = np.resize(target, prediction.shape) # the only difference to trainer
-            sample_test_loss = self.loss_func(prediction, target)
-            # get accuracy
-            sample_test_accuracy =  target == np.round(prediction, 0)
-
-            #  print("sample_test_accuracy", sample_test_accuracy)
-            sample_test_accuracy = np.mean(sample_test_accuracy)
-
-            # print("sample_test_accuracy np mean" , sample_test_accuracy)
-
-            test_loss_aggregator.append(sample_test_loss)
-#                test_loss_aggregator.append(sample_test_loss.numpy())
-
-
-            # print("np.mean(sample_test_accuracy", np.mean(sample_test_accuracy))
-            test_accuracy_aggregator.append(np.mean(sample_test_accuracy))  
+            loss_aggregator.append(loss)
+            accuracy_aggregator.append(np.mean(accuracy))  
 
         # return averages per batch
-        test_loss = tf.reduce_mean(test_loss_aggregator)
-        test_accuracy = tf.reduce_mean(test_accuracy_aggregator)
+        test_loss = np.mean(loss_aggregator)
+        test_accuracy =  np.mean(accuracy_aggregator)
         return test_loss, test_accuracy
 
 
@@ -109,15 +96,9 @@ class MyArcTrainer(Trainer):
         Returns:
             loss (float): average loss before after train step
         """
-        # list for losses per batch
-        losses_aggregator = []
-        accuracy_aggregator = []
-        # iterate over the batch
-        print("inputs_batch", train_batch)
         inputs_batch, targets_batch = train_batch
 
-
-        train_loss_agg = []
+        loss_agg = []
         accuracy_aggregator = []
 
         ## step 1: calculating gradients for each entry in batch
@@ -128,49 +109,53 @@ class MyArcTrainer(Trainer):
 
             # forward propagation
             prediction =  self.arc(inputs)
-
             # calculating error in outputlayer
-            targets = np.resize(targets, prediction.shape) # the only difference to trainer
-            train_loss_agg.append(self.error_function(prediction, targets))
-
+            targets = np.resize(targets, prediction.shape) # the only difference to trainer !!!!!!!!!!!!!!!!!!!!!
+            loss_agg.append(self.error_function(prediction, targets))
             # calculating accuracy
-            accuracy =  targets == np.round(prediction, 0)
-
-        #  print("sample_test_accuracy", sample_test_accuracy)
-            accuracy = np.mean(accuracy)
-            accuracy_aggregator.append(np.mean(accuracy))
-            
+            accuracy = self.accuracy_function(prediction,targets)
+            #accuracy = np.mean(accuracy)
+            accuracy_aggregator.append(accuracy)
             errorterm = self.error_function_derived(prediction, targets)
-            # print("errorterm\n\n")
-            # print(errorterm)
-            # print("targets\n\n")
-            # print(targets)
-            delta = np.array(errorterm)
-            #n_rules = 495
-          #  print(delta.shape[0])
-            delta = np.reshape(delta, ( int(delta.shape[0]),1))
-            if assigned == False: 
-                deltas_avg = delta
-                assigned = True
-            else:
-                deltas_avg = np.concatenate((deltas_avg, delta), axis=1)
+
+            self.adapt(self.arc.FuzzificationLayer, errorterm)
+            # redo this bit 
+            # delta = np.array(errorterm)
+            # delta = np.reshape(delta, ( int(delta.shape[0]),1))
+            # if assigned == False: 
+            #     deltas_avg = delta
+            #     assigned = True
+            # else:
+            #     deltas_avg = np.concatenate((deltas_avg, delta), axis=1)
 
 
         ## step 2: get averages of all entries
-        train_loss_agg = np.array(train_loss_agg)
-        train_loss = np.mean(train_loss_agg)
-        deltas_avg = np.mean(deltas_avg,axis=1)
-        centers_derived = self.calc_mf_derv_center()
-        widths_der = self.calc_mf_derv_widths()
+      #  deltas_avg = np.mean(deltas_avg,axis=1)
+        
 
         ## step 3: adapt the parameters with average gradients
-        self.adapt(self.arc.FuzzificationLayer, deltas_avg, centers_derived, widths_der)
+       # self.adapt(self.arc.FuzzificationLayer, deltas_avg)
         
         # return average loss
-        loss = tf.reduce_mean(train_loss_agg)
-        acc = tf.reduce_mean(accuracy_aggregator)
+        loss =  np.mean(loss_agg)
+        acc = np.mean(accuracy_aggregator)
         return loss, acc
 
+
+    def accuracy_function(self, prediction, target):
+        
+        accs = []
+        for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
+            
+            y = prediction[cidx] # in order to slice [:,idx]
+            t = target[cidx]
+            for idx, number in enumerate(classweight):
+                if bool(number)==True:
+
+                    acc = t[idx] == np.round(y[idx], 0)
+                    accs.append(acc)
+        
+        return acc
 
     def error_function(self, prediction, target):
         """Derived error function:  
@@ -184,15 +169,17 @@ class MyArcTrainer(Trainer):
         """
 
         error_term = []
-        target = target[0]
+        #target = target[0]
         for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
         
             out_row = prediction[cidx] # in order to slice [:,idx]
+            tar = target[cidx]
+          #  print("tar", at)
             for idx, number in enumerate(classweight):
                 if bool(number)==True:
 
                 
-                    error =  0.5*(target[idx] - out_row[idx])**2
+                    error =  0.5*(tar[idx] - out_row[idx])**2
                     
                     error_term.append(error)
                 
@@ -211,15 +198,16 @@ class MyArcTrainer(Trainer):
             error_term (float): output of derived error function
         """
         error_term = []
-        target = target[0]
+      #  target = target[0]
         for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
         
             out_row = prediction[cidx] # in order to slice [:,idx]
+            tar = target[cidx]
             for idx, number in enumerate(classweight):
                 if bool(number)==True:
 
                 
-                    error =  -1*(target[idx] - out_row[idx])
+                    error =  -1*(tar[idx] - out_row[idx])
                     
                     error_term.append(error)
                 
@@ -238,8 +226,7 @@ class MyArcTrainer(Trainer):
 
 
 
-    def adapt(self, layer, error, centers_prime, widths_prime):
-        
+    def adapt(self, layer, error):
         
 
         # get those directly from antecedent layer with inputs attribute
@@ -248,30 +235,23 @@ class MyArcTrainer(Trainer):
         # reshape error to match each mu 
         error = np.reshape(error, mus[0].shape)
         delta = [mu * error for mu in mus]
-        delta.reverse() # the other mu for each x
+        delta.reverse() # the other mu for each 
         
-        # x = np.array_split(centers_prime, range(3, len(centers_prime), 3))
-        # centers_grided = np.meshgrid(x[0], x[1]) 
-        # delta_centers = [d * c for d,c in zip(delta,centers_grided)]
-        # c_delta_x1 = np.sum(delta_centers[0], axis=0)
-        # c_delta_x2 = np.sum(delta_centers[1], axis=1)
-        # deltas_centers = np.concatenate((c_delta_x1, c_delta_x2))
-        # self.arc.FuzzificationLayer.centers =  self.arc.FuzzificationLayer.centers   + deltas_centers  * self.learning_rate
+        centers_prime = self.calc_mf_derv_center()
+        widths_prime = self.calc_mf_derv_widths()
+        
 
-
-        # x = np.array_split(widths_prime, range(3, len(centers_prime), 3))
-        # centers_grided = np.meshgrid(x[0], x[1]) 
-        # delta_centers = [d * c for d,c in zip(delta,centers_grided)]
-        # c_delta_x1 = np.sum(delta_centers[0], axis=0)
-        # c_delta_x2 = np.sum(delta_centers[1], axis=1)
-        # deltas_centers = np.concatenate((c_delta_x1, c_delta_x2))
-        # self.arc.FuzzificationLayer.widths =  self.arc.FuzzificationLayer.widths   + deltas_centers  * self.learning_rate
         self.adapt_parameter('centers', layer, delta, centers_prime)
         self.adapt_parameter('widths', layer, delta, widths_prime)
 
         return 0
     
     def adapt_parameter(self, param, layer, delta, para_prime):
+        """
+        Args:
+            param (str)
+
+        """
         
         # imitate the whole meshgrid process like in antecedent layer
         x = np.array_split(para_prime, range(3, len(para_prime), 3))
