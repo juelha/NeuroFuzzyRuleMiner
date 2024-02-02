@@ -235,7 +235,7 @@ class MyArcTrainer(Trainer):
         # reshape error to match each mu 
         error = np.reshape(error, mus[0].shape)
         delta = [mu * error for mu in mus]
-        delta.reverse() # the other mu for each 
+        #delta.reverse() # the other mu for each 
         
         centers_prime = self.calc_mf_derv_center()
         widths_prime = self.calc_mf_derv_widths()
@@ -254,12 +254,21 @@ class MyArcTrainer(Trainer):
         """
         
         # imitate the whole meshgrid process like in antecedent layer
-        x = np.array_split(para_prime, range(3, len(para_prime), 3))
-        para_gridded = np.meshgrid(x[0], x[1]) 
-        delta = [d * p for d,p in zip(delta, para_gridded)]
-        delta_x1 = np.sum(delta[0], axis=0)
-        delta_x2 = np.sum(delta[1], axis=1)
+       # x = np.array_split(para_prime, range(3, len(para_prime), 3))
+        #para_gridded = np.meshgrid(x[0], x[1]) 
+        #x.reverse()  # so it fits with convention 
+        #para_gridded = np.array(np.meshgrid(*x)) # the '*' unpacks x and passes to messgrid
+       
+        print("delta", delta)
+        delta_x1 = np.sum(delta[0], axis=1)
+        delta_x2 = np.sum(delta[1], axis=0)
         delta = np.concatenate((delta_x1, delta_x2))
+
+        delta *= para_prime
+
+
+
+       # delta = [d * p for d,p in zip(delta, para_gridded)]
 
         # self.fuzzi ...
         param_to_tune = getattr(layer, param)
