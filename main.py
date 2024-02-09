@@ -41,9 +41,9 @@ def main():
     df_name = "dummy"
     
         # Model with MLP arc
-    # MLPModel = Model(DataPipeline(df_name),  
-    #                  MLP((2,6),2),  
-    #                  Trainer(n_epochs=n_epochs))
+    MLPModel = Model(DataPipeline(df_name),  
+                     MLP((2,6),2),  
+                     Trainer(n_epochs=n_epochs))
     # MLPModel.train()
 
 
@@ -52,6 +52,9 @@ def main():
                      MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate))
     MyModel.build_MyArc() 
     MyModel.trainMyArc()
+    MyModel.arc.RuleConsequentLayer.save_weights(df_name)
+
+    #MyModel.build_MyArc_CW()
     # MyModel.build_MyArc() # works 
    # MyModel.build_MyArc_MF()
     # for i in range(1):
@@ -63,7 +66,7 @@ def main():
     # print(MLPModel.summary()) 
 
 
- #   rules = ruleExtractor(MyModel, MLPModel, df_name)
+    rules = ruleExtractor(MyModel, MLPModel, df_name)
     # rules.print_results()
     
     return 0

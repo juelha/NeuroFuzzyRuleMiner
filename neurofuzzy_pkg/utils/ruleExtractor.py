@@ -43,66 +43,91 @@ class ruleExtractor():
         self.extractRules()
         
 
+    def get_if_part(self, feature_names, mfs):
+
+        feature_names = np.array(["x1", "x2"])
+        mfs = np.array(["low", "medium", "high"])
+
+
+        x = feature_names
+        x = np.tile(x[:, np.newaxis], 3).ravel()
+        mfs = np.tile(mfs, 2)
+
+        x = np.char.add(x, ",")    
+        x = np.char.add(x, mfs)    
+        x = np.array_split(x, range(3, len(x), 3))
+        x.reverse()
+        x = np.array(np.meshgrid(*x)) # the '*' unpacks x and passes to messgrid
+        m = x[1].ravel()
+        m = np.char.add(m, ",")   
+        x = np.char.add(m, x[0].ravel())   
+        x = x.tolist()
+        return x
+    
+    def get_then_part(self):
+        weights = self.arc.RuleConsequentLayer.weights
+        print("weights", weights)
+        neww = np.where(weights[:, 0] == 1.0, "bad", "good")
+       
+
+        # Reshape the array to have a single column
+        neww = neww.reshape(-1, 1)
+        neww = neww.tolist()
+        return neww
+
+
     def extractRules(self):
         """Function used for extracting rules from the dicts in the model
         """
 
-        rulesIF = self.arc.RuleAntecedentLayer.rulesIF # 1-90
+       # rulesIF = self.arc.RuleAntecedentLayer.rulesIF # 1-90
         # dict that looks like
         # rulesIF {1: [{'xID': 0, 'mfID': 0}, {'xID': 1, 'mfID': 0}], 2: [{'xID': 0, 'mfID': 0}, {'xID': 1, 'mfID': 1}], ...
 
-        rulesTHEN = self.arc.RuleConsequentLayer.rulesTHEN
+      #  rulesTHEN = self.arc.RuleConsequentLayer.rulesTHEN
         # dict that looks like
         ## old:  rulesTHEN {0: [1, 3, ...], 1: [36, 54, ...]
         # {'RS': x, 'target': self.weights}
         # {0: {'RS': x, 'target': self.weights}
 
-        print("rulesIF",rulesIF)
-        print("rulesTHEN",rulesTHEN)
+      #  print("rulesIF",rulesIF)
+      #  print("rulesTHEN",rulesTHEN)
 
         # going through rules for respective outcome 
         # -> per outcome on output mf & one entry final rules Dict
         # good yield -> outmfID = 1 
         # bad yield -> outmfID = 0
+        rulesIF = self.get_if_part(self.feature_names, self.linguistic_mf)
+        rulesTHEN = self.get_then_part()
+        print(rulesTHEN)
+        rulesIF = np.char.add(rulesIF, ",") 
+        huh = np.char.add(rulesIF, rulesTHEN) 
+        print("huh", huh)
 
             
-        # setting up cols of ruleDict
-        for para in self.feature_names:
-            self.rulesDict[para] = []
-        self.rulesDict['Output'] = []
-
-        # iterating over rules 
-        for ruleID in rulesIF:
-            
-                
-            # keeping track of which parameters have been used
-            # usedNames is needed to fill up the rest of cols with nans
-            usedNames = []
-
-            # validate rule with classifier 
-            ruleAcc =  self.checkRule(rulesIF[ruleID], rulesTHEN[ruleID])
-          #  self.rulesDict[ruleID] = [rulesIF[ruleID], {"then": rulesTHEN[ruleID], 'acc': ruleAcc}]
-                    
-             
-            for participant in rulesIF[ruleID]:
-                # get parameter name
-                name = self.feature_names[participant['xID']]
-                # add value of mf under parameter name
-                self.rulesDict[name].append(self.linguistic_mf[participant['mfID']])
-                
-                usedNames.append(name)
         
-            # determine which parameters to fill with nan
-            missingNames = list(set(self.feature_names) - set(usedNames)) 
-            for name in missingNames:
-                self.rulesDict[name].append(nan)
-            
-            self.rulesDict['Output'].append(rulesTHEN[ruleID])
-            # if rulesTHEN[ruleID] == [1,0]:
-            #     self.rulesDict['Output'].append(self.lingusitic_output[0])
-            # if rulesTHEN[ruleID] == [0,1]:
-            #     self.rulesDict['Output'].append(self.lingusitic_output[1])
-        
+        # Initialize empty lists to store values
+        x1_values = []
+        x2_values = []
+        out_values = []
+
+        # Process each element in the array
+        for element in huh:
+            # Split the string by commas
+            elements = element.strip("'").split(',')
+
+            # Extract values and append to respective lists
+            x1_values.append(elements[1])
+            x2_values.append(elements[3])
+            out_values.append(elements[4])
+     
+
+        # Create a pandas DataFrame
+        df = pd.DataFrame({'x1': x1_values, 'x2': x2_values, 'out': out_values})
+
+        # Display the resulting DataFrame
+        print(df)
+        self.rulesDict = df
 
         print("/n dict", self.rulesDict)
         self.save_results()
