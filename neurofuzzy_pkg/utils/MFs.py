@@ -22,8 +22,12 @@ def center_init(x, n_mfs):
         numpy.ndarray: initalized widths with the shape (x.size,)
     """
     n_inputs = x.size // n_mfs
-    multiplicator = np.tile(np.arange(1, n_mfs + 1), n_inputs)
-    cetnters = (x / (n_mfs + 1)) * multiplicator
+    # multiplicator = np.tile(np.arange(1, n_mfs + 1), n_inputs)
+    # cetnters = (x / (n_mfs + 1)) * multiplicator
+
+
+    multiplicator = np.tile(np.arange(0, n_mfs ), n_inputs)
+    cetnters = (x / (n_mfs -1)) * multiplicator
   #  print(cetnters)
     return cetnters
 
@@ -38,7 +42,7 @@ def widths_init(x, n_mfs):
     Returns: 
         numpy.ndarray: initalized widths with the shape (x.size,)
     """
-    return x/(n_mfs+1)
+    return x/(2*n_mfs+1)
 
 
 def MF_gaussian(x, center, width):
