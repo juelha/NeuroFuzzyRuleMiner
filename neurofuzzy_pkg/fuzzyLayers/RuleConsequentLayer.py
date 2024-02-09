@@ -137,7 +137,7 @@ class RuleConsequentLayer():
 
         #print("In", inputs)
         # # build weights     
-        self.weights = np.zeros((inputs.shape[0], 2), dtype=np.float32) # danger output classes hc 
+        self.weights = np.zeros((inputs.shape[0], 3), dtype=np.float32) # danger output classes hc 
     # print("weights", self.class_weights)
 
         for ruleID, firingStrength in enumerate(inputs):  

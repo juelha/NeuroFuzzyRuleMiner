@@ -37,7 +37,7 @@ class RuleAntecedentLayer():
         # for rule extraction
         self.rulesIF = {}   
         self.n_rules = 0     
-        self.n_participants = 2 # two participants in a rule #hc
+        self.n_participants = 4 # two participants in a rule #hc
         self.n_mfs = 3 # hc
 
 
@@ -84,9 +84,7 @@ class RuleAntecedentLayer():
         self.n_rules = int(self.n_mfs**self.n_participants)
 
         # x = np.array_split(x, range(self.n_mfs, len(x), self.n_mfs))
-        # x =  np.meshgrid(x[0], x[1]) # hc
-        # self.inputs = x #  need meshgrid for training
-        # x = (x[0] * x[1]).ravel() # hc
+
 
        
         x = np.array_split(x, range(3, len(x), 3))

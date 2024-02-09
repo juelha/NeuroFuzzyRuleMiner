@@ -252,13 +252,17 @@ class MyArcTrainer(Trainer):
             param (str)
 
         """
-        
+
        
         deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
         deltas = np.array(deltas)
         deltas = deltas.ravel()
+        print("deltas", deltas)
+        print("para", para_prime)
         deltas *= para_prime
 
+
+        # self.fuzzi ...
         param_to_tune = getattr(layer, param)
         print("heh", param_to_tune)
         param_to_tune -= np.multiply(deltas, self.learning_rate)

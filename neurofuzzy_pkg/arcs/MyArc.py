@@ -88,10 +88,8 @@ class MyArc():
         #   n_inputs = int(features.shape[0])
         #  print(n_inputs)
 
-        n_mfs = self.FuzzificationLayer.n_mfs
-        n = n_mfs * n_inputs
-        k = self.RuleAntecedentLayer.n_participants 
-        n_rules = int(coefficient(n, k) - n)
+
+        n_rules = int(self.RuleAntecedentLayer.n_mfs**self.RuleAntecedentLayer.n_participants )
 
         for i in range(n_rules):
             self.RuleConsequentLayer.dictrules[i] = []
@@ -108,11 +106,12 @@ class MyArc():
 
         for ruleID in tqdm(self.RuleConsequentLayer.dictrules, desc="selecting"):
             l = self.RuleConsequentLayer.dictrules[ruleID]
+          
             max_val = max(l)
             idx_max = l.index(max_val)
             
             tar = self.RuleConsequentLayer.tars[ruleID][idx_max]
-            #print("tar", tar)
+            print("tar", tar)
             self.RuleConsequentLayer.weights[ruleID] = tar
    
         self.RuleConsequentLayer.save_weights(df_name)

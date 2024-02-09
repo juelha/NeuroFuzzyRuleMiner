@@ -137,13 +137,13 @@ Args:
     n_mfs = 3
     
     feature_names = max_vals.keys().values.tolist()
-    c = np.array_split(layer.centers, 2)
-    c = np.array_split(c, range(n_mfs, len(c), n_mfs))
-    w = np.array_split(layer.widths,2)
-    w = np.array_split(w, range(n_mfs, len(w), n_mfs))
+    
+    c = np.array_split(layer.centers, 4) # hc
+    print("HERE", c)
+ 
+    w = np.array_split(layer.widths,  4) # hc
+ 
 
-    c = c[0]
-    w = w[0]
    
    # print("c", c)
     #print("w", w)
