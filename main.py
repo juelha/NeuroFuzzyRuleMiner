@@ -66,7 +66,7 @@ def main():
     # print(MLPModel.summary()) 
 
 
-    rules = ruleExtractor(MyModel, MLPModel, df_name)
+   # rules = ruleExtractor(MyModel, MLPModel, df_name)
     # rules.print_results()
     
     return 0

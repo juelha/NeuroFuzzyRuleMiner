@@ -45,8 +45,7 @@ class ruleExtractor():
 
     def get_if_part(self, feature_names, mfs):
 
-        feature_names = np.array(["x1", "x2"])
-        mfs = np.array(["low", "medium", "high"])
+ 
 
 
         x = feature_names

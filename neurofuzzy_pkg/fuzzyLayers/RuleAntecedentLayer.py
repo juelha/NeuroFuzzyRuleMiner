@@ -80,9 +80,8 @@ class RuleAntecedentLayer():
        # self.inputs = x # saved for training
 
     
-        n = x.size 
-        k = self.n_participants 
-        self.n_rules = int(coefficient(n, k) - n)
+    
+        self.n_rules = int(self.n_mfs**self.n_participants)
 
         # x = np.array_split(x, range(self.n_mfs, len(x), self.n_mfs))
         # x =  np.meshgrid(x[0], x[1]) # hc
@@ -94,7 +93,8 @@ class RuleAntecedentLayer():
         x.reverse()  # so it fits with convention 
         x = np.array(np.meshgrid(*x)) # the '*' unpacks x and passes to messgrid
         self.inputs = x #  need meshgrid for training
-        x = (x[1] * x[0]).ravel()
+
+        x = np.prod(x, axis=0).ravel()
   
 
         assert self.n_rules == x.size, f'the number of rules generated: {x.size} has to equal: {self.n_rules} -> coefficient(inputs * n_mfs, participants) - inputs * n_mfs' 

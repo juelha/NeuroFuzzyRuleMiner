@@ -253,24 +253,13 @@ class MyArcTrainer(Trainer):
 
         """
         
-        # imitate the whole meshgrid process like in antecedent layer
-       # x = np.array_split(para_prime, range(3, len(para_prime), 3))
-        #para_gridded = np.meshgrid(x[0], x[1]) 
-        #x.reverse()  # so it fits with convention 
-        #para_gridded = np.array(np.meshgrid(*x)) # the '*' unpacks x and passes to messgrid
        
-        print("delta", delta)
-        delta_x1 = np.sum(delta[0], axis=1)
-        delta_x2 = np.sum(delta[1], axis=0)
-        delta = np.concatenate((delta_x1, delta_x2))
+        deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
+        deltas = np.array(deltas)
+        deltas = deltas.ravel()
+        deltas *= para_prime
 
-        delta *= para_prime
-
-
-
-       # delta = [d * p for d,p in zip(delta, para_gridded)]
-
-        # self.fuzzi ...
         param_to_tune = getattr(layer, param)
-        param_to_tune -= np.multiply(delta, self.learning_rate)
+        print("heh", param_to_tune)
+        param_to_tune -= np.multiply(deltas, self.learning_rate)
         setattr(layer, param, param_to_tune)
