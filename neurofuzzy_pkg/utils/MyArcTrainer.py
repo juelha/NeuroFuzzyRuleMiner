@@ -231,18 +231,28 @@ class MyArcTrainer(Trainer):
 
         # get those directly from antecedent layer with inputs attribute
         mus = self.arc.RuleAntecedentLayer.inputs
+        print("MUS", mus[0])
         
         # reshape error to match each mu 
         error = np.reshape(error, mus[0].shape)
-        delta = [mu * error for mu in mus]
+        deltas = []
+        for i, _ in enumerate(mus):
+            delta = error
+            for j, mu in enumerate(mus):
+                if i==j:
+                    continue
+                delta *= mu
+            deltas.append(delta)
+       # delta = [mu * error for mu in mus]
         #delta.reverse() # the other mu for each 
+        print("HERERE", deltas)
         
         centers_prime = self.calc_mf_derv_center()
         widths_prime = self.calc_mf_derv_widths()
         
 
-        self.adapt_parameter('centers', layer, delta, centers_prime)
-        self.adapt_parameter('widths', layer, delta, widths_prime)
+        self.adapt_parameter('centers', layer, deltas, centers_prime)
+        self.adapt_parameter('widths', layer, deltas, widths_prime)
 
         return 0
     
@@ -253,8 +263,33 @@ class MyArcTrainer(Trainer):
 
         """
 
-       
-        deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
+        deltas = []
+
+            
+        x = np.sum(delta[0], axis=3)
+        x = np.sum(x, axis=1)
+        x = np.sum(x, axis=1)
+        deltas.append(x)
+
+        y = np.sum(delta[1], axis=2)
+        y = np.sum(y, axis=1)
+        y = np.sum(y, axis=1)
+        deltas.append(y)
+        
+        z = np.sum(delta[2], axis=0)
+        #print("x", x)
+        z = np.sum(z, axis=1)
+        z = np.sum(z, axis=1)
+        deltas.append(z)
+
+        w = np.sum(delta[3], axis=1)
+        #print("x", x)
+        w = np.sum(w, axis=1)
+        w = np.sum(w, axis=1)
+        deltas.append(w)
+
+        # deltas = [np.sum(d, axis=3-(i%2)) for i, d in enumerate(delta)]
+        # deltas = [np.sum(d, axis=(1,2)) for i, d in enumerate(deltas)]
         deltas = np.array(deltas)
         deltas = deltas.ravel()
         print("deltas", deltas)

@@ -67,7 +67,7 @@ class DataPipeline():
             df, targets = self.load_iris()
         elif self.df_name == "wine":
             df, targets = self.load_wine()
-        elif self.df_name == "dummy":
+        elif self.df_name == "dummy4":
             df, targets = self.load_dummy()
         return df,targets
     
@@ -77,7 +77,7 @@ class DataPipeline():
         'pandas.core.frame.DataFrame'
         """
         # get save path 
-        file_name = 'dummy_df.csv'
+        file_name = 'dummy4_df.csv'
         save_path = os.path.dirname(__file__) +  '/../data'
         full_path = os.path.join(save_path, file_name)
         assert  os.path.exists(full_path), f'File {file_name} not found'
@@ -152,7 +152,7 @@ class DataPipeline():
        # targets = targets.apply(lambda x: int(x >= treshhold))
 
         # one hot encoding
-        depth = 3 # DANGER HC
+        depth = 2 # DANGER HC
         b = tf.one_hot(targets, depth)
         targets = b.numpy()
 
