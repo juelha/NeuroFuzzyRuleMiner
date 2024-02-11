@@ -51,78 +51,6 @@ class MyArcTrainer(Trainer):
 
 
 
-    def training_loop(self, train_ds_og, test_ds_og, validation_ds_og):
-        """Training of the model
-        Args: 
-            train_ds (PrefetchDataset): dataset for training
-            test_ds (PrefetchDataset): dataset for testing
-        """
-        # picking random batch from dataset
-        # test_ds = self.pick_batch(test_ds_og)
-        # train_ds =  self.pick_batch(train_ds_og)
-        # validation_ds = self.pick_batch(validation_ds_og)
-        test_ds =  test_ds_og
-        train_ds = train_ds_og
-        validation_ds = validation_ds_og
-
-
-        # run model on test_ds to keep track of progress during training
-        test_loss, test_accuracy = self.test(test_ds)
-        self.test_losses.append(test_loss)
-        self.test_accuracies.append(test_accuracy)
-
-        # same thing for train_ds
-        train_loss, _ = self.test(train_ds)
-        self.train_losses.append(train_loss)
-
-        # same thing for validation ds
-        validation_ds_loss, validation_ds_accuracy = self.test(validation_ds)
-        self.v_losses.append(validation_ds_loss)
-        self.v_accuracies.append(validation_ds_accuracy)
-       
-        # training loop until self.iters 
-        for epoch in range(self.n_epochs):
-            print(f'Epoch: {str(epoch)} starting with \n \
-            test accuracy {self.test_accuracies[-1]} \n \
-            test loss {self.test_losses[-1]} \n \
-            train loss {self.train_losses[-1]} \n \
-            validation accuracy {self.v_accuracies[-1]} \n \
-            validation loss {self.v_losses[-1]} ')
-
-
-            # shuffle
-            # train_ds = tf.random.shuffle(train_ds)
-            # test_ds = tf.random.shuffle(test_ds)
-            # validation_ds = tf.random.shuffle(validation_ds)
-
-            # in each epoch, pick a random batch
-            # test_ds =  self.pick_batch(test_ds_og)
-            # train_ds =  self.pick_batch(train_ds_og)
-            # validation_ds = self.pick_batch(validation_ds_og)
-
-            # train and keep track
-            epoch_loss_agg = []
-            for input,target in train_ds:
-                train_loss = self.train_step(input, target)
-                epoch_loss_agg.append(train_loss)
-
-            #track training loss
-            self.train_losses.append(tf.reduce_mean(epoch_loss_agg))
-
-            #testing, so we can track accuracy and test loss
-            test_loss, test_accuracy = self.test(test_ds)
-            self.test_losses.append(test_loss)
-            self.test_accuracies.append(test_accuracy)
-
-            # same thing for validation ds
-            validation_ds_loss, validation_ds_accuracy = self.test(validation_ds)
-            self.v_losses.append(validation_ds_loss)
-            self.v_accuracies.append(validation_ds_accuracy)
-
-        print("Training Loop completed")
-        return 0
-
-
     def test(self, ds):
         """Forward pass of test_data
         Args:
@@ -177,6 +105,7 @@ class MyArcTrainer(Trainer):
         """
 
         train_loss_agg = []
+        accuracy_aggregator = []
 
         ## step 1: calculating gradients for each entry in batch
         # iterating over data entries of a batch
@@ -190,6 +119,10 @@ class MyArcTrainer(Trainer):
             # calculating error in outputlayer
             train_loss_agg.append(self.error_function(prediction, targets))
             errorterm = self.error_function_derived(prediction, targets)
+            # calculating accuracy
+            accuracy = self.accuracy_function(prediction,targets)
+            #accuracy = np.mean(accuracy)
+            accuracy_aggregator.append(accuracy)
             # print("errorterm\n\n")
             # print(errorterm)
             # print("targets\n\n")
@@ -215,7 +148,8 @@ class MyArcTrainer(Trainer):
         ## step 3: adapt the parameters with average gradients
         self.adapt(self.arc.FuzzificationLayer, deltas_avg, centers_derived, widths_der)
         
-        return train_loss
+        acc = np.mean(accuracy_aggregator)
+        return train_loss, acc
 
 
     def error_function(self, prediction, targets):
@@ -340,17 +274,30 @@ class MyArcTrainer(Trainer):
     def accuracy_function(self, prediction, target):
         
         accs = []
+        target = target[0]
+      #  print("tar", targets)
+      #  print("pre", prediction)
+
         for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
+         #   print("tar", targets.numpy)
             
-            y = prediction[cidx] # in order to slice [:,idx]
-            t = target[cidx]
+           # print("cd", cidx)
+            #print("out", prediction)
+            assigned = False
+          #  tar_row = targets[cidx] # would need to blow up targets to vectoize 
+            out_row = prediction[cidx] # in order to slice [:,idx]
             for idx, number in enumerate(classweight):
                 if bool(number)==True:
-
-                    acc = t[idx] == np.round(y[idx], 0)
+                    #print("idx", idx)
+                   # print("tar",targets[idx]  )
+                   # print("out_row[:,idx]", out_row[idx])
+                    acc = target[idx] == np.round(out_row[idx], 0)
                     accs.append(acc)
-        
-        return acc
+                    assigned = True
+            # if assigned==False:        
+            #     error_term.append(0) # for weights that are 0 0
+       # print("error", error_term)
+        return accs
 
     def adapt(self, layer, gradients, centers_derived, widths_der):
         

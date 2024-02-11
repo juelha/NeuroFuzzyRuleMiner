@@ -18,7 +18,7 @@ class Trainer():
     ___________________________________________________________
     """
 
-    def __init__(self, arc=None, n_epochs=5, learning_rate=0.01, optimizer_func=Adam):
+    def __init__(self, n_epochs,  arc=None, learning_rate=None, optimizer_func=Adam):
         """Initializes Trainer()-Object
         
         Args:
@@ -48,6 +48,8 @@ class Trainer():
         ]
         
         # for visualization of training
+        # for visualization of training
+        self.train_accuracies = []
         self.test_accuracies = []
         self.test_losses = []
         self.train_losses = []
@@ -66,34 +68,9 @@ class Trainer():
             class neurofuzzyTrainer() 
         """
         self.training_loop(train_ds,  test_ds, validation_ds)
-      #  self.visualize_training(self.df_name, self.arc.Name)
+        self.visualize_training(self.df_name, self.arc.Name)
 
-    def pick_batch(self, ds):
-        """Return one entry from batch 
-        Args:
-            ds (PrefetchDataset): dataset from which to sample from
-        Returns:
-            batch (TensorSliceDataset): a batch from ds
-                                        shapes: ((32, 5), (32, 2)), 
-                                        types: (tf.float32, tf.float32)
-        Note:
-            had to work around bc cannot iterate 'for batch in batches'
-        """
 
-        max = ds.cardinality().numpy()
-    
-       # randI = np.random.randint(0, high=max)
-        randI = tf.random.uniform(shape=[], minval=0, maxval=max, dtype=tf.int64)
-        print("max", max)
-        print("rand", randI)
-        
-        i = 0
-        for input,target in ds:
-            if i == randI:
-                # return current batch
-                batch = tf.data.Dataset.from_tensor_slices(([input],[target]))
-                return batch
-            i += 1
 
 
     def training_loop(self, train_ds_og, test_ds_og, validation_ds_og):
@@ -103,9 +80,12 @@ class Trainer():
             test_ds (PrefetchDataset): dataset for testing
         """
         # picking random batch from dataset
-        test_ds = self.pick_batch(test_ds_og)
-        train_ds =  self.pick_batch(train_ds_og)
-        validation_ds = self.pick_batch(validation_ds_og)
+        test_ds =  test_ds_og
+        train_ds = train_ds_og
+        validation_ds = validation_ds_og
+        # test_ds = self.pick_batch(test_ds_og)
+        # train_ds =  self.pick_batch(train_ds_og)
+        # validation_ds = self.pick_batch(validation_ds_og)
 
         # run model on test_ds to keep track of progress during training
         test_loss, test_accuracy = self.test(test_ds)
@@ -113,13 +93,14 @@ class Trainer():
         self.test_accuracies.append(test_accuracy)
 
         # same thing for train_ds
-        train_loss, _ = self.test(train_ds)
+        train_loss, train_acc = self.test(train_ds)
         self.train_losses.append(train_loss)
+        self.train_accuracies.append(train_acc)
 
         # same thing for validation ds
-        validation_ds_loss, validation_ds_accuracy = self.test(validation_ds)
-        self.v_losses.append(validation_ds_loss)
-        self.v_accuracies.append(validation_ds_accuracy)
+        # validation_ds_loss, validation_ds_accuracy = self.test(validation_ds)
+        # self.v_losses.append(validation_ds_loss)
+        # self.v_accuracies.append(validation_ds_accuracy)
        
         # training loop until self.iters 
         for epoch in range(self.n_epochs):
@@ -129,14 +110,15 @@ class Trainer():
             train loss {self.train_losses[-1]}')
 
             # in each epoch, pick a random batch
-            test_ds =  self.pick_batch(test_ds_og)
-            train_ds =  self.pick_batch(train_ds_og)
+            # test_ds =  self.pick_batch(test_ds_og)
+            # train_ds =  self.pick_batch(train_ds_og)
 
             # train and keep track
             epoch_loss_agg = []
             for input,target in train_ds:
-                train_loss = self.train_step(input, target)
-                epoch_loss_agg.append(train_loss)
+                train_loss, train_acc = self.train_step(input,target)
+                self.train_accuracies.append(train_acc)
+                self.train_losses.append(train_loss)
 
             #track training loss
             self.train_losses.append(tf.reduce_mean(epoch_loss_agg))
@@ -270,15 +252,18 @@ class Trainer():
             type_model (str): type of model that has been trained
         """
         plt.figure()
-        line1, = plt.plot(self.train_losses)
-        line2, = plt.plot(self.test_losses)
-        line3, = plt.plot(self.test_accuracies)
-        line4, = plt.plot(self.v_accuracies)
-        line5, = plt.plot(self.v_losses)
+        # accuracies
+        line1, = plt.plot(self.test_accuracies)
+        line2, = plt.plot(self.train_accuracies)
+       # line3, = plt.plot(self.val_accuracies)
+        # losses
+        line4, = plt.plot(self.test_losses)
+        line5, = plt.plot(self.train_losses)
+       # line5, = plt.plot(self.v_losses)
         plt.xlabel("Training steps")
         plt.ylabel("Loss/Accuracy")
-        plt.legend((line1, line2, line3, line4, line5),
-        ("training losses", "test losses", "test accuracy", "v_accuracies", "v_losses"))
+        plt.legend((line1, line2, line4, line5),
+        ("test accuracy", "training accuracy", "test losses", "training losses"))
         plt.title(f'{type_model}')
         plt.figure
        
@@ -288,7 +273,6 @@ class Trainer():
         completeName = os.path.join(save_path, file_name)
         plt.savefig(completeName)
         plt.clf()
-
     def summary(self):
         column_names = ['n_epochs', 'learning_rate', 'loss_func', 'optimizer_func']
         d = self.params
