@@ -42,7 +42,7 @@ def center_init(n_mfs, feature_ranges):
         print("x", x)
        # print("\n")
         for i in range(n_mfs):
-            center = (x/(n_mfs+1))*(i+1)
+            center = (x/(n_mfs-1))*(i)
            # print("center", center)
             centers_per_x.append(center)
         centers.append(centers_per_x)
@@ -67,7 +67,7 @@ def widths_init(n_mfs, centers, n_inputs):
        # print("\n")
         for i in range(n_mfs):
             
-            widths_per_x.append(centers[xID][0])
+            widths_per_x.append(centers[xID][1]/2)
            # print("center", center)
 
         widths.append(widths_per_x)

@@ -58,12 +58,12 @@ class MyArcTrainer(Trainer):
             test_ds (PrefetchDataset): dataset for testing
         """
         # picking random batch from dataset
-        test_ds = self.pick_batch(test_ds_og)
-        train_ds =  self.pick_batch(train_ds_og)
-        validation_ds = self.pick_batch(validation_ds_og)
-        # test_ds =  test_ds_og
-        # train_ds = train_ds_og
-        # validation_ds = validation_ds_og
+        # test_ds = self.pick_batch(test_ds_og)
+        # train_ds =  self.pick_batch(train_ds_og)
+        # validation_ds = self.pick_batch(validation_ds_og)
+        test_ds =  test_ds_og
+        train_ds = train_ds_og
+        validation_ds = validation_ds_og
 
 
         # run model on test_ds to keep track of progress during training
@@ -96,9 +96,9 @@ class MyArcTrainer(Trainer):
             # validation_ds = tf.random.shuffle(validation_ds)
 
             # in each epoch, pick a random batch
-            test_ds =  self.pick_batch(test_ds_og)
-            train_ds =  self.pick_batch(train_ds_og)
-            validation_ds = self.pick_batch(validation_ds_og)
+            # test_ds =  self.pick_batch(test_ds_og)
+            # train_ds =  self.pick_batch(train_ds_og)
+            # validation_ds = self.pick_batch(validation_ds_og)
 
             # train and keep track
             epoch_loss_agg = []
@@ -152,7 +152,7 @@ class MyArcTrainer(Trainer):
                 sample_test_loss = self.error_function(prediction, target)
                # print("sample_test_loss",sample_test_loss)
                 # get accuracy
-                sample_test_accuracy =  target == np.round(prediction, 0)
+                sample_test_accuracy =  self.accuracy_function(prediction, target)
               #  sample_test_accuracy = ones - self.error_function(prediction, target)
                 sample_test_accuracy = np.mean(sample_test_accuracy)
                 test_loss_aggregator.append(sample_test_loss)
@@ -336,7 +336,21 @@ class MyArcTrainer(Trainer):
         fuzzified_inputs = fuzzified_inputs.stack()
         return fuzzified_inputs
  
+    
+    def accuracy_function(self, prediction, target):
+        
+        accs = []
+        for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
+            
+            y = prediction[cidx] # in order to slice [:,idx]
+            t = target[cidx]
+            for idx, number in enumerate(classweight):
+                if bool(number)==True:
 
+                    acc = t[idx] == np.round(y[idx], 0)
+                    accs.append(acc)
+        
+        return acc
 
     def adapt(self, layer, gradients, centers_derived, widths_der):
         
