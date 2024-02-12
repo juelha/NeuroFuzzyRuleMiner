@@ -51,6 +51,8 @@ class DataPipeline():
         df = pd.DataFrame(self.params, column_names)
         return df
     
+
+
     def loader(self):
         """Load specified dataset
         
@@ -59,64 +61,52 @@ class DataPipeline():
                            options: ["dummy", "wine"]
 
         Returns:
-            df, targets
+            df, targets ('pandas.core.frame.DataFrame')
+        
+        Note: assumes last column of df is the target vector
         """
-        if self.df_name == None:
-            print("no df specified")
-        elif self.df_name == "iris":
-            df, targets = self.load_iris()
-        elif self.df_name == "wine":
-            df, targets = self.load_wine()
-        elif self.df_name == "dummy":
-            df, targets = self.load_dummy()
+        # check if str is in possible datasets
+        file_name = self.df_name + '_df.csv'
+        save_path = os.path.dirname(__file__) +  '/../data'
+        full_path = os.path.join(save_path, file_name)
+        assert  os.path.exists(full_path), f'File {file_name} not found'
+        df = pd.read_csv(full_path)
+        # shuffle first so inputs and targets stay on same row
+        df = df.sample(frac=1) # do we need to shuffle here? 
+        # separate into input and targets 
+        targets = df.pop(df.columns[-1]) # always use last column
+        # get featuer names <- documenting MFs
+        self.feature_names = list(df.columns)
+        # get max value of each feature <- center init        
+        self.feature_ranges = df.max()
+        print(f"Dataset {self.df_name} loaded: \n {df.head()} \n")
+
         return df,targets
     
-    def load_dummy(self):
-        """Loads dummy dataset 
+    # def loader(self):
+    #     """Load specified dataset
         
-        'pandas.core.frame.DataFrame'
-        """
-        # get save path 
-        file_name = 'dummy_df.csv'
-        save_path = os.path.dirname(__file__) +  '/../data'
-        full_path = os.path.join(save_path, file_name)
-        assert  os.path.exists(full_path), f'File {file_name} not found'
-        df = pd.read_csv(full_path)
-        # shuffle first so inputs and targets stay on same row
-        df = df.sample(frac=1) # do we need to shuffle here? 
-        # separate into input and targets 
-        targets = df.pop("out")
-        # get featuer names <- documenting MFs
-        self.feature_names = list(df.columns)
-        # get max value of each feature <- center init        
-        self.feature_ranges = df.max()
-        print(f"Dataset {self.df_name} loaded: \n {df.head()} \n")
-        return df, targets
+    #     Args:
+    #         df_name (str): dataset to load 
+    #                        options: ["dummy", "wine"]
 
+    #     Returns:
+    #         df, targets
+    #     """
+    #     if self.df_name == None:
+    #         print("no df specified")
+    #     elif self.df_name == "iris":
+    #         df, targets = self.load_iris()
+    #     elif self.df_name == "wine":
+    #         df, targets = self.load_wine()
+    #     elif self.df_name == "dummy4":
+    #         df, targets = self.load_dummy()
+    #     else:
+    #         print(self.df_name)
+    #         raise ValueError("no df name given")
+    #     return df,targets
+    
 
-
-
-    def load_iris(self):
-        """Loads dummy dataset 
-        
-        'pandas.core.frame.DataFrame'
-        """
-        # get save path 
-        file_name = 'iris_df.csv'
-        save_path = os.path.dirname(__file__) +  '/../data'
-        full_path = os.path.join(save_path, file_name)
-        assert  os.path.exists(full_path), f'File {file_name} not found'
-        df = pd.read_csv(full_path)
-        # shuffle first so inputs and targets stay on same row
-        df = df.sample(frac=1) # do we need to shuffle here? 
-        # separate into input and targets 
-        targets = df.pop("target")
-        # get featuer names <- documenting MFs
-        self.feature_names = list(df.columns)
-        # get max value of each feature <- center init        
-        self.feature_ranges = df.max()
-        print(f"Dataset {self.df_name} loaded: \n {df.head()} \n")
-        return df, targets
 
 
     def load_wine(self):

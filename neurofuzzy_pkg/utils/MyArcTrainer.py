@@ -152,7 +152,7 @@ class MyArcTrainer(Trainer):
             for idx, number in enumerate(classweight):
                 if bool(number)==True:
 
-                    acc = t[idx] == np.round(y[idx], 0)
+                    acc = t[idx] == np.round(y[idx], 2)
                     accs.append(acc)
         
         return acc
@@ -210,7 +210,7 @@ class MyArcTrainer(Trainer):
                     error =  -1*(tar[idx] - out_row[idx])
                     
                     error_term.append(error)
-                
+        print("error", error_term)
         return error_term
 
 
@@ -231,8 +231,8 @@ class MyArcTrainer(Trainer):
 
         # get those directly from antecedent layer with inputs attribute
         mus = self.arc.RuleAntecedentLayer.inputs
-        print("MUS", mus[0])
-        
+     #   print("MUS", mus[0])
+      #  
         # reshape error to match each mu 
         error = np.reshape(error, mus[0].shape)
         deltas = []
@@ -245,7 +245,7 @@ class MyArcTrainer(Trainer):
             deltas.append(delta)
        # delta = [mu * error for mu in mus]
         #delta.reverse() # the other mu for each 
-        print("HERERE", deltas)
+     #   print("HERERE", deltas)
         
         centers_prime = self.calc_mf_derv_center()
         widths_prime = self.calc_mf_derv_widths()
@@ -266,43 +266,62 @@ class MyArcTrainer(Trainer):
         deltas = []
 
         deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
+
+        # if delta[0].ndim == 2:
+
+        #     deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
+
+        # elif delta[0].ndim == 3: 
+        #     x = delta[0]
+        #     x = np.sum(x, axis=(1,2))
+        #     deltas.append(x)
+
+        #     x = delta[1]
+        #     x = np.sum(x, axis=0)
+        #     x = np.sum(x, axis=1)
+        #     deltas.append(x)
+
+
+        #     x = delta[2]
+        #     x = np.sum(x, axis=1)
+        #     x = np.sum(x, axis=0)
+        #     deltas.append(x)
+
+        # elif delta[0].ndim == 4:
+        #     x = delta[0]
+        #     x = np.sum(x, axis=3)
+        #     x = np.sum(x, axis=1)
+        #     x = np.sum(x, axis=1)
+        #     deltas.append(x)
+
+        #     x = delta[1]
+        #     x = np.sum(x, axis=0)
+        #     x = np.sum(x, axis=1)
+        #     x = np.sum(x, axis=1)
+        #     deltas.append(x)
+            
+        #     x = delta[2]
+        #     x = np.sum(x, axis=0) # or 1
+        #     x = np.sum(x, axis=2)
+        #     x = np.sum(x, axis=0)
+        #     deltas.append(x)
+
+        #     x = delta[3]
+        #     x = np.sum(x, axis=1) # or 2
+        #     x = np.sum(x, axis=0)
+        #     x = np.sum(x, axis=0)
+        #     deltas.append(x)
+
         deltas = np.array(deltas)
         deltas = deltas.ravel()
-        # x = delta[0]
-        # x = np.sum(x, axis=3)
-        # x = np.sum(x, axis=1)
-        # x = np.sum(x, axis=1)
-        # deltas.append(x)
 
-        # x = delta[1]
-        # x = np.sum(x, axis=0)
-        # x = np.sum(x, axis=1)
-        # x = np.sum(x, axis=1)
-        # deltas.append(x)
         
-        # x = delta[2]
-        # x = np.sum(x, axis=0) # or 1
-        # x = np.sum(x, axis=2)
-        # x = np.sum(x, axis=0)
-        # deltas.append(x)
-
-        # x = delta[3]
-        # x = np.sum(x, axis=1) # or 2
-        # x = np.sum(x, axis=0)
-        # x = np.sum(x, axis=0)
-        # deltas.append(x)
-
-        # deltas = [np.sum(d, axis=3-(i%2)) for i, d in enumerate(delta)]
-        # deltas = [np.sum(d, axis=(1,2)) for i, d in enumerate(deltas)]
-       # deltas = np.array(deltas)
-       # deltas = deltas.ravel()
-        print("deltas", deltas)
-        print("para", para_prime)
+      # print("para", para_prime)
         deltas *= para_prime
-
+        print("deltas", deltas)
 
         # self.fuzzi ...
         param_to_tune = getattr(layer, param)
-        print("heh", param_to_tune)
+      #  print("heh", param_to_tune)
         param_to_tune -= np.multiply(deltas, self.learning_rate)
         setattr(layer, param, param_to_tune)

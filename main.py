@@ -38,7 +38,7 @@ def main():
     batch_size = 100
     learning_rate = 1
     n_epochs = 10
-    df_name = "dummy"
+    df_name = "dummy2"
     
         # Model with MLP arc
     MLPModel = Model(DataPipeline(df_name),  

@@ -87,7 +87,7 @@ class RuleAntecedentLayer():
 
 
        
-        x = np.array_split(x, range(3, len(x), 3))
+        x = np.array_split(x, range(3, len(x), 3)) # hc
        # x.reverse()  # so it fits with convention 
         x = np.array(np.meshgrid(*x,indexing='ij')) # the '*' unpacks x and passes to messgrid
         self.inputs = x #  need meshgrid for training
