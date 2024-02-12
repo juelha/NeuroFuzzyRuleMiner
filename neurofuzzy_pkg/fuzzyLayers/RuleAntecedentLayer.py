@@ -37,7 +37,7 @@ class RuleAntecedentLayer():
         # for rule extraction
         self.rulesIF = {}   
         self.n_rules = 0     
-        self.n_participants = 4 # two participants in a rule #hc
+        self.n_participants = 2 # two participants in a rule #hc
         self.n_mfs = 3 # hc
 
 
@@ -88,11 +88,13 @@ class RuleAntecedentLayer():
 
        
         x = np.array_split(x, range(3, len(x), 3))
-        x.reverse()  # so it fits with convention 
-        x = np.array(np.meshgrid(*x)) # the '*' unpacks x and passes to messgrid
+       # x.reverse()  # so it fits with convention 
+        x = np.array(np.meshgrid(*x,indexing='ij')) # the '*' unpacks x and passes to messgrid
         self.inputs = x #  need meshgrid for training
 
-        x = np.prod(x, axis=0).ravel()
+
+        x = (x[0] * x[1]).ravel()
+       # x = np.prod(x, axis=0).ravel()
   
 
         assert self.n_rules == x.size, f'the number of rules generated: {x.size} has to equal: {self.n_rules} -> coefficient(inputs * n_mfs, participants) - inputs * n_mfs' 

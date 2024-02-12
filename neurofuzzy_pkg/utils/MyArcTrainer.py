@@ -265,33 +265,37 @@ class MyArcTrainer(Trainer):
 
         deltas = []
 
-            
-        x = np.sum(delta[0], axis=3)
-        x = np.sum(x, axis=1)
-        x = np.sum(x, axis=1)
-        deltas.append(x)
+        deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
+        deltas = np.array(deltas)
+        deltas = deltas.ravel()
+        # x = delta[0]
+        # x = np.sum(x, axis=3)
+        # x = np.sum(x, axis=1)
+        # x = np.sum(x, axis=1)
+        # deltas.append(x)
 
-        y = np.sum(delta[1], axis=2)
-        y = np.sum(y, axis=1)
-        y = np.sum(y, axis=1)
-        deltas.append(y)
+        # x = delta[1]
+        # x = np.sum(x, axis=0)
+        # x = np.sum(x, axis=1)
+        # x = np.sum(x, axis=1)
+        # deltas.append(x)
         
-        z = np.sum(delta[2], axis=0)
-        #print("x", x)
-        z = np.sum(z, axis=1)
-        z = np.sum(z, axis=1)
-        deltas.append(z)
+        # x = delta[2]
+        # x = np.sum(x, axis=0) # or 1
+        # x = np.sum(x, axis=2)
+        # x = np.sum(x, axis=0)
+        # deltas.append(x)
 
-        w = np.sum(delta[3], axis=1)
-        #print("x", x)
-        w = np.sum(w, axis=1)
-        w = np.sum(w, axis=1)
-        deltas.append(w)
+        # x = delta[3]
+        # x = np.sum(x, axis=1) # or 2
+        # x = np.sum(x, axis=0)
+        # x = np.sum(x, axis=0)
+        # deltas.append(x)
 
         # deltas = [np.sum(d, axis=3-(i%2)) for i, d in enumerate(delta)]
         # deltas = [np.sum(d, axis=(1,2)) for i, d in enumerate(deltas)]
-        deltas = np.array(deltas)
-        deltas = deltas.ravel()
+       # deltas = np.array(deltas)
+       # deltas = deltas.ravel()
         print("deltas", deltas)
         print("para", para_prime)
         deltas *= para_prime
