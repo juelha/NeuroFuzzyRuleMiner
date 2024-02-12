@@ -241,7 +241,7 @@ class MyArcTrainer(Trainer):
             for j, mu in enumerate(mus):
                 if i==j:
                     continue
-                delta *= mu
+                delta = delta* mu
             deltas.append(delta)
        # delta = [mu * error for mu in mus]
         #delta.reverse() # the other mu for each 

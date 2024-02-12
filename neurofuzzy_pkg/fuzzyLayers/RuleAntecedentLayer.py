@@ -93,8 +93,8 @@ class RuleAntecedentLayer():
         self.inputs = x #  need meshgrid for training
 
 
-        x = (x[0] * x[1]).ravel()
-       # x = np.prod(x, axis=0).ravel()
+      #  x = (x[0] * x[1]).ravel()
+        x = np.prod(x, axis=0).ravel()
   
 
         assert self.n_rules == x.size, f'the number of rules generated: {x.size} has to equal: {self.n_rules} -> coefficient(inputs * n_mfs, participants) - inputs * n_mfs' 
