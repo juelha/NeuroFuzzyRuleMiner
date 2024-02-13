@@ -80,9 +80,9 @@ class Model():
         self.arc.FuzzificationLayer.load_weights(self.data.df_name)
         self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
         self.data.load_data_for_training() # doubled ! hc
-      #  MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
+       # MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
         self.train()
-     #   MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_ranges )
+       # MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_ranges )
         #self.arc.FuzzificationLayer.save_weights(self.data.df_name)
 
 
@@ -90,7 +90,7 @@ class Model():
         """Calling trainer
         """
         # loading data, performing datapipeline and getting datasets
-        self.data.load_data_for_training()
+     #   self.data.load_data_for_training()
        # self.train_ds = self.data.train_ds
         #self.test_ds = self.data.test_ds
         #self.validation_ds = self.data.validation_ds

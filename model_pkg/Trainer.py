@@ -95,15 +95,15 @@ class Trainer():
        
         # training loop until self.iters 
         for epoch in range(self.n_epochs):
-            print(f'Epoch: {str(epoch)} starting with \n \
-            test accuracy {self.test_accuracies[-1]} \n \
-            test loss {self.test_losses[-1]} \n \
-            train loss {self.train_losses[-1]}')
+            # print(f'Epoch: {str(epoch)} starting with \n \
+            # test accuracy {self.test_accuracies[-1]} \n \
+            # test loss {self.test_losses[-1]} \n \
+            # train loss {self.train_losses[-1]}')
 
            
 
             # train and keep track
-            print("FUCKOFF",train_ds[0].shape)
+          #  print("FUCKOFF",train_ds[0].shape)
             train_loss, train_acc = self.train_step(train_ds)
             self.train_accuracies.append(train_acc)
             self.train_losses.append(train_loss)
@@ -138,7 +138,8 @@ class Trainer():
 
         inputs_batch, targets_batch = ds
         
-        for input, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
+       # for input, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
+        for input, target in (zip(inputs_batch, desc='testing'), targets_batch):
             prediction = self.arc(input)
             loss = self.loss_func(prediction, target)
             accuracy =  target == np.round(prediction, 0)

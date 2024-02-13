@@ -104,6 +104,7 @@ class MyArc():
                 else:
                     x = layer.build(x)
 
+      #  for ruleID in tqdm(self.RuleConsequentLayer.dictrules, desc="selecting"):
         for ruleID in tqdm(self.RuleConsequentLayer.dictrules, desc="selecting"):
             l = self.RuleConsequentLayer.dictrules[ruleID]
           
@@ -111,12 +112,12 @@ class MyArc():
             idx_max = l.index(max_val)
             
             tar = self.RuleConsequentLayer.tars[ruleID][idx_max]
-            print("tar", tar)
+           # print("tar", tar)
             self.RuleConsequentLayer.weights[ruleID] = tar
    
         self.RuleConsequentLayer.save_weights(df_name)
         self.RuleConsequentLayer.load_weights(df_name)
-        print("building done")
+       # print("building done")
         done = True
 
 
@@ -132,7 +133,7 @@ class MyArc():
         self.FuzzificationLayer.save_weights(df_name)
         self.FuzzificationLayer.load_weights(df_name)
         #MFs.visuMFs(self.FuzzificationLayer, dir="after_building", func="InputMFs", max_vals=feature_ranges)
-        print("building done")
+      #  print("building done")
         done = True
         return done       
 

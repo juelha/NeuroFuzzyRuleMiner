@@ -72,6 +72,7 @@ class MyArcTrainer(Trainer):
         inputs_batch, targets_batch = ds
         
         for input, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
+       # for input, target in (zip(inputs_batch, targets_batch)):
             prediction = self.arc(input)
             target = np.resize(target, prediction.shape) # the only difference to trainer !!!!!!!!!!!!!!!!!!!!!
             loss = self.loss_func(prediction, target)
@@ -106,7 +107,7 @@ class MyArcTrainer(Trainer):
         deltas_avg = None
         assigned = False
         for inputs, targets in (zip(tqdm(inputs_batch, desc='training'), targets_batch)):
-
+      #  for inputs, targets in (zip(inputs_batch, targets_batch)):
             # forward propagation
             prediction =  self.arc(inputs)
             # calculating error in outputlayer
@@ -152,7 +153,9 @@ class MyArcTrainer(Trainer):
             for idx, number in enumerate(classweight):
                 if bool(number)==True:
 
-                    acc = t[idx] == np.round(y[idx], 2)
+                    acc = t[idx] == np.round(y[idx], 0)
+                  #  print("here", t[idx])
+                   # print("hopre", y[idx])
                     accs.append(acc)
         
         return acc
@@ -179,7 +182,7 @@ class MyArcTrainer(Trainer):
                 if bool(number)==True:
 
                 
-                    error =  0.5*(tar[idx] - out_row[idx])**2
+                    error =  0.5*( out_row[idx] - tar[idx] )**2
                     
                     error_term.append(error)
                 
@@ -207,10 +210,10 @@ class MyArcTrainer(Trainer):
                 if bool(number)==True:
 
                 
-                    error =  -1*(tar[idx] - out_row[idx])
+                    error =  (out_row[idx] - tar[idx])
                     
                     error_term.append(error)
-        print("error", error_term)
+      #  print("error", error_term)
         return error_term
 
 
@@ -251,6 +254,7 @@ class MyArcTrainer(Trainer):
         widths_prime = self.calc_mf_derv_widths()
         
 
+
         self.adapt_parameter('centers', layer, deltas, centers_prime)
         self.adapt_parameter('widths', layer, deltas, widths_prime)
 
@@ -263,14 +267,14 @@ class MyArcTrainer(Trainer):
 
         """
 
-        deltas = []
+     
 
-        deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
-
+        # deltas = []
         # if delta[0].ndim == 2:
 
         #     deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
 
+        
         # elif delta[0].ndim == 3: 
         #     x = delta[0]
         #     x = np.sum(x, axis=(1,2))
@@ -312,16 +316,47 @@ class MyArcTrainer(Trainer):
         #     x = np.sum(x, axis=0)
         #     deltas.append(x)
 
-        deltas = np.array(deltas)
-        deltas = deltas.ravel()
+    #     deltas = np.array(deltas)
+    #     deltas = deltas.ravel()
 
         
-      # print("para", para_prime)
-        deltas *= para_prime
-        print("deltas", deltas)
+    #   # print("para", para_prime)
+    #     deltas = deltas * para_prime
+        
+      #  print("deltas", deltas)
 
         # self.fuzzi ...
-        param_to_tune = getattr(layer, param)
+       # param_to_tune = getattr(layer, param)
+
+        # deriv para have to be meshgridded too
+        para_prime = np.array_split(para_prime, range(3, len(para_prime), 3)) # hc
+       # x.reverse()  # so it fits with convention 
+        para_prime = np.array(np.meshgrid(*para_prime,indexing='ij'))
+        delta = [d * para_prime[i] for i, d in enumerate(delta)]
+        # for p, d in zip(para_prime,delta):
+        # # param_gridded = param_gridded[0]
+        #     p.setflags(write=1) # needed 
+        #    # print("change", d*self.learning_rate)
+        #     d = d* p#np.multiply(d, self.learning_rate) 
+
+
+        # params to tune
+        para = getattr(layer, param)
+        
+       # print("param before", para)
+
+        param_split = np.array_split(para, range(3, len(para), 3)) # does return adress 
+
+        param_gridded = np.meshgrid(*param_split, indexing="ij", copy=False) # If False, a view into the original arrays are returned in order to conserve memory.  Default is True.
+
+        for p, d in zip(param_gridded,delta):
+        # param_gridded = param_gridded[0]
+            p.setflags(write=1) # needed 
+           # print("change", d*self.learning_rate)
+            p -= np.multiply(d, self.learning_rate) # changes param
+       # print("param afte", para)
+
+
       #  print("heh", param_to_tune)
-        param_to_tune -= np.multiply(deltas, self.learning_rate)
-        setattr(layer, param, param_to_tune)
+       # para =  para - np.multiply(deltas, self.learning_rate)
+        setattr(layer, param, para)

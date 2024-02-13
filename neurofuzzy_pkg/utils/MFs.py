@@ -138,10 +138,10 @@ Args:
     
     feature_names = max_vals.keys().values.tolist()
     
-    c = np.array_split(layer.centers, 4) # hc
-    print("HERE", c)
+    c = np.array_split(layer.centers, 2) # hc
+   # print("HERE", c)
  
-    w = np.array_split(layer.widths,  4) # hc
+    w = np.array_split(layer.widths,  2) # hc
  
 
    
@@ -160,6 +160,8 @@ Args:
 
 #            print(layer.centers[j+i*layer.n_mfs])
             for bleh in x:
+              #  print(c[xID])
+              #  print(c[xID][mfID])
                 y[mfID].append(layer.mf_type(bleh,c[xID][mfID],w[xID][mfID]))
 
             plt.plot(x, y[mfID], label=mf_names[mfID])

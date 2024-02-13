@@ -50,7 +50,7 @@ class RuleAntecedentLayer():
         # n_rows, n_cols = inputs.shape
 
         # # build weights which will be used to weight the inputs <- importance of participant in rule?
-        # self.weights = np.ones((n_rows, n_cols), dtype=np.float32)
+        self.weights = np.ones((self.n_mfs**self.n_participants, self.n_participants), dtype=np.float32)
 
         # self.train_params = {'weights': self.weights}
         # self.built = True
@@ -95,6 +95,8 @@ class RuleAntecedentLayer():
 
       #  x = (x[0] * x[1]).ravel()
         x = np.prod(x, axis=0).ravel()
+
+       # x = x *np.prod(self.weights, axis=1)
   
 
         assert self.n_rules == x.size, f'the number of rules generated: {x.size} has to equal: {self.n_rules} -> coefficient(inputs * n_mfs, participants) - inputs * n_mfs' 

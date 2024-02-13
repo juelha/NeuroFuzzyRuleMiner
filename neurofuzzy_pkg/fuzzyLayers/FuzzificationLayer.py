@@ -92,7 +92,8 @@ class FuzzificationLayer():
 
         x = self.preprocess_x(x)
         self.inputs = x # saved for training 
-
+       # print("CENTERS", self.centers)
+       # print("WIdths", self.widths)
     
         fuzzy_x = self.mf_type(x, self.centers, self.widths)
             

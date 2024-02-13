@@ -3,6 +3,7 @@ from model_pkg import *
 from neurofuzzy_pkg import * 
 from tests_pkg import *
 from neurofuzzy_pkg import utils
+import time
 
 
 def main():
@@ -39,12 +40,14 @@ def main():
     learning_rate = 1
     n_epochs = 10
     df_name = "dummy2"
+
+    
     
         # Model with MLP arc
-    MLPModel = Model(DataPipeline(df_name),  
-                     MLP((2,6),2),  
-                     Trainer(n_epochs=n_epochs))
-    # MLPModel.train()
+    # MLPModel = Model(DataPipeline(df_name),  
+    #                  MLP((2,6),2),  
+    #                  Trainer(n_epochs=n_epochs))
+   # MLPModel.train()
 
 
     MyModel = Model(DataPipeline(df_name, batch_size=batch_size), 
@@ -52,7 +55,7 @@ def main():
                      MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate))
     MyModel.build_MyArc() 
     MyModel.trainMyArc()
-    MyModel.arc.RuleConsequentLayer.save_weights(df_name)
+  #  MyModel.arc.RuleConsequentLayer.save_weights(df_name)
 
     #MyModel.build_MyArc_CW()
     # MyModel.build_MyArc() # works 
@@ -73,5 +76,6 @@ def main():
 
 
 if __name__ == "__main__":
-
+   # start_time = time.time()
     main()
+  #  print("--- %s seconds ---" % (time.time() - start_time))
