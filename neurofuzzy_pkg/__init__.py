@@ -4,6 +4,8 @@ from neurofuzzy_pkg.arcs.SugenoArc import SugenoArc
 from neurofuzzy_pkg.arcs.MyArc import MyArc
 from neurofuzzy_pkg.utils.MyArcTrainer import MyArcTrainer
 from neurofuzzy_pkg.utils.Builder import Builder
+from neurofuzzy_pkg.utils.Classifier import Classifier
+
 
 
 from neurofuzzy_pkg.utils.neurofuzzyTrainer import neurofuzzyTrainer
