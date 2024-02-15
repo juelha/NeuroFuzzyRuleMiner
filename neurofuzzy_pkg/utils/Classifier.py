@@ -31,9 +31,9 @@ class Classifier():
     def get_class(self, input_vec, df_name=None): 
         # propagating through network
         outputs = self.arc(input_vec)
-        print("out", outputs)
+       # print("out", outputs)
         outputs = np.sum(outputs, axis=1).tolist()
-        print("out after", outputs)
+      # print("out after", outputs)
 
         max_val = max(outputs)
         idx_max = outputs.index(max_val)
@@ -50,6 +50,6 @@ class Classifier():
 
     
     def is_class_correct(self, classID, target):
-        print("target", target)
-        print("classid", classID)
+        #print("target", target)
+       # print("classid", classID)
         return classID == target

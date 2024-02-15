@@ -279,10 +279,10 @@ class MyArcTrainer(Trainer):
 
             x = delta[0]
             x = np.sum(x, axis=1)
-            deltas.append(x)
+            deltas.append(x/9* self.learning_rate)
             x = delta[1]
             x = np.sum(x, axis=0)
-            deltas.append(x)
+            deltas.append(x/9* self.learning_rate)
 
           #  deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
 
@@ -372,5 +372,12 @@ class MyArcTrainer(Trainer):
 
 
       #  print("heh", param_to_tune)
+        
+        for i, p in enumerate(para):
+            print("p", p)
+            if p <= 0 or p >= 10: #hc
+                deltas[i] = 0#0.00001 # randomize todo
+                print("P",p)
+       # print("deltas", deltas)
         para =  para - deltas #np.multiply(deltas, self.learning_rate)
         setattr(layer, param, para)
