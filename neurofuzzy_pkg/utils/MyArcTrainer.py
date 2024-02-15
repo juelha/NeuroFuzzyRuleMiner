@@ -267,57 +267,69 @@ class MyArcTrainer(Trainer):
 
         """
 
-     
+                # deriv para have to be meshgridded too
+        para_prime = np.array_split(para_prime, range(3, len(para_prime), 3)) # hc
+       # x.reverse()  # so it fits with convention 
+        para_prime = np.array(np.meshgrid(*para_prime,indexing='ij'))
+        delta = [d * para_prime[i] for i, d in enumerate(delta)]
 
-        # deltas = []
-        # if delta[0].ndim == 2:
+        deltas = []
+        if delta[0].ndim == 2:
 
-        #     deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
+
+            x = delta[0]
+            x = np.sum(x, axis=1)
+            deltas.append(x)
+            x = delta[1]
+            x = np.sum(x, axis=0)
+            deltas.append(x)
+
+          #  deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
 
         
-        # elif delta[0].ndim == 3: 
-        #     x = delta[0]
-        #     x = np.sum(x, axis=(1,2))
-        #     deltas.append(x)
+        elif delta[0].ndim == 3: 
+            #print("true")
+            x = delta[0]
+            x = np.sum(x, axis=(1,2)) # works
+            deltas.append(x* self.learning_rate)
 
-        #     x = delta[1]
-        #     x = np.sum(x, axis=0)
-        #     x = np.sum(x, axis=1)
-        #     deltas.append(x)
+            x = delta[1]
+            x = np.sum(x, axis=0)
+            x = np.sum(x, axis=1)
+            deltas.append(x* self.learning_rate)
 
+            x = delta[2]
+            x = np.sum(x, axis=1)            
+            x = np.sum(x, axis=0)
+            deltas.append(x* self.learning_rate)
 
-        #     x = delta[2]
-        #     x = np.sum(x, axis=1)
-        #     x = np.sum(x, axis=0)
-        #     deltas.append(x)
+        elif delta[0].ndim == 4:
+            x = delta[0]
+            x = np.sum(x, axis=3)
+            x = np.sum(x, axis=1)
+            x = np.sum(x, axis=1)
+            deltas.append(x)
 
-        # elif delta[0].ndim == 4:
-        #     x = delta[0]
-        #     x = np.sum(x, axis=3)
-        #     x = np.sum(x, axis=1)
-        #     x = np.sum(x, axis=1)
-        #     deltas.append(x)
-
-        #     x = delta[1]
-        #     x = np.sum(x, axis=0)
-        #     x = np.sum(x, axis=1)
-        #     x = np.sum(x, axis=1)
-        #     deltas.append(x)
+            x = delta[1]
+            x = np.sum(x, axis=0)
+            x = np.sum(x, axis=1)
+            x = np.sum(x, axis=1)
+            deltas.append(x)
             
-        #     x = delta[2]
-        #     x = np.sum(x, axis=0) # or 1
-        #     x = np.sum(x, axis=2)
-        #     x = np.sum(x, axis=0)
-        #     deltas.append(x)
+            x = delta[2]
+            x = np.sum(x, axis=0) # or 1
+            x = np.sum(x, axis=2)
+            x = np.sum(x, axis=0)
+            deltas.append(x)
 
-        #     x = delta[3]
-        #     x = np.sum(x, axis=1) # or 2
-        #     x = np.sum(x, axis=0)
-        #     x = np.sum(x, axis=0)
-        #     deltas.append(x)
+            x = delta[3]
+            x = np.sum(x, axis=1) # or 2
+            x = np.sum(x, axis=0)
+            x = np.sum(x, axis=0)
+            deltas.append(x)
 
-    #     deltas = np.array(deltas)
-    #     deltas = deltas.ravel()
+        deltas = np.array(deltas)
+        deltas = deltas.ravel()
 
         
     #   # print("para", para_prime)
@@ -327,12 +339,14 @@ class MyArcTrainer(Trainer):
 
         # self.fuzzi ...
        # param_to_tune = getattr(layer, param)
+        
+      #  print("Delta", delta)
 
-        # deriv para have to be meshgridded too
-        para_prime = np.array_split(para_prime, range(3, len(para_prime), 3)) # hc
-       # x.reverse()  # so it fits with convention 
-        para_prime = np.array(np.meshgrid(*para_prime,indexing='ij'))
-        delta = [d * para_prime[i] for i, d in enumerate(delta)]
+    #     # deriv para have to be meshgridded too
+    #     para_prime = np.array_split(para_prime, range(3, len(para_prime), 3)) # hc
+    #    # x.reverse()  # so it fits with convention 
+    #     para_prime = np.array(np.meshgrid(*para_prime,indexing='ij'))
+    #     delta = [d * para_prime[i] for i, d in enumerate(delta)]
         # for p, d in zip(para_prime,delta):
         # # param_gridded = param_gridded[0]
         #     p.setflags(write=1) # needed 
@@ -345,18 +359,18 @@ class MyArcTrainer(Trainer):
         
        # print("param before", para)
 
-        param_split = np.array_split(para, range(3, len(para), 3)) # does return adress 
+        # param_split = np.array_split(para, range(3, len(para), 3)) # does return adress 
 
-        param_gridded = np.meshgrid(*param_split, indexing="ij", copy=False) # If False, a view into the original arrays are returned in order to conserve memory.  Default is True.
+        # param_gridded = np.meshgrid(*param_split, indexing="ij", copy=False) # If False, a view into the original arrays are returned in order to conserve memory.  Default is True.
 
-        for p, d in zip(param_gridded,delta):
-        # param_gridded = param_gridded[0]
-            p.setflags(write=1) # needed 
-           # print("change", d*self.learning_rate)
-            p -= np.multiply(d, self.learning_rate) # changes param
+        # for p, d in zip(param_gridded,delta):
+        # # param_gridded = param_gridded[0]
+        #     p.setflags(write=1) # needed 
+        #   #  print("change", d)
+        #     p -= np.multiply(d, self.learning_rate) # changes param
        # print("param afte", para)
 
 
       #  print("heh", param_to_tune)
-       # para =  para - np.multiply(deltas, self.learning_rate)
+        para =  para - deltas #np.multiply(deltas, self.learning_rate)
         setattr(layer, param, para)

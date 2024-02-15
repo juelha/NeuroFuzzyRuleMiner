@@ -80,7 +80,7 @@ class RuleAntecedentLayer():
        # self.inputs = x # saved for training
 
     
-    
+        
         self.n_rules = int(self.n_mfs**self.n_participants)
 
         # x = np.array_split(x, range(self.n_mfs, len(x), self.n_mfs))

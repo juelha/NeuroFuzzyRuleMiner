@@ -52,7 +52,8 @@ def main():
 
     MyModel = Model(DataPipeline(df_name, batch_size=batch_size), 
                      MyArc(), 
-                     MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate))
+                     MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate),
+                     Builder())
     MyModel.build_MyArc() 
     MyModel.trainMyArc()
   #  MyModel.arc.RuleConsequentLayer.save_weights(df_name)

@@ -6,6 +6,7 @@ from neurofuzzy_pkg.fuzzyLayers.FuzzificationLayer import FuzzificationLayer
 from neurofuzzy_pkg.fuzzyLayers.RuleAntecedentLayer import RuleAntecedentLayer
 from neurofuzzy_pkg.fuzzyLayers.RuleConsequentLayer import RuleConsequentLayer
 
+
 # mamdani specific
 from neurofuzzy_pkg.fuzzyLayers.mamdani_layers.FuzzificationLayerMam import FuzzificationLayerMam
 from neurofuzzy_pkg.fuzzyLayers.mamdani_layers.RuleAntecedentLayerMam import RuleAntecedentLayerMam

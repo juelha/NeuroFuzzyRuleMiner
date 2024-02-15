@@ -15,7 +15,7 @@ class Model():
     """Masterclass for combining data, architecture and trainer.
     """
 
-    def __init__(self, data, arc, trainer):
+    def __init__(self, data, arc, trainer, builder=None, classifier=None):
         """Initializes Model()-Object
 
         Args:
@@ -32,6 +32,8 @@ class Model():
         self.data = data
         self.arc = arc
         self.trainer = trainer
+        self.builder = builder
+        self.classifier = classifier
 
     def run(self):
         """
@@ -43,7 +45,8 @@ class Model():
     def build_MyArc(self):
         # load data for building my arc
         self.data.load_data_for_building()
-        self.arc.build(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name)
+        self.builder.arc = self.arc
+        self.builder(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name)
         print("Build done")
 
     def build_MyArc_CW(self):
@@ -58,6 +61,7 @@ class Model():
     def build_MyArc_MF(self):
         # load data for building my arc
         self.data.load_data_for_building()
+        self.builder.arc = self.arc
         self.arc.build_MFs(self.data.feature_ranges, self.data.df_name)
         print("Build done")
 

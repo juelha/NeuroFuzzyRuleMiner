@@ -47,6 +47,7 @@ class MyArc():
         ]
 
 
+
     def __call__(self, x):
         """Forward propagating the inputs through the network
 
@@ -60,82 +61,7 @@ class MyArc():
             x = layer(x)
         return x        
 
-    def build(self, inputs, targets, feature_ranges, df_name =None):
-        """Forward propagating the inputs through the network
-
-        Args: 
-            x (tf.Tensor): crisp input (1 row of the dataset)
-
-        Returns: 
-            done (boolean): if built
-        """
-        self.build_MFs(feature_ranges, df_name)
-        self.build_classweights(inputs, targets, df_name)
-        return True       
-    
-
-    def build_classweights(self, inputs, targets, df_name =None):
-
-        # calc of amount of rules
-        ## HOT FIX ##
-        # inputs = <MapDataset element_spec=TensorSpec(shape=(11,), dtype=tf.float64, name=None)>
-        # problem: cant get to the shape in the MapDataset element 
-        # print("HEREREEEEE", inputs)
-        # print("HEREREEEEE", inputs.shape)
-        n_inputs = inputs.shape[1] # horizontal
-
-        # for features in inputs.take(1):
-        #   n_inputs = int(features.shape[0])
-        #  print(n_inputs)
-
-
-        n_rules = int(self.RuleAntecedentLayer.n_mfs**self.RuleAntecedentLayer.n_participants )
-
-        for i in range(n_rules):
-            self.RuleConsequentLayer.dictrules[i] = []
-            self.RuleConsequentLayer.tars[i] = []
-
-        for weird_thingy, weirdtar in (zip(tqdm(inputs, desc='building'), targets)):
-            for layer in self.internal_layers:
-                if type(layer) == type(self.FuzzificationLayer):
-                    x = layer(weird_thingy)
-                elif type(layer) == type(self.RuleConsequentLayer):
-                    x = layer.build(x, weirdtar)
-                else:
-                    x = layer.build(x)
-
-      #  for ruleID in tqdm(self.RuleConsequentLayer.dictrules, desc="selecting"):
-        for ruleID in tqdm(self.RuleConsequentLayer.dictrules, desc="selecting"):
-            l = self.RuleConsequentLayer.dictrules[ruleID]
-          
-            max_val = max(l)
-            idx_max = l.index(max_val)
-            
-            tar = self.RuleConsequentLayer.tars[ruleID][idx_max]
-           # print("tar", tar)
-            self.RuleConsequentLayer.weights[ruleID] = tar
    
-        self.RuleConsequentLayer.save_weights(df_name)
-        self.RuleConsequentLayer.load_weights(df_name)
-       # print("building done")
-        done = True
-
-
-    def build_MFs(self, feature_ranges, df_name):
-        done = False
-
-
-       # print("sdjkdfg", feature_ranges)
-        self.FuzzificationLayer.build(feature_ranges)
-
-        #print("here",self.FuzzificationLayer.centers)
-               
-        self.FuzzificationLayer.save_weights(df_name)
-        self.FuzzificationLayer.load_weights(df_name)
-        #MFs.visuMFs(self.FuzzificationLayer, dir="after_building", func="InputMFs", max_vals=feature_ranges)
-      #  print("building done")
-        done = True
-        return done       
 
         
     def get_params(self):
