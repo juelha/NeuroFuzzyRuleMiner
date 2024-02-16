@@ -87,6 +87,7 @@ class Model():
         self.arc.FuzzificationLayer.load_weights(self.data.df_name)
         self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
         self.data.load_data_for_training() # doubled ! hc
+        self.trainer.builder = self.builder
         #MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
         self.train()
         #MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_ranges )

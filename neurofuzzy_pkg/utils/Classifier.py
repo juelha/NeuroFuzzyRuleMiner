@@ -32,11 +32,12 @@ class Classifier():
         # propagating through network
         outputs = self.arc(input_vec)
        # print("out", outputs)
-        outputs = np.sum(outputs, axis=1).tolist()
+        outputs = np.sum(outputs, axis=1) # make 1d
+        idx_max = np.argmax(outputs)
       # print("out after", outputs)
 
-        max_val = max(outputs)
-        idx_max = outputs.index(max_val)
+       # max_val = max(outputs)
+       # idx_max = outputs.index(max_val)
         classID = self.arc.RuleConsequentLayer.weights[idx_max]
         return classID
     

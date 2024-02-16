@@ -37,7 +37,7 @@ class RuleAntecedentLayer():
         # for rule extraction
         self.rulesIF = {}   
         self.n_rules = 0     
-        self.n_participants = 3 # two participants in a rule #hc
+        self.n_participants = 2 # two participants in a rule #hc
         self.n_mfs = 3 # hc
 
 

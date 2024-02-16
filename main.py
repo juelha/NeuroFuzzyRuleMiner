@@ -39,7 +39,7 @@ def main():
     batch_size = 100
     learning_rate = 1
     n_epochs = 10
-    df_name = "dummy3"
+    df_name = "dummy2"
 
     
     

@@ -32,6 +32,7 @@ class MyArcTrainer(Trainer):
         self.n_epochs = n_epochs
         self.learning_rate = learning_rate
         self.feature_ranges = None
+        self.builder = None
       #  self.df_name = None
        # self.feature_ranges = None 
 
@@ -47,6 +48,10 @@ class MyArcTrainer(Trainer):
         
         self.training_loop(train_ds, test_ds, validation_ds)
         
+
+
+
+
 
     def preprocess_target(self, target, prediction):
         """
@@ -70,22 +75,23 @@ class MyArcTrainer(Trainer):
         loss_aggregator = []
 
         inputs_batch, targets_batch = ds
-        
+        accuracy = self.get_class_accuracy(inputs_batch, targets_batch)
         for input, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
        # for input, target in (zip(inputs_batch, targets_batch)):
             prediction = self.arc(input)
             target = np.resize(target, prediction.shape) # the only difference to trainer !!!!!!!!!!!!!!!!!!!!!
             loss = self.loss_func(prediction, target)
-            accuracy = self.accuracy_function(prediction, target)
+           # accuracy = self.accuracy_function(prediction, target)
+
            # accuracy =  target == np.round(prediction, 0)
             #accuracy = np.mean(accuracy)
 
             loss_aggregator.append(loss)
-            accuracy_aggregator.append(np.mean(accuracy))  
+          #  accuracy_aggregator.append(np.mean(accuracy))  
 
         # return averages per batch
         test_loss = np.mean(loss_aggregator)
-        test_accuracy =  np.mean(accuracy_aggregator)
+        test_accuracy =  np.mean(accuracy)
         return test_loss, test_accuracy
 
 
@@ -106,6 +112,7 @@ class MyArcTrainer(Trainer):
         # iterating over data entries of a batch
         deltas_avg = None
         assigned = False
+        accuracy = self.get_class_accuracy(inputs_batch, targets_batch)
         for inputs, targets in (zip(tqdm(inputs_batch, desc='training'), targets_batch)):
       #  for inputs, targets in (zip(inputs_batch, targets_batch)):
             # forward propagation
@@ -114,9 +121,9 @@ class MyArcTrainer(Trainer):
             targets = np.resize(targets, prediction.shape) # the only difference to trainer !!!!!!!!!!!!!!!!!!!!!
             loss_agg.append(self.error_function(prediction, targets))
             # calculating accuracy
-            accuracy = self.accuracy_function(prediction,targets)
+            
             #accuracy = np.mean(accuracy)
-            accuracy_aggregator.append(accuracy)
+           # accuracy_aggregator.append(accuracy)
             errorterm = self.error_function_derived(prediction, targets)
 
             self.adapt(self.arc.FuzzificationLayer, errorterm)
@@ -139,7 +146,7 @@ class MyArcTrainer(Trainer):
         
         # return average loss
         loss =  np.mean(loss_agg)
-        acc = np.mean(accuracy_aggregator)
+        acc = np.mean(accuracy)
         return loss, acc
 
 
@@ -158,9 +165,37 @@ class MyArcTrainer(Trainer):
                    # print("hopre", y[idx])
                     accs.append(acc)
         
-        return acc
+        return accs#self.get_class_accuracy(prediction,target)
 
-    def error_function(self, prediction, target):
+
+    def get_class(self, input_vec, df_name=None): 
+        # propagating through network
+        outputs = self.arc(input_vec)
+       # print("out", outputs)
+        outputs = np.sum(outputs, axis=1) # make 1d
+        idx_max = np.argmax(outputs)
+      # print("out after", outputs)
+
+       # max_val = max(outputs)
+       # idx_max = outputs.index(max_val)
+        classID = self.arc.RuleConsequentLayer.weights[idx_max]
+        return classID
+    
+
+    def get_class_accuracy(self, inputs, targets, df_name =None):
+        acc = []
+        for input_vec, target_vec in (zip(tqdm(inputs, desc='class testing'), targets)):
+            classID = self.get_class(input_vec) 
+            acc.append(self.is_class_correct(classID, target_vec))
+        return np.mean(acc)
+
+    
+    def is_class_correct(self, classID, target):
+        #print("target", target)
+       # print("classid", classID)
+        return classID == target
+    
+    def error_function(self, pred, tar):
         """Derived error function:  
             error function: tf.reduce_mean(0.5*(prediction - targets)**2)
         
@@ -173,21 +208,45 @@ class MyArcTrainer(Trainer):
 
         error_term = []
         #target = target[0]
-        for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
+        epsilon = 1e-15  # Small constant to prevent log(0)
+
+        # Clip predicted probabilities to avoid log(0) or log(1)
+        pred = np.clip(pred, epsilon, 1 - epsilon)
+        tar = np.clip(tar, epsilon, 1 - epsilon)
+        # losses = []
+        # for p,t in zip(pred,tar):
+        #     # Calculate cross-entropy loss
+        #     loss = - np.sum(t * np.log(p) + (1 - t) * np.log(1 - p))
+
+        #     # Normalize by the number of examples
+        #     num_examples = len(t)
+        #     loss /= num_examples
+        #     losses.append(loss)
+        # for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
         
-            out_row = prediction[cidx] # in order to slice [:,idx]
-            tar = target[cidx]
-          #  print("tar", at)
-            for idx, number in enumerate(classweight):
-                if bool(number)==True:
+        #     out_row = prediction[cidx] # in order to slice [:,idx]
+        #     tar = target[cidx]
+        #   #  print("tar", at)
+        #     for idx, number in enumerate(classweight):
+        #         if bool(number)==True:
 
                 
-                    error =  0.5*( tar[idx] - out_row[idx]  )**2
+        #             error =  0.5*( tar[idx] - out_row[idx]  )**2
                     
-                    error_term.append(error)
+        #             error_term.append(error)
                 
-        return error_term
+        return self.cross_entropy_loss(pred,tar)
 
+    def cross_entropy_loss_prime(self, p,t):
+    # https://shivammehta25.github.io/posts/deriving-categorical-cross-entropy-and-softmax/
+        return  np.sum(p- t, axis=1) #/ len(t)
+
+
+    def cross_entropy_loss(self, p, t):
+        # Calculate cross-entropy loss
+      #  print("HERE", len(t))
+        
+        return - np.sum(t * np.log(p), axis=1) / len(t)
 
 
     def error_function_derived(self, prediction, target):
@@ -200,21 +259,24 @@ class MyArcTrainer(Trainer):
         Returns:
             error_term (float): output of derived error function
         """
-        error_term = []
-      #  target = target[0]
-        for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
+        #return self.cross_entropy_loss_prime(prediction, target)
+    #     error_term = []
+    #   #  target = target[0]
+    #     for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
         
-            out_row = prediction[cidx] # in order to slice [:,idx]
-            tar = target[cidx]
-            for idx, number in enumerate(classweight):
-                if bool(number)==True:
+    #         out_row = prediction[cidx] # in order to slice [:,idx]
+    #         tar = target[cidx]
+    #         for idx, number in enumerate(classweight):
+    #             if bool(number)==True:
 
                 
-                    error = -1* (tar[idx]-out_row[idx])
+    #                 error = -1* (tar[idx]-out_row[idx])
                     
-                    error_term.append(error)
-      #  print("error", error_term)
-        return  np.sum(-1* (target-prediction),axis=1)#error_term
+    #                 error_term.append(error)
+    #   #  print("error", error_term)
+       # return  np.sum(-1* (target-prediction),axis=1)#error_term
+       # return  np.sum(prediction- target,axis=1)#error_term
+        return self.cross_entropy_loss_prime(prediction, target)
 
 
 
