@@ -38,17 +38,17 @@ def main():
     # My Model
     batch_size = 100
     learning_rate = 1
-    n_epochs = 10
-    n_participants = 4
-    df_name = "dummy4"
+    n_epochs = 5
+    n_participants = 3
+    df_name = "iris"
 
     
     
         # Model with MLP arc
-    MLPModel = Model(DataPipeline(df_name),  
-                     MLP((2,6),2),  
-                     Trainer(n_epochs=n_epochs))
-    MLPModel.train()
+    # MLPModel = Model(DataPipeline(df_name),  
+    #                  MLP((2,6),2),  
+    #                  Trainer(n_epochs=n_epochs))
+    # MLPModel.train()
 
 
     MyModel = Model(DataPipeline(df_name, batch_size=batch_size), 
@@ -73,7 +73,7 @@ def main():
     # print(MLPModel.summary()) 
 
 
-    rules = RuleMiner(MyModel, MLPModel, df_name)
+    rules = RuleMiner(MyModel, df_name)
     rules.print_results()
     
     return 0

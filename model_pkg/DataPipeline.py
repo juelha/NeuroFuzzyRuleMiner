@@ -27,6 +27,7 @@ class DataPipeline():
             split of dataset is 80:10:10
         """
         self.df_name = df_name
+        self.df_names = df_names = ['dummy2', 'dummy3', 'dummy4', 'iris']
         self.batch_size = batch_size
         self.params = [self.batch_size]
         
@@ -66,6 +67,11 @@ class DataPipeline():
         Note: assumes last column of df is the target vector
         """
         # check if str is in possible datasets
+        
+        if self.df_name not in self.df_names:
+            raise ValueError(
+                f"Valid values for df name are {self.df_names}.")
+    
         file_name = self.df_name + '_df.csv'
         save_path = os.path.dirname(__file__) +  '/../data'
         full_path = os.path.join(save_path, file_name)
@@ -79,6 +85,8 @@ class DataPipeline():
         self.feature_names = list(df.columns)
         # get max value of each feature <- center init        
         self.feature_ranges = df.max()
+        self.n_features = len(self.feature_names)
+        self.n_classes = len(np.unique(targets))
         print(f"Dataset {self.df_name} loaded: \n {df.head()} \n")
 
         return df,targets
@@ -126,6 +134,8 @@ class DataPipeline():
         self.feature_names = list(df.columns)
         # get max value of each feature <- center init
         self.feature_ranges = df.max()
+        self.n_features = len(self.feature_names)
+        self.n_classes = len(np.unique(targets))
         return df, targets
 
 
@@ -142,8 +152,8 @@ class DataPipeline():
        # targets = targets.apply(lambda x: int(x >= treshhold))
 
         # one hot encoding
-        depth = 2 # DANGER HC
-        b = tf.one_hot(targets, depth)
+        #depth = 2 # DANGER HC
+        b = tf.one_hot(targets, self.n_classes)
         targets = b.numpy()
 
         self.inputs = df.to_numpy()# df.map(lambda x,y: x)
@@ -164,8 +174,7 @@ class DataPipeline():
         self.generate_folders(self.df_name) 
 
         # one hot encoding
-        depth = 2
-        b = tf.one_hot(targets, depth)
+        b = tf.one_hot(targets, self.n_classes)
         targets = b.numpy()
 
         df = df.to_numpy()

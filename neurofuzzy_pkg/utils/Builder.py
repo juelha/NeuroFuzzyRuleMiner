@@ -34,6 +34,7 @@ class Builder():
         """
         self.build_MFs(feature_ranges, df_name)
         self.build_classweights(inputs, targets, df_name)
+    
         return True       
     
 
@@ -53,7 +54,7 @@ class Builder():
         #  print(n_inputs)
 
 
-        n_rules = int(self.arc.RuleAntecedentLayer.n_mfs**self.arc.RuleAntecedentLayer.n_participants )
+        n_rules = int(self.arc.RuleAntecedentLayer.n_mfs**self.arc.RuleAntecedentLayer.n_features )
 
         for i in range(n_rules):
             self.arc.RuleConsequentLayer.dictrules[i] = []
@@ -70,8 +71,10 @@ class Builder():
         for ruleID in tqdm(self.arc.RuleConsequentLayer.dictrules, desc="selecting"):
             l = self.arc.RuleConsequentLayer.dictrules[ruleID]
           
-            max_val = max(l)
-            idx_max = l.index(max_val)
+          #  max_val = max(l)
+           # idx_max = l.index(max_val)
+
+            idx_max = np.argmax(l)
             
             tar = self.arc.RuleConsequentLayer.tars[ruleID][idx_max]
            # print("tar", tar)

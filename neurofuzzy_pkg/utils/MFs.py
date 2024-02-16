@@ -138,12 +138,12 @@ Args:
     
     feature_names = max_vals.keys().values.tolist()
     
-    c = np.array_split(layer.centers, 2) # hc
+    c = np.array_split(layer.centers, len(feature_names)) # hc
    # print("HERE", c)
  
-    w = np.array_split(layer.widths,  2) # hc
+    w = np.array_split(layer.widths, len(feature_names)) # hc
  
-
+    print("max", max_vals)
    
    # print("c", c)
     #print("w", w)
@@ -152,18 +152,20 @@ Args:
     for xID, max_value in enumerate(max_vals):
     #for name, input in zip(names,layer.inputs):
 #        x = np.arange(0, means[xID] , (means[xID]*0.01))
-        x = np.arange(0, max_value, 0.01)
+        x = np.arange(0, max_value, max_value/1000)
         y = {}
 
         for mfID in range(layer.n_mfs):
             y[mfID] = []
 
 #            print(layer.centers[j+i*layer.n_mfs])
-            for bleh in x:
+         #   for bleh in x:
               #  print(c[xID])
               #  print(c[xID][mfID])
-                y[mfID].append(layer.mf_type(bleh,c[xID][mfID],w[xID][mfID]))
+            y[mfID] =layer.mf_type(x,c[xID][mfID],w[xID][mfID])
 
+           # print("x", x)
+            #print("y,", y[mfID])
             plt.plot(x, y[mfID], label=mf_names[mfID])
 
           #  print("hui", c[xID][mfID])

@@ -18,7 +18,7 @@ class RuleMiner():
     ___________________________________________________________
     """
 
-    def __init__(self, neuro_fuzzy_model, mlp_model, df_name):
+    def __init__(self, neuro_fuzzy_model, df_name):
         """Init ruleExtractor and calling extractRules()
 
         Args:
@@ -28,15 +28,16 @@ class RuleMiner():
 
         # arcs used
         self.arc = neuro_fuzzy_model.arc
-        self.classifier = mlp_model 
+        self.classifier = None#mlp_model 
 
         # for final Dict of rules
         self.rulesDict = {}
         self.feature_names = neuro_fuzzy_model.data.feature_names
         self.linguistic_mf = ["low","medium","high"]
-        self.lingusitic_output = ["bad", "good"]
-        self.n_participants = 4
-        self.n_outputs = 2# hc neuro_fuzzy_model.arc.RuleConsequentLayer.n_mfs 
+        self.lingusitic_output = ["Setosa", "Versicolour", "Virginica"]# ["bad", "good"]
+        self.n_mfs = len(self.linguistic_mf)
+        self.n_participants = len(neuro_fuzzy_model.data.feature_names)
+        self.n_outputs = len(self.lingusitic_output)# hc neuro_fuzzy_model.arc.RuleConsequentLayer.n_mfs 
         self.df_name = df_name
 
         # calling functions
@@ -47,34 +48,40 @@ class RuleMiner():
 
         
         feature_names = np.asarray(feature_names)
-        feature_names = np.tile(feature_names[:, np.newaxis], 3).ravel()
+        feature_names = np.tile(feature_names[:, np.newaxis], self.n_mfs).ravel()
 
         mfs = np.tile(mfs, self.n_participants)
 
       #  fuzzy = np.char.add(feature_names, ",") 
        # fuzzy = np.char.add(fuzzy, mfs) 
-        fuzzy = np.char.add(mfs, ",") 
+      #  fuzzy = np.char.add(mfs, ",") 
 
   
-        fuzzy = np.array_split(fuzzy, range(3, len(fuzzy), 3))
+        mfs = np.array_split(mfs, range(3, len(mfs), self.n_mfs))
         #x.reverse()
-        fuzzy = np.stack(np.meshgrid(*fuzzy, indexing='ij'), axis=-1).reshape(-1, self.n_participants)
+        mfs = np.stack(np.meshgrid(*mfs, indexing='ij'), axis=-1).reshape(-1, self.n_participants)
 
 
-        return fuzzy#.tolist()
+        return mfs#.tolist()
     
     def get_then_part(self):
         weights = self.arc.RuleConsequentLayer.weights
-        print("weights", weights)
-        neww = np.where(weights[:, 0] == 1.0, 0, 1)
-       
-
+      #  print("weights", weights)
+        
+        output = []
+        for w in weights:
+            print("w", w)
+            idx_max = np.argmax(w)
+            output.append(self.lingusitic_output[idx_max])
+               
+        output = np.array(output)
+        output = output.reshape(-1, 1)
         # Reshape the array to have a single column
-        neww = neww.reshape(-1, )
-        neww = neww.T
-        neww = neww.reshape(-1, 1)
+       # neww = neww.reshape(-1, )
+      #  neww = neww.T
+      #  neww = neww.reshape(-1, 1)
        # neww = neww.tolist()
-        return neww
+        return output
 
 
     def extractRules(self):
@@ -99,12 +106,12 @@ class RuleMiner():
         # good yield -> outmfID = 1 
         # bad yield -> outmfID = 0
         rulesIF = self.get_if_part(self.feature_names, self.linguistic_mf)
-        print("if", rulesIF)
+    #    print("if", rulesIF)
         rulesTHEN = self.get_then_part()
-        print("then", rulesTHEN)
+     #   print("then", rulesTHEN)
        # rulesIF = np.char.add(rulesIF, ",") 
         huh = np.concatenate((rulesIF, rulesTHEN), axis=1)# #np.char.add(rulesIF, rulesTHEN) 
-        print("huh", huh)
+      #  print("huh", huh)
         #huh = huh[0]
 
             
@@ -137,15 +144,15 @@ class RuleMiner():
      
 
         # Create a pandas DataFrame
-        self.feature_names.append("Target")
-        print("honk", self.feature_names)
+        self.feature_names.append("Class")
+   #     print("honk", self.feature_names)
         df =      pd.DataFrame(huh, columns=self.feature_names)
 
         # Display the resulting DataFrame
-        print(df)
+    #    print(df)
         self.rulesDict = df
 
-        print("/n dict", self.rulesDict)
+     #   print("/n dict", self.rulesDict)
         self.save_results()
       #  self.print_results()
 

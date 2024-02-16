@@ -33,6 +33,7 @@ class MyArcTrainer(Trainer):
         self.learning_rate = learning_rate
         self.feature_ranges = None
         self.builder = None
+        self.max_vals = None
       #  self.df_name = None
        # self.feature_ranges = None 
 
@@ -370,25 +371,25 @@ class MyArcTrainer(Trainer):
             x = np.sum(x, axis=3)
             x = np.sum(x, axis=1)
             x = np.sum(x, axis=1)
-            deltas.append(x)
+            deltas.append(x/81 * self.learning_rate)
 
             x = delta[1]
             x = np.sum(x, axis=0)
             x = np.sum(x, axis=1)
             x = np.sum(x, axis=1)
-            deltas.append(x)
+            deltas.append(x/81 * self.learning_rate)
             
             x = delta[2]
             x = np.sum(x, axis=0) # or 1
             x = np.sum(x, axis=2)
             x = np.sum(x, axis=0)
-            deltas.append(x)
+            deltas.append(x/81 * self.learning_rate)
 
             x = delta[3]
             x = np.sum(x, axis=1) # or 2
             x = np.sum(x, axis=0)
             x = np.sum(x, axis=0)
-            deltas.append(x)
+            deltas.append(x/81 * self.learning_rate)
 
         deltas = np.array(deltas)
         deltas = deltas.ravel()
@@ -433,13 +434,17 @@ class MyArcTrainer(Trainer):
        # print("param afte", para)
 
 
-      #  print("heh", param_to_tune)
-        
+      #  print("heh", para)
+        n_mfs = 3 #hc
+       # print("HOOONK",self.max_vals)
+        hmm = np.repeat(self.max_vals, n_mfs)
+        #print("honik",hmm)
         for i, p in enumerate(para):
-          #  print("p", p)
-            if p <= 0 or p >= 10: #hc
+          #  for j in n_mfs:
+        #  print("p", p)
+            if p <= 0 or p >= hmm[i]: #hc
                 deltas[i] = 0#0.00001 # randomize todo
-               # print("P",p)
+            # print("P",p)
        # print("deltas", deltas)
         para =  para - deltas #np.multiply(deltas, self.learning_rate)
         setattr(layer, param, para)

@@ -45,7 +45,10 @@ class Model():
     def build_MyArc(self):
         # load data for building my arc
         self.data.load_data_for_building()
-        self.builder.arc = self.arc
+        self.builder.arc = self.arc#
+        self.arc.RuleAntecedentLayer.n_features = self.data.n_features
+        self.arc.RuleConsequentLayer.n_classes = self.data.n_classes
+        
         self.builder(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name)
         print("Build done")
 
@@ -88,9 +91,12 @@ class Model():
         self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
         self.data.load_data_for_training() # doubled ! hc
         self.trainer.builder = self.builder
-       # MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
+        MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
+        self.trainer.max_vals = self.data.feature_ranges
+        print("???", self.data.feature_ranges)
+        print("!!!", self.trainer.max_vals)
         self.train()
-      #  MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_ranges )
+        MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_ranges )
         #self.arc.FuzzificationLayer.save_weights(self.data.df_name)
 
 
