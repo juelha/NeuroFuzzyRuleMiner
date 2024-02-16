@@ -9,7 +9,7 @@ from neurofuzzy_pkg.utils.Classifier import Classifier
 
 
 from neurofuzzy_pkg.utils.neurofuzzyTrainer import neurofuzzyTrainer
-from neurofuzzy_pkg.utils.ruleExtractor import ruleExtractor
+from neurofuzzy_pkg.utils.RuleMiner import RuleMiner
 from neurofuzzy_pkg.utils.math_funcs import coefficient
 #from neurofuzzy_pkg.utils.DirStructManger import generate_folders
 

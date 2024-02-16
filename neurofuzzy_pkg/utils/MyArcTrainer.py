@@ -234,8 +234,8 @@ class MyArcTrainer(Trainer):
         #             error =  0.5*( tar[idx] - out_row[idx]  )**2
                     
         #             error_term.append(error)
-                
-        return self.cross_entropy_loss(pred,tar)
+        return 0.5*( tar - pred  )**2
+     #   return self.cross_entropy_loss(pred,tar)
 
     def cross_entropy_loss_prime(self, p,t):
     # https://shivammehta25.github.io/posts/deriving-categorical-cross-entropy-and-softmax/
@@ -435,11 +435,11 @@ class MyArcTrainer(Trainer):
 
       #  print("heh", param_to_tune)
         
-        # for i, p in enumerate(para):
-        #   #  print("p", p)
-        #     if p <= 0 or p >= 10: #hc
-        #         deltas[i] = 0#0.00001 # randomize todo
-        #        # print("P",p)
+        for i, p in enumerate(para):
+          #  print("p", p)
+            if p <= 0 or p >= 10: #hc
+                deltas[i] = 0#0.00001 # randomize todo
+               # print("P",p)
        # print("deltas", deltas)
         para =  para - deltas #np.multiply(deltas, self.learning_rate)
         setattr(layer, param, para)

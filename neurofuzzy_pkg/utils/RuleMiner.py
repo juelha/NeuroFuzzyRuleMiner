@@ -10,9 +10,9 @@ from model_pkg import *
 from neurofuzzy_pkg import * 
 
 
-class ruleExtractor():
+class RuleMiner():
     """
-    The ruleExtractor-Class() is responsible for:
+    The RuleMiner-Class() is responsible for:
     - extracting the rules from the neurofuzzy model
     - and validating the rulse by testing them with the MLP classifier
     ___________________________________________________________
@@ -35,7 +35,7 @@ class ruleExtractor():
         self.feature_names = neuro_fuzzy_model.data.feature_names
         self.linguistic_mf = ["low","medium","high"]
         self.lingusitic_output = ["bad", "good"]
-        
+        self.n_participants = 4
         self.n_outputs = 2# hc neuro_fuzzy_model.arc.RuleConsequentLayer.n_mfs 
         self.df_name = df_name
 
@@ -45,33 +45,35 @@ class ruleExtractor():
 
     def get_if_part(self, feature_names, mfs):
 
- 
+        
+        feature_names = np.asarray(feature_names)
+        feature_names = np.tile(feature_names[:, np.newaxis], 3).ravel()
+
+        mfs = np.tile(mfs, self.n_participants)
+
+      #  fuzzy = np.char.add(feature_names, ",") 
+       # fuzzy = np.char.add(fuzzy, mfs) 
+        fuzzy = np.char.add(mfs, ",") 
+
+  
+        fuzzy = np.array_split(fuzzy, range(3, len(fuzzy), 3))
+        #x.reverse()
+        fuzzy = np.stack(np.meshgrid(*fuzzy, indexing='ij'), axis=-1).reshape(-1, self.n_participants)
 
 
-        x = feature_names
-        x = np.tile(x[:, np.newaxis], 3).ravel()
-        mfs = np.tile(mfs, 2)
-
-        x = np.char.add(x, ",")    
-        x = np.char.add(x, mfs)    
-        x = np.array_split(x, range(3, len(x), 3))
-        x.reverse()
-        x = np.array(np.meshgrid(*x)) # the '*' unpacks x and passes to messgrid
-        m = x[1].ravel()
-        m = np.char.add(m, ",")   
-        x = np.char.add(m, x[0].ravel())   
-        x = x.tolist()
-        return x
+        return fuzzy#.tolist()
     
     def get_then_part(self):
         weights = self.arc.RuleConsequentLayer.weights
         print("weights", weights)
-        neww = np.where(weights[:, 0] == 1.0, "bad", "good")
+        neww = np.where(weights[:, 0] == 1.0, 0, 1)
        
 
         # Reshape the array to have a single column
+        neww = neww.reshape(-1, )
+        neww = neww.T
         neww = neww.reshape(-1, 1)
-        neww = neww.tolist()
+       # neww = neww.tolist()
         return neww
 
 
@@ -97,32 +99,47 @@ class ruleExtractor():
         # good yield -> outmfID = 1 
         # bad yield -> outmfID = 0
         rulesIF = self.get_if_part(self.feature_names, self.linguistic_mf)
+        print("if", rulesIF)
         rulesTHEN = self.get_then_part()
-        print(rulesTHEN)
-        rulesIF = np.char.add(rulesIF, ",") 
-        huh = np.char.add(rulesIF, rulesTHEN) 
+        print("then", rulesTHEN)
+       # rulesIF = np.char.add(rulesIF, ",") 
+        huh = np.concatenate((rulesIF, rulesTHEN), axis=1)# #np.char.add(rulesIF, rulesTHEN) 
         print("huh", huh)
+        #huh = huh[0]
 
             
         
-        # Initialize empty lists to store values
-        x1_values = []
-        x2_values = []
-        out_values = []
+        # # Initialize empty lists to store values
+        # rules_Dict = {}
+        # for i, feature in enumerate(self.feature_names):
+        #     rules_Dict[feature] = []
 
-        # Process each element in the array
-        for element in huh:
-            # Split the string by commas
-            elements = element.strip("'").split(',')
+        # rules_Dict['Target'] = []
 
-            # Extract values and append to respective lists
-            x1_values.append(elements[1])
-            x2_values.append(elements[3])
-            out_values.append(elements[4])
+        # # Process each element in the array
+        # for i, element in enumerate(rulesIF):
+        #     # Split the string by commas
+        #    # elements = element.strip("'").split(',')
+
+        #     # Extract values and append to respective lists
+        #     for j,feature in enumerate(self.feature_names):
+        #      #   print("i", i)
+        #       #  print("keys", rules_Dict.keys())
+        #        # print("fea", feature)
+             
+        #         #    print("HM", elements[i+1])
+        #         rules_Dict[feature] = element[j]
+        #     rules_Dict['Target'].append(rulesTHEN[i])
+
+        #     # x1_values.append(elements[1])
+        #     # x2_values.append(elements[3])
+        #     # out_values.append(elements[4])
      
 
         # Create a pandas DataFrame
-        df = pd.DataFrame({'x1': x1_values, 'x2': x2_values, 'out': out_values})
+        self.feature_names.append("Target")
+        print("honk", self.feature_names)
+        df =      pd.DataFrame(huh, columns=self.feature_names)
 
         # Display the resulting DataFrame
         print(df)

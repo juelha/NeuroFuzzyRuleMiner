@@ -138,8 +138,8 @@ class Trainer():
 
         inputs_batch, targets_batch = ds
         
-       # for input, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
-        for input, target in (zip(inputs_batch, desc='testing'), targets_batch):
+        for input, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
+      #  for input, target in (zip(inputs_batch, desc='testing'), targets_batch):
             prediction = self.arc(input)
             loss = self.loss_func(prediction, target)
             accuracy =  target == np.round(prediction, 0)
@@ -170,9 +170,9 @@ class Trainer():
               with tf.GradientTape() as tape:
                     # forward pass to get prediction
                     prediction = self.arc(input)
-                    print("pred", prediction)
+                   # print("pred", prediction)
                     # get loss
-                    print("tar", target)
+                    #print("tar", target)
                     loss = self.loss_func(prediction, target)
                     accuracy =  target == np.round(prediction, 0)
                     accuracy = np.mean(accuracy)
