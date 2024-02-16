@@ -182,7 +182,7 @@ class MyArcTrainer(Trainer):
                 if bool(number)==True:
 
                 
-                    error =  0.5*( out_row[idx] - tar[idx] )**2
+                    error =  0.5*( tar[idx] - out_row[idx]  )**2
                     
                     error_term.append(error)
                 
@@ -210,11 +210,11 @@ class MyArcTrainer(Trainer):
                 if bool(number)==True:
 
                 
-                    error =  (out_row[idx] - tar[idx])
+                    error = -1* (tar[idx]-out_row[idx])
                     
                     error_term.append(error)
       #  print("error", error_term)
-        return error_term
+        return  np.sum(-1* (target-prediction),axis=1)#error_term
 
 
 
@@ -279,10 +279,10 @@ class MyArcTrainer(Trainer):
 
             x = delta[0]
             x = np.sum(x, axis=1)
-            deltas.append(x/9* self.learning_rate)
+            deltas.append(x)#/9* self.learning_rate)
             x = delta[1]
             x = np.sum(x, axis=0)
-            deltas.append(x/9* self.learning_rate)
+            deltas.append(x)#/9* self.learning_rate)
 
           #  deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
 
@@ -373,11 +373,11 @@ class MyArcTrainer(Trainer):
 
       #  print("heh", param_to_tune)
         
-        for i, p in enumerate(para):
-            print("p", p)
-            if p <= 0 or p >= 10: #hc
-                deltas[i] = 0#0.00001 # randomize todo
-                print("P",p)
+        # for i, p in enumerate(para):
+        #   #  print("p", p)
+        #     if p <= 0 or p >= 10: #hc
+        #         deltas[i] = 0#0.00001 # randomize todo
+        #        # print("P",p)
        # print("deltas", deltas)
         para =  para - deltas #np.multiply(deltas, self.learning_rate)
         setattr(layer, param, para)

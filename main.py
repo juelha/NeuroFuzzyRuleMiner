@@ -39,7 +39,7 @@ def main():
     batch_size = 100
     learning_rate = 1
     n_epochs = 10
-    df_name = "dummy2"
+    df_name = "dummy3"
 
     
     
@@ -57,7 +57,7 @@ def main():
                      Classifier())
     MyModel.build_MyArc() 
     MyModel.trainMyArc()
-    print(MyModel.class_acc())
+    print(MyModel.class_acc()) # when arc is not trained -> 0.688
   #  MyModel.arc.RuleConsequentLayer.save_weights(df_name)
 
     #MyModel.build_MyArc_CW()
