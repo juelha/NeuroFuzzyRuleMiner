@@ -44,7 +44,7 @@ class RuleConsequentLayer():
         self.tars = {}
         self.built = False
         self.threshold = 0.1 # hc
-        self.weights = None # the weights that assign a rule to a class 
+        self.class_weights = None # the weights that assign a rule to a class 
 
         # for training
         self.tunable = False 
@@ -71,7 +71,7 @@ class RuleConsequentLayer():
 
         #print("In", inputs)
         # # build weights     
-        self.weights = np.zeros((inputs.shape[0], self.n_classes), dtype=np.float32) # danger output classes hc 
+        self.class_weights = np.zeros((inputs.shape[0], self.n_classes), dtype=np.float32) # danger output classes hc 
     # print("weights", self.class_weights)
 
         for ruleID, firingStrength in enumerate(inputs):  
@@ -111,7 +111,7 @@ class RuleConsequentLayer():
         self.inputs = x
 
 
-        x = x[:, np.newaxis] * self.weights
+        x = x[:, np.newaxis] * self.class_weights
     
        
         return x # returning layer as well for defuzzication  

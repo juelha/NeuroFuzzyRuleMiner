@@ -178,7 +178,7 @@ class MyArcTrainer(Trainer):
 
        # max_val = max(outputs)
        # idx_max = outputs.index(max_val)
-        classID = self.arc.RuleConsequentLayer.weights[idx_max]
+        classID = self.arc.RuleConsequentLayer.class_weights[idx_max]
         return classID
     
 

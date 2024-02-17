@@ -80,12 +80,12 @@ class Builder():
             
             tar = self.arc.RuleConsequentLayer.tars[ruleID][idx_max]
            # print("tar", tar)
-            self.arc.RuleConsequentLayer.weights[ruleID] = tar
+            self.arc.RuleConsequentLayer.class_weights[ruleID] = tar
    
        # self.arc.RuleConsequentLayer.save_weights(df_name)
        # self.arc.RuleConsequentLayer.load_weights(df_name)
-        save_weights(self.arc.RuleConsequentLayer, "weights", df_name)
-        load_weights(self.arc.RuleConsequentLayer, "weights", df_name)
+        save_weights(self.arc.RuleConsequentLayer, "class_weights", df_name)
+        load_weights(self.arc.RuleConsequentLayer, "class_weights", df_name)
        # print("building done")
         done = True
 

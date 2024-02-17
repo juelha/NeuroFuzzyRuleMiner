@@ -10,8 +10,8 @@ def main():
     """
     Main Program of the project:
     1. Train NeuroFuzzy model
-        - The NeuroFuzzy model will be trained as classifier (output is either good|bad yield)
-        - The trained weights (parameters of membership functions) will give us the rules
+        - The NeuroFuzzy model will be trained as a classifier 
+        - The trained weights (parameters of membership functions and classweights) will give us the rules
     2. Train MLP model 
         - Trained as classifier to validate rules from NeuroFuzzy model
     3. Extract neuro fuzzy rules 
@@ -27,31 +27,12 @@ def main():
 "╚═╝░░╚══╝╚══════╝░╚═════╝░╚═╝░░╚═╝░╚════╝░░░░░░░╚═╝░░░░░░╚═════╝░╚══════╝╚══════╝░░░╚═╝░░░░░░░░░╚═╝░░░░░╚═╝░╚════╝░╚═════╝░╚══════╝╚══════╝")
 
 
-    ## Model based on Mamdani Inference <- WORKS!!!
-   # MamdaniModel = Model(DataPipeline(), MamdaniArc(), neurofuzzyTrainer())
-    #MamdaniModel.run()
-
-    ## Model based on Sugeno Inference
-  #  SugenoModel = Model(DataPipeline(), SugenoArc(), neurofuzzyTrainer())
-   # SugenoModel.run()
-  
     # My Model
-    batch_size = 100
     learning_rate = 1
     n_epochs = 5
-    n_participants = 3
     df_name = "iris"
 
-    
-    
-        # Model with MLP arc
-    # MLPModel = Model(DataPipeline(df_name),  
-    #                  MLP((2,6),2),  
-    #                  Trainer(n_epochs=n_epochs))
-    # MLPModel.train()
-
-
-    MyModel = Model(DataPipeline(df_name, batch_size=batch_size), 
+    MyModel = Model(DataPipeline(df_name), 
                      MyArc(), 
                      MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate),
                      Builder(),
@@ -59,11 +40,7 @@ def main():
     MyModel.build_MyArc() 
     MyModel.trainMyArc()
     print(MyModel.class_acc()) # when arc is not trained -> 0.688
-  #  MyModel.arc.RuleConsequentLayer.save_weights(df_name)
 
-    #MyModel.build_MyArc_CW()
-    # MyModel.build_MyArc() # works 
-   # MyModel.build_MyArc_MF()
     # for i in range(1):
     #     MyModel.trainMyArc()
     #     MyModel.build_MyArc_CW()
@@ -74,8 +51,8 @@ def main():
 
 
     MyRules = RuleMiner(MyModel, df_name)
-    MyRules.get_best_rule_IDs(inputs=MyModel.data.inputs)
-    MyRules.print_results()
+    MyRules.get_best_rules(inputs=MyModel.data.inputs)
+   # MyRules.print_results()
     
     return 0
 

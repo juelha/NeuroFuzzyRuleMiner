@@ -76,29 +76,20 @@ class Model():
         return self.classifier.get_class_accuracy(self.data.inputs, self.data.targets, self.data.df_name)
 
 
-    # def build(self):
-    #     """
-    #     """
-    #    # self.feature_names = self.data.feature_names
-    #   #  self.arc.feature_names = self.feature_names
-    #     self.arc.build(self.inputs_mean, self.feature_names)
-    #    # self.trainer.test(self.inputs_mean)
-    #     self.built = True
-    #     return True
 
     def trainMyArc(self):
         # get feature_names names 
         load_weights(self.arc.FuzzificationLayer, "centers", self.data.df_name)
         load_weights(self.arc.FuzzificationLayer, "widths", self.data.df_name)
-        load_weights(self.arc.RuleConsequentLayer, "weights", self.data.df_name)
+        load_weights(self.arc.RuleConsequentLayer, "class_weights", self.data.df_name)
      #   self.arc.FuzzificationLayer.load_weights(self.data.df_name)
       #  self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
         self.data.load_data_for_training() # doubled ! hc
         self.trainer.builder = self.builder
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
         self.trainer.max_vals = self.data.feature_ranges
-        print("???", self.data.feature_ranges)
-        print("!!!", self.trainer.max_vals)
+      #  print("???", self.data.feature_ranges)
+       # print("!!!", self.trainer.max_vals)
         self.train()
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_ranges )
         #self.arc.FuzzificationLayer.save_weights(self.data.df_name)
@@ -109,15 +100,7 @@ class Model():
         """
         # loading data, performing datapipeline and getting datasets
         self.data.load_data_for_training()
-       # self.train_ds = self.data.train_ds
-        #self.test_ds = self.data.test_ds
-        #self.validation_ds = self.data.validation_ds
-        #self.feature_names = self.data.feature_names
-        # passing parameter names onto trainer
         self.trainer.arc = self.arc
-      #  self.trainer.feature_ranges = self.data.feature_ranges # for visuali
-       # self.trainer.df_name = self.data.df_name # for saving pictures of training
-       # print("here", self.data.feature_ranges)
         tf.keras.backend.clear_session()
         # trainig model
         self.trainer(self.data.train_ds,  self.data.test_ds, self.data.validation_ds)
