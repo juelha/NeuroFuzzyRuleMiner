@@ -4,7 +4,6 @@ import pandas as pd
 
 # custom
 from neurofuzzy_pkg.fuzzyLayers import *
-from neurofuzzy_pkg.utils.math_funcs import coefficient
 import neurofuzzy_pkg.utils.MFs as MFs
 
 
@@ -36,13 +35,11 @@ class MyArc():
 
         self.FuzzificationLayer = FuzzificationLayer()
         self.RuleAntecedentLayer = RuleAntecedentLayer()
-        self.NormalizationLayer = NormalizationLayer()
         self.RuleConsequentLayer = RuleConsequentLayer()
 
         self.internal_layers = [
             self.FuzzificationLayer,
             self.RuleAntecedentLayer,
-            #self.NormalizationLayer,
             self.RuleConsequentLayer,
         ]
 

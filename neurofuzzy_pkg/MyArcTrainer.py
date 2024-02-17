@@ -9,7 +9,6 @@ from model_pkg.Trainer import Trainer
 from neurofuzzy_pkg import utils
 from neurofuzzy_pkg.utils.MFs import MF_gaussian,MF_gaussian_prime_a, MF_gaussian_prime_b
 from neurofuzzy_pkg.utils.MFs import MF_tri, MF_tri_prime_a, MF_tri_prime_b
-from neurofuzzy_pkg.utils.math_funcs import coefficient
 import neurofuzzy_pkg.utils.MFs as MFs
 
 

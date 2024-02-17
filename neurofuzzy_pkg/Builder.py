@@ -4,7 +4,6 @@ import pandas as pd
 
 # custom
 from neurofuzzy_pkg.fuzzyLayers import *
-from neurofuzzy_pkg.utils.math_funcs import coefficient
 import neurofuzzy_pkg.utils.MFs as MFs
 
 

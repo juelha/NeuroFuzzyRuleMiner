@@ -4,7 +4,6 @@ import numpy as np
 
 # custom
 from neurofuzzy_pkg.fuzzyLayers.FuzzificationLayer import FuzzificationLayer
-from neurofuzzy_pkg.utils.math_funcs import coefficient
 
 
 class RuleAntecedentLayer():

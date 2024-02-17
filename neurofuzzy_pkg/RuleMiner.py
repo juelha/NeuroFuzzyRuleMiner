@@ -290,7 +290,7 @@ class RuleMiner():
 
     def save_results(self, rules, best=False):
         # save results to csv files
-        save_path = os.path.dirname(__file__) +  f'/../../results/{self.df_name}'
+        save_path = os.path.dirname(__file__) +  f'/../results/{self.df_name}'
 
         ## good yield 
         

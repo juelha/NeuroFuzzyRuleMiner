@@ -8,7 +8,6 @@ import os
 # custom
 import neurofuzzy_pkg.utils.MFs as MFs
 
-import neurofuzzy_pkg.utils.math_funcs as math_funcs
 
 
 class FuzzificationLayer():
