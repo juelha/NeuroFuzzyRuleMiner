@@ -1,6 +1,6 @@
 ,sepal length (cm),sepal width (cm),petal length (cm),petal width (cm),Class,Activations
-79,high,high,high,medium,Virginica,0.49535256158876934
-80,high,high,high,high,Virginica,0.5363231500800183
-77,high,high,medium,high,Virginica,0.5381418536322743
-75,high,high,medium,low,Setosa,0.5665693174775858
-76,high,high,medium,medium,Versicolour,0.5665937705085804
+80,high,high,high,high,Virginica,0.54347530943108
+79,high,high,high,medium,Virginica,0.5434964351345706
+77,high,high,medium,high,Virginica,0.548515668105228
+76,high,high,medium,medium,Versicolour,0.5485933371961512
+75,high,high,medium,low,Setosa,0.5758749613160866

@@ -87,7 +87,6 @@ class FuzzificationLayer():
 
 
         # check if trainable params have been built
-        assert self.built, f'Layer {type(self)} is not built yet'
 
         x = self.preprocess_x(x)
         self.inputs = x # saved for training 

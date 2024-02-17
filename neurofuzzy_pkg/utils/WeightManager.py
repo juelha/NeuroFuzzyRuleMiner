@@ -23,6 +23,9 @@ def save_weights(layer, param_name, df_name):
         layer (callable): layer the param is the attribute to
         param_name (str): name of parameter to load either: "centers", "widths", "weights
         dataset_name (str): name of datasets weights have been built on
+
+    Raises:
+        AssertionError: if save_path not found
     """
     # save
     # opt 1: yaml
@@ -49,6 +52,9 @@ def load_weights(layer, param_name, df_name):
         layer (callable): layer the param is the attribute to
         param_name (str): name of parameter to load either: "centers", "widths", "weights
         dataset_name (str): name of datasets weights have been built on
+
+    Raises:
+        AssertionError: if save_path not found
     """
     # opt 1: yaml
     file_name = f"config_{param_name}.yaml"

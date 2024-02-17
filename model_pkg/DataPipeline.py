@@ -27,7 +27,7 @@ class DataPipeline():
             split of dataset is 80:10:10
         """
         self.df_name = df_name
-        self.df_names = df_names = ['dummy2', 'dummy3', 'dummy4', 'iris']
+        self.df_names =  ['dummy2', 'dummy3', 'dummy4', 'iris']
         self.batch_size = batch_size
         self.params = [self.batch_size]
         
@@ -59,11 +59,13 @@ class DataPipeline():
         
         Args:
             df_name (str): dataset to load 
-                           options: ["dummy", "wine"]
+                           options: ['dummy2', 'dummy3', 'dummy4', 'iris']
 
         Returns:
             df, targets ('pandas.core.frame.DataFrame')
         
+        Raises:
+            ValueError; if no df_name was given
         Note: assumes last column of df is the target vector
         """
         # check if str is in possible datasets
@@ -91,54 +93,7 @@ class DataPipeline():
 
         return df,targets
     
-    # def loader(self):
-    #     """Load specified dataset
-        
-    #     Args:
-    #         df_name (str): dataset to load 
-    #                        options: ["dummy", "wine"]
-
-    #     Returns:
-    #         df, targets
-    #     """
-    #     if self.df_name == None:
-    #         print("no df specified")
-    #     elif self.df_name == "iris":
-    #         df, targets = self.load_iris()
-    #     elif self.df_name == "wine":
-    #         df, targets = self.load_wine()
-    #     elif self.df_name == "dummy4":
-    #         df, targets = self.load_dummy()
-    #     else:
-    #         print(self.df_name)
-    #         raise ValueError("no df name given")
-    #     return df,targets
     
-
-
-
-    def load_wine(self):
-        """Loads wine quality dataset
-        
-        Returns:
-            df, targets
-        """
-        # load from website 
-        df = pd.read_csv(
-        "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv", 
-        delimiter=";")
-        # shuffle first so inputs and targets stay on same row
-        df = df.sample(frac=1)
-        # separate into input and targets 
-        targets = df.pop('quality')
-        self.feature_names = list(df.columns)
-        # get max value of each feature <- center init
-        self.feature_ranges = df.max()
-        self.n_features = len(self.feature_names)
-        self.n_classes = len(np.unique(targets))
-        return df, targets
-
-
 
     def load_data_for_building(self):
         """
@@ -146,13 +101,8 @@ class DataPipeline():
 
         """
         df, targets = self.loader()
-        self.generate_folders(self.df_name) 
-        # make targets binary 
-        treshhold = np.mean(targets)        
-       # targets = targets.apply(lambda x: int(x >= treshhold))
+        generate_folders(self.df_name) 
 
-        # one hot encoding
-        #depth = 2 # DANGER HC
         b = tf.one_hot(targets, self.n_classes)
         targets = b.numpy()
 
@@ -171,7 +121,7 @@ class DataPipeline():
         df, targets = self.loader()
         # calculate treshhold
        # self.treshhold = np.mean(targets)  
-        self.generate_folders(self.df_name) 
+        generate_folders(self.df_name) 
 
         # one hot encoding
         b = tf.one_hot(targets, self.n_classes)
@@ -188,75 +138,3 @@ class DataPipeline():
         self.test_ds = (test_ds, test_tar)# test_ds.apply(self.pipeline_for_training)
         self.validation_ds = (validation_ds, validation_tar)#validation_ds.apply(self.pipeline_for_training)
 
-    def pipeline_for_training(self, df):
-        """Performs the needed operations to prepare the datasets for training
-
-        Args:
-            df (tf.data.Dataset): dataset to prepare
-        
-        Returns: 
-            df (tf.PrefetchDataset): prepared dataset
-        """
-        # target is one-hot-encoded to have two outputs, representing two output perceptrons
-      #  df = df.map(lambda features, target: (features, self.make_binary(target)))
-       # df = df.map(lambda inputs, target: (inputs, tf.one_hot(int(target), 2)))
-        # cache this progress in memory
-       # df = df.cache()
-        # shuffle, batch, prefetch
-        df = df.shuffle(50)
-        df = df.batch(self.batch_size)
-        df = df.prefetch(buffer_size=1)
-        return df
-    
-    
-    def make_binary(self,target):
-        """
-        is needed to make the non-binary classification problem binary
-        input: the target to be simplified 
-        returns: boolean 
-        """
-        # note: casting to integers lowers accuracy
-        return(tf.expand_dims(int(target >= self.treshhold), -1))
-        #return(tf.expand_dims(target >= self.treshhold, -1))
-    
-    def generate_folders(self, df_name):
-        self.generate_folders_config(df_name)
-        self.generate_folders_results(df_name)
-
-    def generate_folders_config(self, df_name):
-        """
-        Args: 
-            df_name (str): name of loaded dataset
-        
-        ├── config 
-        |   ├── [df_name]       <- name of given dataframe
-        │           └── weights <- where weights of Fuzzification- and ConsequentLayer will be saved
-        """
-        relative_path = f"/../config/{df_name}/"
-        save_path = os.path.dirname(__file__) + relative_path
-        if not os.path.exists(save_path):
-            os.mkdir(save_path)
-            os.mkdir(save_path + "weights")
-            print(f"Directory {df_name} created in config, full path is {save_path}\n") 
-
-
-    def generate_folders_results(self, df_name):
-        """
-        Args: 
-            df_name (str): name of loaded dataframe
-        
-        ├── results 
-        |   ├── [df_name]       <- name of given dataframe
-        │           └── figures <- MFs before and after training and performance of arc
-        """
-        relative_path = f"/../results/{df_name}"
-        save_path = os.path.dirname(__file__) + relative_path
-        if not os.path.exists(save_path):
-            os.mkdir(save_path)
-            save_path += "/figures"
-            os.mkdir(save_path)
-            save_path_fig_1 = save_path + "/before_training"
-            os.mkdir(save_path_fig_1)
-            save_path_fig2 = save_path + "/after_training"
-            os.mkdir(save_path_fig2)
-            print(f'Directory {df_name} created, full path is {save_path}\n') 

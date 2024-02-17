@@ -106,7 +106,6 @@ class RuleConsequentLayer():
             shape=(n_rules,), dtype=tf.float32
         """
         # check if built
-        assert self.built, f'Layer {type(self)} is not built yet'
 
         self.inputs = x
 

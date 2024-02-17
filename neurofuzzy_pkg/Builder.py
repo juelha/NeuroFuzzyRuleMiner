@@ -25,7 +25,7 @@ class Builder():
         self.arc = arc
         pass
 
-    def __call__(self, inputs, targets, feature_ranges, df_name=None):
+    def __call__(self, inputs, targets, feature_ranges, df_name=None, n_mfs=3):
         """Forward propagating the inputs through the network
 
         Args: 
@@ -34,28 +34,21 @@ class Builder():
         Returns: 
             done (boolean): if built
         """
-        self.build_MFs(feature_ranges, df_name)
+        self.build_MFs(feature_ranges, df_name, n_mfs)
         self.build_classweights(inputs, targets, df_name)
     
         return True       
     
 
 
-    def build_classweights(self, inputs, targets, df_name =None):
-
-        # calc of amount of rules
-        ## HOT FIX ##
-        # inputs = <MapDataset element_spec=TensorSpec(shape=(11,), dtype=tf.float64, name=None)>
-        # problem: cant get to the shape in the MapDataset element 
-        # print("HEREREEEEE", inputs)
-        # print("HEREREEEEE", inputs.shape)
-        n_inputs = inputs.shape[1] # horizontal
-
-        # for features in inputs.take(1):
-        #   n_inputs = int(features.shape[0])
-        #  print(n_inputs)
-
-
+    def build_classweights(self, inputs, targets, df_name=None):
+        """
+        Args:
+            inputs():
+            targets():
+            df_name(str): needed for saving classweights
+        """
+        
         n_rules = int(self.arc.RuleAntecedentLayer.n_mfs**self.arc.RuleAntecedentLayer.n_features )
 
         for i in range(n_rules):
@@ -67,43 +60,29 @@ class Builder():
             x = self.arc.RuleAntecedentLayer(x)
             x = self.arc.RuleConsequentLayer.build(x, weirdtar)
 
-           
-
-      #  for ruleID in tqdm(self.RuleConsequentLayer.dictrules, desc="selecting"):
         for ruleID in tqdm(self.arc.RuleConsequentLayer.dictrules, desc="selecting"):
             l = self.arc.RuleConsequentLayer.dictrules[ruleID]
-          
-          #  max_val = max(l)
-           # idx_max = l.index(max_val)
-
             idx_max = np.argmax(l)
-            
             tar = self.arc.RuleConsequentLayer.tars[ruleID][idx_max]
-           # print("tar", tar)
             self.arc.RuleConsequentLayer.class_weights[ruleID] = tar
    
-       # self.arc.RuleConsequentLayer.save_weights(df_name)
-       # self.arc.RuleConsequentLayer.load_weights(df_name)
         save_weights(self.arc.RuleConsequentLayer, "class_weights", df_name)
         load_weights(self.arc.RuleConsequentLayer, "class_weights", df_name)
-       # print("building done")
-        done = True
 
 
-    def build_MFs(self, feature_ranges, df_name):
-        done = False
+    def build_MFs(self, feature_ranges, df_name, n_mfs):
+        
+       # self.arc.FuzzificationLayer.build(feature_ranges)
+
+        x = self.arc.FuzzificationLayer.preprocess_x(feature_ranges)
+        x = x.to_numpy() # drops names from max value, either do this or give names of features directly to visualizer
+        # build centers and widths of MFs
+        self.arc.FuzzificationLayer.centers = MFs.center_init(x, n_mfs)
+        self.arc.FuzzificationLayer.widths = MFs.widths_init(x, n_mfs)
 
 
-       # print("sdjkdfg", feature_ranges)
-        self.arc.FuzzificationLayer.build(feature_ranges)
-
-        #print("here",self.FuzzificationLayer.centers)
         save_weights(self.arc.FuzzificationLayer, "centers", df_name)
         save_weights(self.arc.FuzzificationLayer, "widths", df_name)
         
-      #  self.arc.FuzzificationLayer.save_weights(df_name)
-       # self.arc.FuzzificationLayer.load_weights(df_name)
-        #MFs.visuMFs(self.FuzzificationLayer, dir="after_building", func="InputMFs", max_vals=feature_ranges)
-      #  print("building done")
         done = True
         return done       
