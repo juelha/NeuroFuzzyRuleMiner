@@ -99,11 +99,6 @@ class RuleAntecedentLayer():
        # x = x *np.prod(self.weights, axis=1)
   
 
-        assert self.n_rules == x.size, f'the number of rules generated: {x.size} has to equal: {self.n_rules} -> coefficient(inputs * n_mfs, participants) - inputs * n_mfs' 
+        assert self.n_rules == x.size, f'the number of rules generated: {x.size} has to equal: {self.n_rules} -> n_mfs ** n_participants' 
 
         return x
-
-
-
-    
-

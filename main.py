@@ -40,7 +40,7 @@ def main():
     learning_rate = 1
     n_epochs = 5
     n_participants = 3
-    df_name = "iris"
+    df_name = "dummy2"
 
     
     
@@ -73,8 +73,9 @@ def main():
     # print(MLPModel.summary()) 
 
 
-    rules = RuleMiner(MyModel, df_name)
-    rules.print_results()
+    MyRules = RuleMiner(MyModel, df_name)
+    MyRules.get_best_rule_IDs(inputs=MyModel.data.inputs)
+    MyRules.print_results()
     
     return 0
 

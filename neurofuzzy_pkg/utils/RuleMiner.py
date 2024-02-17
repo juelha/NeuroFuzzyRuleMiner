@@ -8,6 +8,7 @@ import numpy as np
 # custom
 from model_pkg import *
 from neurofuzzy_pkg import * 
+from tqdm import tqdm 
 
 
 class RuleMiner():
@@ -32,9 +33,10 @@ class RuleMiner():
 
         # for final Dict of rules
         self.rulesDict = {}
+        self.inputs = None
         self.feature_names = neuro_fuzzy_model.data.feature_names
         self.linguistic_mf = ["low","medium","high"]
-        self.lingusitic_output = ["Setosa", "Versicolour", "Virginica"]# ["bad", "good"]
+        self.lingusitic_output =  ["bad", "good"] # ["Setosa", "Versicolour", "Virginica"]
         self.n_mfs = len(self.linguistic_mf)
         self.n_participants = len(neuro_fuzzy_model.data.feature_names)
         self.n_outputs = len(self.lingusitic_output)# hc neuro_fuzzy_model.arc.RuleConsequentLayer.n_mfs 
@@ -151,9 +153,10 @@ class RuleMiner():
         # Display the resulting DataFrame
     #    print(df)
         self.rulesDict = df
+       # self.get_best_ruleIDs(self.inputs)
 
      #   print("/n dict", self.rulesDict)
-        self.save_results()
+        self.save_results(self.rulesDict)
       #  self.print_results()
 
         ## bad yield 
@@ -166,6 +169,54 @@ class RuleMiner():
        # self.df_good = df_good
 
         return 0
+    
+
+    def get_best_rule_IDs(self,inputs, n=5):
+        """
+        """
+        # check if n < generated rules
+        acc = []
+        activations = []
+        for input_vec in tqdm(inputs, desc='class selecting'):
+            # append activations of consequent layer
+            activations.append(self.arc(input_vec)) 
+
+        print("actvation", activations)
+       # activations = np.array(activations
+        
+        activations = np.concatenate(activations, axis=1)
+        print("actvation np ", activations)
+
+        activations = np.sum(activations, axis = 1)
+        best_indeces = np.argpartition(activations, -n)[-n:]
+        #res = np.sum(*activations, axis = 0)
+        print("res", best_indeces)
+        best_indeces = best_indeces[np.argsort(activations[best_indeces])]
+        print("res ewa ", best_indeces)
+
+        print("here",self.rulesDict)
+        best_rules = self.rulesDict.iloc[best_indeces]
+        print("best", best_rules)
+    #     for ruleID in tqdm(self.arc.RuleConsequentLayer.dictrules, desc="selecting"):
+    #         l = self.arc.RuleConsequentLayer.dictrules[ruleID]
+          
+    #       #  max_val = max(l)
+    #        # idx_max = l.index(max_val)
+
+    #         idx_max = np.argmax(l)
+            
+    #         tar = self.arc.RuleConsequentLayer.tars[ruleID][idx_max]
+    #        # print("tar", tar)
+    #         self.arc.RuleConsequentLayer.weights[ruleID] = tar
+   
+    #     self.arc.RuleConsequentLayer.save_weights(df_name)
+    #     self.arc.RuleConsequentLayer.load_weights(df_name)
+    #    # print("building done")
+    #     done = True
+        self.save_results(best_rules, best=True)
+
+
+        return best_rules
 
 
     def checkRule(self, elements, target):
@@ -232,15 +283,18 @@ class RuleMiner():
                 return False
             return True
 
-    def save_results(self):
+    def save_results(self, rules, best=False):
         # save results to csv files
         save_path = os.path.dirname(__file__) +  f'/../../results/{self.df_name}'
 
         ## good yield 
+        
         file_name = f"{self.df_name}_rules.csv"
+        if best:
+            file_name = f"{self.df_name}_best__rules.csv"
         completeName = os.path.join(save_path, file_name)
 
-        df_good = pd.DataFrame(self.rulesDict)
+        df_good = pd.DataFrame(rules)
         df_good.to_csv(completeName)
         return 0 
 
@@ -250,59 +304,22 @@ class RuleMiner():
         """      
 
         # bad yield
-        print("\n┌────────────────────────────────────────────────────────────────┐" + ("\n") +
-                "│                         OUTCOME: 0                             │" + ("\n") +
-                "└────────────────────────────────────────────────────────────────┘\n")
-        print(self.df_bad)
+        print("\n┌───────────────────────────────────────────────────────────────┐" + ("\n") +
+                "│                           Results                             │" + ("\n") +
+                "└───────────────────────────────────────────────────────────────┘\n")
 
-        rules_generated_bad = len(self.mamdaniArc.RuleConsequentLayer.rulesTHEN[0]) 
-        rules_validated_bad = len(self.rulesDict[0]['ruleID']) 
-        if rules_generated_bad == 0:
-            accuracy_bad = 0
-        else:
-            accuracy_bad = 100 * (rules_validated_bad/rules_generated_bad)
+        n_rules_generated = int(self.n_mfs**self.n_participants)
+        n_rules_validated = 0
 
-        print(f'Rules Generated for Bad Yield: {rules_generated_bad}')
-        print(f'Rules Validated for Bad Yield: {rules_validated_bad}')
-        print(f'Accuracy of Rules Bad Yield: {round(accuracy_bad,2)}%')
+        validation_percentage = 100 * (n_rules_validated/n_rules_generated)
+
+        print(f'# Rules Generated: {n_rules_generated}')
+        print(f'# Rules Validated: {n_rules_validated}')
+        print(f'Percentage of Validation: {round(validation_percentage,2)}%')
         
 
 
 
-        # good yield
-        print("\n┌────────────────────────────────────────────────────────────────┐" + ("\n") +
-                "│                         OUTCOME: 1                             │" + ("\n") +
-                "└────────────────────────────────────────────────────────────────┘\n")
-        print(self.df_good)
-        
-        rules_generated_good = len(self.mamdaniArc.RuleConsequentLayer.rulesTHEN[1]) 
-        rules_validated_good = len(self.rulesDict[1]['ruleID']) 
-        if rules_generated_good == 0: # catch divide by zero error
-            accuracy_good = 0
-        else:
-            accuracy_good = 100 * (rules_validated_good/rules_generated_good)
-        
-        print(f'Rules Generated for Good Yield: {rules_generated_good}')
-        print(f'Rules Validated for Good Yield: {rules_validated_good}')
-        print(f'Accuracy of Rules Good Yield: {round(accuracy_good,2)}%')
-   
-
-        # in total
-        total_rules_generated = rules_generated_bad + rules_generated_good
-        total_rules_validated = rules_validated_bad + rules_validated_good
-        if total_rules_generated == 0: # catch divide by zero error
-            total_accuracy = 0
-        else:
-            total_accuracy = 100 * (total_rules_validated/total_rules_generated)
-        total_possible_rules = self.mamdaniArc.RuleAntecedentLayer.n_rules*2
-
-        print("\n┌────────────────────────────────────────────────────────────────┐" + ("\n") +
-                "│                         IN TOTAL                               │" + ("\n") +
-                "└────────────────────────────────────────────────────────────────┘\n")
-        print(f'Total Rules being possible by combination: {total_possible_rules}')
-        print(f'Total Rules Generated: {total_rules_generated}')
-        print(f'Total Rules Validated: {total_rules_validated}')
-        print(f'Total Accuracy of Rules: {round(total_accuracy,2)}%')
         
 
 
