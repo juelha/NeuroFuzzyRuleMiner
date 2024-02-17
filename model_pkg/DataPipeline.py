@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 import os
-#from neurofuzzy_pkg.utils.DirStructManger import generate_folders
+from neurofuzzy_pkg.utils.DirStructManger import generate_folders
 
 
 class DataPipeline():

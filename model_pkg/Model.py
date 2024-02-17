@@ -9,6 +9,7 @@ import os.path
 # custom
 from model_pkg import *
 import neurofuzzy_pkg.utils.MFs as MFs
+from neurofuzzy_pkg.utils.WeightManager import load_weights
 
 
 class Model():
@@ -50,6 +51,7 @@ class Model():
         self.arc.RuleConsequentLayer.n_classes = self.data.n_classes
         
         self.builder(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name)
+
         print("Build done")
 
     def build_MyArc_CW(self):
@@ -86,9 +88,11 @@ class Model():
 
     def trainMyArc(self):
         # get feature_names names 
-        
-        self.arc.FuzzificationLayer.load_weights(self.data.df_name)
-        self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
+        load_weights(self.arc.FuzzificationLayer, "centers", self.data.df_name)
+        load_weights(self.arc.FuzzificationLayer, "widths", self.data.df_name)
+        load_weights(self.arc.RuleConsequentLayer, "weights", self.data.df_name)
+     #   self.arc.FuzzificationLayer.load_weights(self.data.df_name)
+      #  self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
         self.data.load_data_for_training() # doubled ! hc
         self.trainer.builder = self.builder
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )

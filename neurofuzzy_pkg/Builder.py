@@ -14,6 +14,9 @@ from yaml.loader import UnsafeLoader
 import os
 
 
+from neurofuzzy_pkg.utils.WeightManager import save_weights
+from neurofuzzy_pkg.utils.WeightManager import load_weights
+
 class Builder():
     """Architecture of the neuro fuzzy neural network
     """
@@ -79,8 +82,10 @@ class Builder():
            # print("tar", tar)
             self.arc.RuleConsequentLayer.weights[ruleID] = tar
    
-        self.arc.RuleConsequentLayer.save_weights(df_name)
-        self.arc.RuleConsequentLayer.load_weights(df_name)
+       # self.arc.RuleConsequentLayer.save_weights(df_name)
+       # self.arc.RuleConsequentLayer.load_weights(df_name)
+        save_weights(self.arc.RuleConsequentLayer, "weights", df_name)
+        load_weights(self.arc.RuleConsequentLayer, "weights", df_name)
        # print("building done")
         done = True
 
@@ -93,9 +98,11 @@ class Builder():
         self.arc.FuzzificationLayer.build(feature_ranges)
 
         #print("here",self.FuzzificationLayer.centers)
-               
-        self.arc.FuzzificationLayer.save_weights(df_name)
-        self.arc.FuzzificationLayer.load_weights(df_name)
+        save_weights(self.arc.FuzzificationLayer, "centers", df_name)
+        save_weights(self.arc.FuzzificationLayer, "widths", df_name)
+        
+      #  self.arc.FuzzificationLayer.save_weights(df_name)
+       # self.arc.FuzzificationLayer.load_weights(df_name)
         #MFs.visuMFs(self.FuzzificationLayer, dir="after_building", func="InputMFs", max_vals=feature_ranges)
       #  print("building done")
         done = True
