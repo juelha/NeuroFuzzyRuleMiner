@@ -40,7 +40,7 @@ def main():
     learning_rate = 1
     n_epochs = 5
     n_participants = 3
-    df_name = "dummy2"
+    df_name = "iris"
 
     
     

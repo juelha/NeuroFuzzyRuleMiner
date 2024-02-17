@@ -36,7 +36,7 @@ class RuleMiner():
         self.inputs = None
         self.feature_names = neuro_fuzzy_model.data.feature_names
         self.linguistic_mf = ["low","medium","high"]
-        self.lingusitic_output =  ["bad", "good"] # ["Setosa", "Versicolour", "Virginica"]
+        self.lingusitic_output =  ["Setosa", "Versicolour", "Virginica"] #["bad", "good"] # 
         self.n_mfs = len(self.linguistic_mf)
         self.n_participants = len(neuro_fuzzy_model.data.feature_names)
         self.n_outputs = len(self.lingusitic_output)# hc neuro_fuzzy_model.arc.RuleConsequentLayer.n_mfs 
@@ -72,7 +72,7 @@ class RuleMiner():
         
         output = []
         for w in weights:
-            print("w", w)
+          #  print("w", w)
             idx_max = np.argmax(w)
             output.append(self.lingusitic_output[idx_max])
                
@@ -181,22 +181,27 @@ class RuleMiner():
             # append activations of consequent layer
             activations.append(self.arc(input_vec)) 
 
-        print("actvation", activations)
+       # print("actvation", activations)
        # activations = np.array(activations
         
         activations = np.concatenate(activations, axis=1)
-        print("actvation np ", activations)
+        #print("actvation np ", activations)
 
         activations = np.sum(activations, axis = 1)
+        activations = activations/np.shape(inputs)[0] # normalize
+        print("activations", activations)
         best_indeces = np.argpartition(activations, -n)[-n:]
         #res = np.sum(*activations, axis = 0)
-        print("res", best_indeces)
+       # print("res", best_indeces)
         best_indeces = best_indeces[np.argsort(activations[best_indeces])]
-        print("res ewa ", best_indeces)
+       # print("res ewa ", best_indeces)
 
-        print("here",self.rulesDict)
+       # print("here",self.rulesDict)
         best_rules = self.rulesDict.iloc[best_indeces]
-        print("best", best_rules)
+
+        best_rules = best_rules.assign( Activations = activations[best_indeces] )
+       # print("activations", activations)
+       # print("Hm", np.shape(inputs)[0])
     #     for ruleID in tqdm(self.arc.RuleConsequentLayer.dictrules, desc="selecting"):
     #         l = self.arc.RuleConsequentLayer.dictrules[ruleID]
           
