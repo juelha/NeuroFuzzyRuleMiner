@@ -53,8 +53,8 @@ class RuleMiner():
         # get rules and combine
         rulesIF = self.get_if_part(self.fuzzy_labels)
         rulesTHEN = self.get_then_part()
-        print("huh", rulesIF)
-        print("ha", rulesTHEN)
+      #  print("huh", rulesIF)
+     #   print("ha", rulesTHEN)
         rules = np.concatenate((rulesIF, rulesTHEN), axis=1)
    
         # save as df 
@@ -85,7 +85,7 @@ class RuleMiner():
         output = []
         # go through weights and select the max idx
         # since weights are one-hot encoded this will match the idx of the belonging class
-        print("w", weights)
+       # print("w", weights)
         for w in weights:
             idx_max = np.argmax(w)
             output.append(self.lingusitic_output[idx_max])

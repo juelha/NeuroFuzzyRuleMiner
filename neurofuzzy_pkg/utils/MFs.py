@@ -180,7 +180,7 @@ Args:
 
         
         # get save path 
-        file_name =  '_MFs_' + feature_names[xID] + '.png'
+        file_name =  'MFs_' + feature_names[xID] + '.png'
         save_path = os.path.dirname(__file__) +  f'/../../results/{df_name}/figures/' + dir
         completeName = os.path.join(save_path, file_name)
 

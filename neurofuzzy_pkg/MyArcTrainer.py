@@ -34,6 +34,7 @@ class MyArcTrainer(Trainer):
         self.builder = None
         self.n_mfs = None
         self.max_vals = None
+    
       #  self.df_name = None
        # self.feature_ranges = None 
 
@@ -209,11 +210,7 @@ class MyArcTrainer(Trainer):
 
         error_term = []
         #target = target[0]
-        epsilon = 1e-15  # Small constant to prevent log(0)
-
-        # Clip predicted probabilities to avoid log(0) or log(1)
-        pred = np.clip(pred, epsilon, 1 - epsilon)
-        tar = np.clip(tar, epsilon, 1 - epsilon)
+       
         # losses = []
         # for p,t in zip(pred,tar):
         #     # Calculate cross-entropy loss
@@ -235,7 +232,17 @@ class MyArcTrainer(Trainer):
         #             error =  0.5*( tar[idx] - out_row[idx]  )**2
                     
         #             error_term.append(error)
-        return 0.5*( tar - pred  )**2
+     #   print("HM", np.shape(tar)[1])
+        # epsilon = 1e-15  # Small constant to prevent log(0)
+
+        # # Clip predicted probabilities to avoid log(0) or log(1)
+        # pred = np.clip(pred, epsilon, 1 - epsilon)
+        # tar = np.clip(tar, epsilon, 1 - epsilon)
+      #  error = np.sum( tar * pred / np.shape(tar)[1], axis=1)
+     #   error = 1-error
+        error = 0.5*( tar - pred  )**2
+       # print("e", error)
+        return error
      #   return self.cross_entropy_loss(pred,tar)
 
     def cross_entropy_loss_prime(self, p,t):
@@ -261,33 +268,48 @@ class MyArcTrainer(Trainer):
             error_term (float): output of derived error function
         """
         #return self.cross_entropy_loss_prime(prediction, target)
-    #     error_term = []
+        error_term = []
     #   #  target = target[0]
-    #     for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
+        weights = self.arc.RuleConsequentLayer.class_weights
         
-    #         out_row = prediction[cidx] # in order to slice [:,idx]
-    #         tar = target[cidx]
-    #         for idx, number in enumerate(classweight):
-    #             if bool(number)==True:
-
-                
-    #                 error = -1* (tar[idx]-out_row[idx])
-                    
-    #                 error_term.append(error)
+        output = []
+        # go through weights and select the max idx
+        # since weights are one-hot encoded this will match the idx of the belonging class
+        for i,w in enumerate(weights):
+            idx_max = np.argmax(w)
+            output.append(-1* (target[i][idx_max]-prediction[i][idx_max])) 
+               
+        output = np.array(output)
+        output = output.reshape(-1, 1)
+        error = output
     #   #  print("error", error_term)
        # return  np.sum(-1* (target-prediction),axis=1)#error_term
        # return  np.sum(prediction- target,axis=1)#error_term
         #return self.cross_entropy_loss_prime(prediction, target)
-        pred = np.where(prediction == 0, -1, prediction)
-        tar = np.where(target == 0, -1, target)
-
-        zeros = np.zeros_like(tar)
-
-        honk = np.concatenate((zeros, 1-tar*pred),axis=1)
 
 
-        # my hinge
-        error = np.sum(1-tar*pred, axis=1)
+
+        # # Clip predicted probabilities to avoid log(0) or log(1)
+        # pred = np.clip(pred, epsilon, 1 - epsilon)
+        # tar = np.clip(tar, epsilon, 1 - epsilon)
+      #  error = np.sum( tar * pred / np.shape(tar)[1], axis=1)
+     #   error = 1-error
+        
+
+
+
+    #     pred = np.where(prediction == 0, -1, prediction)
+    #     tar = np.where(target == 0, -1, target)
+
+    #   #  zeros = np.zeros_like(tar)
+
+    #    # honk = np.concatenate((zeros, 1-tar*pred),axis=1)
+
+
+    #     # my hinge
+    #     error = np.sum( tar * pred / np.shape(tar)[1], axis=1)
+    #     error = 1-error
+     #   error = np.sum(1-tar*pred, axis=1)
         return error
 
 
