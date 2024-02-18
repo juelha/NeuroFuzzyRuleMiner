@@ -60,6 +60,7 @@ class RuleMiner():
         # save as df 
         self.feature_names.append("Class")
         self.rulesDict = pd.DataFrame(rules, columns=self.feature_names)
+
         self.save_results(self.rulesDict)
         return 0
     
@@ -192,8 +193,9 @@ class RuleMiner():
             file_name = f"{self.df_name}_best__rules.csv"
         completeName = os.path.join(save_path, file_name)
 
-        df_good = pd.DataFrame(rules)
-        df_good.to_csv(completeName)
+        df = pd.DataFrame(rules)
+        df.index += 1 
+        df.to_csv(completeName)
         return 0 
 
 
