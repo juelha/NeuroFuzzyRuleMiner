@@ -17,7 +17,7 @@ class MyArc():
     """Architecture of the neuro fuzzy neural network
     """
 
-    def __init__(self):
+    def __init__(self, n_mfs, n_features, n_classes):
         """Initializes MyArc()-Object
 
         Attributes: 
@@ -33,9 +33,13 @@ class MyArc():
         self.total_params = 0
         self.trainable_params = 0
 
-        self.FuzzificationLayer = FuzzificationLayer()
-        self.RuleAntecedentLayer = RuleAntecedentLayer()
-        self.RuleConsequentLayer = RuleConsequentLayer()
+        self.n_mfs = n_mfs
+        self.n_participants = n_features
+
+
+        self.FuzzificationLayer = FuzzificationLayer(n_mfs)
+        self.RuleAntecedentLayer = RuleAntecedentLayer(n_mfs, n_features)
+        self.RuleConsequentLayer = RuleConsequentLayer(n_classes)
 
         self.internal_layers = [
             self.FuzzificationLayer,

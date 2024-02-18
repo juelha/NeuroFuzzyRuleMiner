@@ -1,6 +1,6 @@
-,x1,x2,Class
-5,medium,high,good
-8,high,high,bad
-0,low,low,bad
-3,medium,low,bad
-6,high,low,bad
+,x1,x2,Class,Activations
+2,low,high,high,0.09496262131259141
+1,low,medium,high,0.08296640553427179
+8,high,high,low,0.06531829627902672
+7,high,medium,low,0.0639264434051225
+0,low,low,low,0.009609876283369765

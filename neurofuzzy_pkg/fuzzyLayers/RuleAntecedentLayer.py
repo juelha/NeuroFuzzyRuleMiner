@@ -21,7 +21,7 @@ class RuleAntecedentLayer():
     ___________________________________________________________
     """
 
-    def __init__(self, ):
+    def __init__(self, n_mfs, n_features):
         """Initializes RuleAntecedentLayer()-Object
 
         Attributes:
@@ -36,8 +36,8 @@ class RuleAntecedentLayer():
         # for rule extraction
         self.rulesIF = {}   
         self.n_rules = 0     
-        self.n_features = 4 # two participants in a rule #hc
-        self.n_mfs = 3 # hc
+        self.n_features = n_features 
+        self.n_mfs = n_mfs 
 
 
     def build(self, inputs):
@@ -79,14 +79,14 @@ class RuleAntecedentLayer():
        # self.inputs = x # saved for training
 
     
-        
+      #  print("honk", self.n_mfs)
         self.n_rules = int(self.n_mfs**self.n_features)
 
         # x = np.array_split(x, range(self.n_mfs, len(x), self.n_mfs))
 
 
        
-        x = np.array_split(x, range(3, len(x), 3)) # hc
+        x = np.array_split(x, range(self.n_mfs, len(x), self.n_mfs)) # hc
        # x.reverse()  # so it fits with convention 
         x = np.array(np.meshgrid(*x,indexing='ij')) # the '*' unpacks x and passes to messgrid
         self.inputs = x #  need meshgrid for training

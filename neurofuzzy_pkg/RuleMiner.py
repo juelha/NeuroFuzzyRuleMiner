@@ -19,7 +19,7 @@ class RuleMiner():
     ___________________________________________________________
     """
 
-    def __init__(self, neuro_fuzzy_model, df_name):
+    def __init__(self, neuro_fuzzy_model, df_name, fuzzy_labels, ling_out):
         """Init ruleExtractor and calling extractRules()
 
         Args:
@@ -35,8 +35,8 @@ class RuleMiner():
         self.rulesDict = {}
         self.inputs = None
         self.feature_names = neuro_fuzzy_model.data.feature_names
-        self.fuzzy_labels = ["low","medium","high"]
-        self.lingusitic_output =  ["Setosa", "Versicolour", "Virginica"] #["bad", "good"] # 
+        self.fuzzy_labels = fuzzy_labels #["low","medium","high"]
+        self.lingusitic_output =  ling_out #["Setosa", "Versicolour", "Virginica"] #["bad", "good"] # 
         self.n_mfs = len(self.fuzzy_labels)
         self.n_participants = len(neuro_fuzzy_model.data.feature_names)
         self.n_outputs = len(self.lingusitic_output)# hc neuro_fuzzy_model.arc.RuleConsequentLayer.n_mfs 
@@ -53,6 +53,8 @@ class RuleMiner():
         # get rules and combine
         rulesIF = self.get_if_part(self.fuzzy_labels)
         rulesTHEN = self.get_then_part()
+        print("huh", rulesIF)
+        print("ha", rulesTHEN)
         rules = np.concatenate((rulesIF, rulesTHEN), axis=1)
    
         # save as df 
@@ -69,7 +71,7 @@ class RuleMiner():
             fuzzy_labels (list(str)):  ["low","medium","high"] or  ["small","medium","large"]
         """
         fuzzy_labels = np.tile(fuzzy_labels, self.n_participants)
-        fuzzy_labels = np.array_split(fuzzy_labels, range(3, len(fuzzy_labels), self.n_mfs))
+        fuzzy_labels = np.array_split(fuzzy_labels, range(self.n_mfs, len(fuzzy_labels), self.n_mfs))
         fuzzy_labels = np.stack(np.meshgrid(*fuzzy_labels, indexing='ij'), axis=-1).reshape(-1, self.n_participants)
         return fuzzy_labels
     
@@ -82,6 +84,7 @@ class RuleMiner():
         output = []
         # go through weights and select the max idx
         # since weights are one-hot encoded this will match the idx of the belonging class
+        print("w", weights)
         for w in weights:
             idx_max = np.argmax(w)
             output.append(self.lingusitic_output[idx_max])
@@ -99,21 +102,22 @@ class RuleMiner():
         """
         # check if n < generated rules
         acc = []
-        activations = []
+        x = []
         # get activations per output for inptus
         for input_vec in tqdm(inputs, desc='class selecting'):
             
-            activations.append(self.arc(input_vec)) 
+            x.append(self.arc(input_vec)) 
 
-        activations = np.concatenate(activations, axis=1)
+        x = np.concatenate(x, axis=1)
         #print("actvation np ", activations)
 
-        activations = np.sum(activations, axis = 1)
-        activations = activations/np.shape(inputs)[0] # normalize
-        best_indeces = np.argpartition(activations, -n)[-n:]
-        best_indeces = best_indeces[np.argsort(activations[best_indeces])]
+        x = np.sum(x, axis = 1)
+        x = x/np.shape(inputs)[0] # normalize
+        best_indeces = np.argsort(x)[-n:]  # get best n indeces, low to high
+        best_indeces = np.flip(best_indeces) # reverse so highest activation is first
+      #  print("hooonk", best_indeces)
         best_rules = self.rulesDict.iloc[best_indeces]
-        best_rules = best_rules.assign( Activations = activations[best_indeces] )
+        best_rules = best_rules.assign( Activations = x[best_indeces] )
         self.save_results(best_rules, best=True)
         return best_rules
 

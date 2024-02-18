@@ -21,7 +21,7 @@ class FuzzificationLayer():
     ___________________________________________________________
     """
 
-    def __init__(self, n_mfs=3, mf_type=MFs.MF_gaussian):
+    def __init__(self, n_mfs, mf_type=MFs.MF_gaussian):
         """Initializing FuzzificationLayer()-Object
         Args:
             n_mfs (int): number of MFs

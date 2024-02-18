@@ -47,10 +47,10 @@ class Model():
         # load data for building my arc
         self.data.load_data_for_building()
         self.builder.arc = self.arc#
-        self.arc.RuleAntecedentLayer.n_features = self.data.n_features
-        self.arc.RuleConsequentLayer.n_classes = self.data.n_classes
+        #self.arc.RuleAntecedentLayer.n_features = self.data.n_features
+       # self.arc.RuleConsequentLayer.n_classes = self.data.n_classes
         
-        self.builder(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name)
+        self.builder(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name, self.arc.n_mfs)
 
         print("Build done")
 
@@ -88,6 +88,7 @@ class Model():
         self.trainer.builder = self.builder
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
         self.trainer.max_vals = self.data.feature_ranges
+        self.trainer.n_mfs = self.arc.n_mfs
       #  print("???", self.data.feature_ranges)
        # print("!!!", self.trainer.max_vals)
         self.train()

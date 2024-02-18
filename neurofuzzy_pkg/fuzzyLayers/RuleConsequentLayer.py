@@ -24,7 +24,7 @@ class RuleConsequentLayer():
     ___________________________________________________________
     """
 
-    def __init__(self, mf_type=MFs.MF_gaussian, n_mfs=2):
+    def __init__(self, n_classes):
         """Initializes RuleConsequentLayer()-Object
         
         Args:
@@ -50,6 +50,7 @@ class RuleConsequentLayer():
         self.tunable = False 
         self.inputs = []
         self.outputs = []
+        self.n_classes = n_classes
         
         # for rule extraction
         self.rulesTHEN = {}

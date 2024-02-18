@@ -31,14 +31,27 @@ def main():
     learning_rate = 1
     n_epochs = 5
     df_name = "iris"
+    fuzzy_labels = ["small", "medium", "high"]
+    lingusitic_output = ["Setosa", "Versicolour", "Virginica"]
+
+    df_name = "dummy2"
+    fuzzy_labels = ["low", "medium", "high"]
+    lingusitic_output = ["low","high"]
+
+
+    df_name = "xor"
+    fuzzy_labels = ["false", "true"]
+    n_participants = 2
+    lingusitic_output = ["false","true"]
+
 
     MyModel = Model(DataPipeline(df_name), 
-                     MyArc(), 
+                     MyArc(len(fuzzy_labels), n_participants, len(lingusitic_output)), 
                      MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate),
                      Builder(),
                      Classifier())
     MyModel.build_MyArc() 
-    MyModel.trainMyArc()
+  #  MyModel.trainMyArc()
     print(MyModel.class_acc()) # when arc is not trained -> 0.688
 
     # for i in range(1):
@@ -50,7 +63,7 @@ def main():
     # print(MLPModel.summary()) 
 
 
-    MyRules = RuleMiner(MyModel, df_name)
+    MyRules = RuleMiner(MyModel, df_name, fuzzy_labels, lingusitic_output)
     MyRules.get_best_rules(inputs=MyModel.data.inputs)
    # MyRules.print_results()
     

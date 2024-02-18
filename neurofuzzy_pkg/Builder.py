@@ -25,7 +25,7 @@ class Builder():
         self.arc = arc
         pass
 
-    def __call__(self, inputs, targets, feature_ranges, df_name=None, n_mfs=3):
+    def __call__(self, inputs, targets, feature_ranges, df_name, n_mfs):
         """Forward propagating the inputs through the network
 
         Args: 

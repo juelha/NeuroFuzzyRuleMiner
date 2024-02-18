@@ -27,7 +27,7 @@ class DataPipeline():
             split of dataset is 80:10:10
         """
         self.df_name = df_name
-        self.df_names =  ['dummy2', 'dummy3', 'dummy4', 'iris']
+        self.df_names =  ['xor', 'dummy2', 'dummy3', 'dummy4', 'iris']
         self.batch_size = batch_size
         self.params = [self.batch_size]
         
@@ -65,7 +65,8 @@ class DataPipeline():
             df, targets ('pandas.core.frame.DataFrame')
         
         Raises:
-            ValueError; if no df_name was given
+            ValueError: if no df_name was given
+            
         Note: assumes last column of df is the target vector
         """
         # check if str is in possible datasets

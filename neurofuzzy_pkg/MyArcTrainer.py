@@ -32,6 +32,7 @@ class MyArcTrainer(Trainer):
         self.learning_rate = learning_rate
         self.feature_ranges = None
         self.builder = None
+        self.n_mfs = None
         self.max_vals = None
       #  self.df_name = None
        # self.feature_ranges = None 
@@ -276,7 +277,18 @@ class MyArcTrainer(Trainer):
     #   #  print("error", error_term)
        # return  np.sum(-1* (target-prediction),axis=1)#error_term
        # return  np.sum(prediction- target,axis=1)#error_term
-        return self.cross_entropy_loss_prime(prediction, target)
+        #return self.cross_entropy_loss_prime(prediction, target)
+        pred = np.where(prediction == 0, -1, prediction)
+        tar = np.where(target == 0, -1, target)
+
+        zeros = np.zeros_like(tar)
+
+        honk = np.concatenate((zeros, 1-tar*pred),axis=1)
+
+
+        # my hinge
+        error = np.sum(1-tar*pred, axis=1)
+        return error
 
 
 
@@ -322,15 +334,15 @@ class MyArcTrainer(Trainer):
 
         return 0
     
-    def adapt_parameter(self, param, layer, delta, para_prime):
+    def adapt_parameter(self, param_name, layer, delta, para_prime):
         """
         Args:
-            param (str)
+            param_name (str)
 
         """
 
                 # deriv para have to be meshgridded too
-        para_prime = np.array_split(para_prime, range(3, len(para_prime), 3)) # hc
+        para_prime = np.array_split(para_prime, range(self.n_mfs, len(para_prime), self.n_mfs)) # hc
        # x.reverse()  # so it fits with convention 
         para_prime = np.array(np.meshgrid(*para_prime,indexing='ij'))
         delta = [d * para_prime[i] for i, d in enumerate(delta)]
@@ -404,33 +416,10 @@ class MyArcTrainer(Trainer):
         
       #  print("Delta", delta)
 
-    #     # deriv para have to be meshgridded too
-    #     para_prime = np.array_split(para_prime, range(3, len(para_prime), 3)) # hc
-    #    # x.reverse()  # so it fits with convention 
-    #     para_prime = np.array(np.meshgrid(*para_prime,indexing='ij'))
-    #     delta = [d * para_prime[i] for i, d in enumerate(delta)]
-        # for p, d in zip(para_prime,delta):
-        # # param_gridded = param_gridded[0]
-        #     p.setflags(write=1) # needed 
-        #    # print("change", d*self.learning_rate)
-        #     d = d* p#np.multiply(d, self.learning_rate) 
-
 
         # params to tune
-        para = getattr(layer, param)
+        para = getattr(layer, param_name)
         
-       # print("param before", para)
-
-        # param_split = np.array_split(para, range(3, len(para), 3)) # does return adress 
-
-        # param_gridded = np.meshgrid(*param_split, indexing="ij", copy=False) # If False, a view into the original arrays are returned in order to conserve memory.  Default is True.
-
-        # for p, d in zip(param_gridded,delta):
-        # # param_gridded = param_gridded[0]
-        #     p.setflags(write=1) # needed 
-        #   #  print("change", d)
-        #     p -= np.multiply(d, self.learning_rate) # changes param
-       # print("param afte", para)
 
 
       #  print("heh", para)
@@ -441,9 +430,15 @@ class MyArcTrainer(Trainer):
         for i, p in enumerate(para):
           #  for j in n_mfs:
         #  print("p", p)
-            if p <= 0 or p >= hmm[i]: #hc
-                deltas[i] = 0#0.00001 # randomize todo
+            if param_name == "centers":
+                if p <= 0 or p >= hmm[i]: 
+                    deltas[i] = 0#0.00001 # randomize todo
+            if param_name == "widths":
+                
+                if p <= 0 or p >= hmm[i]/5: #hc
+                    #print("yqa")
+                    deltas[i] = 0
             # print("P",p)
        # print("deltas", deltas)
         para =  para - deltas #np.multiply(deltas, self.learning_rate)
-        setattr(layer, param, para)
+        setattr(layer, param_name, para)
