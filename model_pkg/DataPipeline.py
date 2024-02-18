@@ -27,7 +27,7 @@ class DataPipeline():
             split of dataset is 80:10:10
         """
         self.df_name = df_name
-        self.df_names =  ['xor', 'dummy2', 'dummy3', 'dummy4', 'iris']
+        self.df_names =  ['dummy2', 'dummy3', 'dummy4', 'xor', 'iris']
         self.batch_size = batch_size
         self.params = [self.batch_size]
         
@@ -59,7 +59,7 @@ class DataPipeline():
         
         Args:
             df_name (str): dataset to load 
-                           options: ['dummy2', 'dummy3', 'dummy4', 'iris']
+                           options: ['dummy2', 'dummy3', 'dummy4', 'xor', 'iris']
 
         Returns:
             df, targets ('pandas.core.frame.DataFrame')
@@ -132,10 +132,10 @@ class DataPipeline():
 
         # Split the dataset into a train, test and validation split
         # ratio is 80:10:10
-        train_ds, test_ds, validation_ds = np.split(df, [int(.8*len(df)), int(.9*len(df))])
-        train_tar, test_tar, validation_tar = np.split(targets, [int(.8*len(targets)), int(.9*len(targets))])
+        train_ds, test_ds = np.split(df, [int(.8*len(df))])#, int(.9*len(df))])
+        train_tar, test_tar = np.split(targets, [int(.8*len(targets))])#, int(.9*len(targets))])
 
         self.train_ds = (train_ds, train_tar)
         self.test_ds = (test_ds, test_tar)# test_ds.apply(self.pipeline_for_training)
-        self.validation_ds = (validation_ds, validation_tar)#validation_ds.apply(self.pipeline_for_training)
+        #self.validation_ds = (validation_ds, validation_tar)#validation_ds.apply(self.pipeline_for_training)
 
