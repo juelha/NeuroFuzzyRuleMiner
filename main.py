@@ -35,9 +35,9 @@ def main():
     fuzzy_labels = ["small", "medium", "high"]
     lingusitic_output = ["Setosa", "Versicolour", "Virginica"]
 
-    df_name = "dummy4"
-    fuzzy_labels = ["low", "medium", "high"]
-    lingusitic_output = ["low","high"]
+    # df_name = "dummy3"
+    # fuzzy_labels = ["low", "medium", "high"]
+    # lingusitic_output = ["low","high"]
 
 
     # df_name = "xor"

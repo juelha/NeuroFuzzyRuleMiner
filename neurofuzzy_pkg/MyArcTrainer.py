@@ -271,6 +271,10 @@ class MyArcTrainer(Trainer):
         error_term = []
     #   #  target = target[0]
         weights = self.arc.RuleConsequentLayer.class_weights
+
+      #  prediction = np.where(prediction == 0, -1, prediction)
+       # target = np.where(target == 0, -1, target)
+
         
         output = []
         # go through weights and select the max idx
@@ -281,7 +285,7 @@ class MyArcTrainer(Trainer):
                
         output = np.array(output)
         output = output.reshape(-1, 1)
-        error = output
+        error = output#1-output / np.shape(target)[1]
     #   #  print("error", error_term)
        # return  np.sum(-1* (target-prediction),axis=1)#error_term
        # return  np.sum(prediction- target,axis=1)#error_term
@@ -448,12 +452,13 @@ class MyArcTrainer(Trainer):
         n_mfs = 3 #hc
        # print("HOOONK",self.max_vals)
         hmm = np.repeat(self.max_vals, n_mfs)
+        mins = np.repeat(self.min_vals, n_mfs)
         #print("honik",hmm)
         for i, p in enumerate(para):
           #  for j in n_mfs:
         #  print("p", p)
             if param_name == "centers":
-                if p <= 0 or p >= hmm[i]: 
+                if p <= mins[i] or p >= hmm[i]: 
                     deltas[i] = 0#0.00001 # randomize todo
             if param_name == "widths":
                 

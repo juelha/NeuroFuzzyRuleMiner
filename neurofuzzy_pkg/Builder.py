@@ -25,7 +25,7 @@ class Builder():
         self.arc = arc
         pass
 
-    def __call__(self, inputs, targets, feature_ranges, df_name, n_mfs):
+    def __call__(self, inputs, targets, feature_maxs, feature_mins, df_name, n_mfs):
         """Forward propagating the inputs through the network
 
         Args: 
@@ -34,7 +34,7 @@ class Builder():
         Returns: 
             done (boolean): if built
         """
-        self.build_MFs(feature_ranges, df_name, n_mfs)
+        self.build_MFs(feature_maxs, feature_mins, df_name, n_mfs)
         self.build_classweights(inputs, targets, df_name)
     
         return True       
@@ -70,15 +70,18 @@ class Builder():
         load_weights(self.arc.RuleConsequentLayer, "class_weights", df_name)
 
 
-    def build_MFs(self, feature_ranges, df_name, n_mfs):
+    def build_MFs(self, feature_maxs, feature_mins, df_name, n_mfs):
         
        # self.arc.FuzzificationLayer.build(feature_ranges)
 
-        x = self.arc.FuzzificationLayer.preprocess_x(feature_ranges)
-        x = x.to_numpy() # drops names from max value, either do this or give names of features directly to visualizer
+       # feature_maxs = self.arc.FuzzificationLayer.preprocess_x(feature_maxs)
+        #feature_mins = self.arc.FuzzificationLayer.preprocess_x(feature_mins)
+
+        feature_maxs = feature_maxs.to_numpy() # drops names from max value, either do this or give names of features directly to visualizer
+        feature_mins = feature_mins.to_numpy()
         # build centers and widths of MFs
-        self.arc.FuzzificationLayer.centers = MFs.center_init(x, n_mfs)
-        self.arc.FuzzificationLayer.widths = MFs.widths_init(x, n_mfs)
+        self.arc.FuzzificationLayer.centers = MFs.center_init(feature_mins, feature_maxs, n_mfs)
+        self.arc.FuzzificationLayer.widths = MFs.widths_init(feature_mins, feature_maxs, n_mfs)
 
 
         save_weights(self.arc.FuzzificationLayer, "centers", df_name)

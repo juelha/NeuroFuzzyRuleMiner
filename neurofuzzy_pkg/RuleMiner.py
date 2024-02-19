@@ -95,7 +95,7 @@ class RuleMiner():
         return output
 
 
-    def get_best_rules(self, inputs, n=5):
+    def get_best_rules(self, inputs, n=10):
         """
         Args:
             inputs ():

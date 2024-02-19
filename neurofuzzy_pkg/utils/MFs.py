@@ -11,7 +11,7 @@ Collection of
 
 
 
-def center_init(x, n_mfs):
+def center_init(feature_mins, feature_maxs, n_mfs):
     """Initializes the centers of MFs by partitioning the domain of the features
 
     Args:
@@ -21,18 +21,21 @@ def center_init(x, n_mfs):
     Returns: 
         numpy.ndarray: initalized widths with the shape (x.size,)
     """
-    n_inputs = x.size // n_mfs
+    n_inputs = feature_maxs.size // n_mfs
     # multiplicator = np.tile(np.arange(1, n_mfs + 1), n_inputs)
     # cetnters = (x / (n_mfs + 1)) * multiplicator
+    centers = []
+    for i, _ in enumerate(feature_maxs):    
+    # centers.append(np.arange(start=y[i], stop=x[i] + (x[i]-y[i])/(n_mfs-1),step=(x[i]-y[i])/(n_mfs-1)))
+        centers.append(np.linspace(start=feature_mins[i], stop=feature_maxs[i], num=n_mfs, endpoint=True))
+    centers = np.array(centers)
+    #centers.ravel()
+    centers = centers.ravel()
+    print("c", centers)
+    return centers
 
 
-    multiplicator = np.tile(np.arange(0, n_mfs ), n_inputs)
-    cetnters = (x / (n_mfs -1)) * multiplicator
-  #  print(cetnters)
-    return cetnters
-
-
-def widths_init(x, n_mfs):
+def widths_init(feature_mins, feature_maxs, n_mfs):
     """Initializes the widths of MFs by partitioning the domain of the features
 
     Args:
@@ -42,6 +45,9 @@ def widths_init(x, n_mfs):
     Returns: 
         numpy.ndarray: initalized widths with the shape (x.size,)
     """
+    x = np.repeat(feature_mins-feature_maxs, n_mfs)
+
+    
     return x/(2*n_mfs+1)
 
 
@@ -122,7 +128,7 @@ def MF_tri_prime_b(x, a, b):
     mu = (2*abs(a-x)/b**2)
     return mu
 
-def visuMFs(layer, dir, df_name, max_vals, mf_names=["low", "middle", "high"]):
+def visuMFs(layer, dir, df_name, max_vals,min_vals, mf_names=["low", "middle", "high"]):
     """Visualizing the current MFs
 visuMFs(inputMFs, self.arc, dir="before_training", func="inputMFs")
 inputMFs.mf_type, inputMFs.n_mfs, inputMFs.centers, inputMFs.widths, inputMFs.domain_input, 
@@ -152,7 +158,7 @@ Args:
     for xID, max_value in enumerate(max_vals):
     #for name, input in zip(names,layer.inputs):
 #        x = np.arange(0, means[xID] , (means[xID]*0.01))
-        x = np.arange(0, max_value, max_value/1000)
+        x = np.arange(min_vals[xID], max_value, max_value/1000)
         y = {}
 
         for mfID in range(layer.n_mfs):
