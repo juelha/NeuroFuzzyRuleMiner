@@ -1,4 +1,4 @@
-,sepal length (cm),sepal width (cm),petal length (cm),petal width (cm),Class
+,sepal length,sepal width,petal length,petal width,Class
 1,small,small,small,small,Setosa
 2,small,small,small,medium,Setosa
 3,small,small,small,high,Virginica

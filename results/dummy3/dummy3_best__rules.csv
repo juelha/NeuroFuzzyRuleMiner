@@ -1,6 +1,11 @@
 ,x1,x2,x3,Class,Activations
-21,high,low,high,low,0.021089068189715683
-1,low,low,low,low,0.019320771272145345
-2,low,low,medium,low,0.01845684678174361
-3,low,low,high,low,0.018245597438354716
-10,medium,low,low,low,0.018178933903531164
+24,high,medium,high,low,0.10037264551508664
+21,high,low,high,low,0.09832370746876597
+4,low,medium,low,low,0.09553088534391896
+6,low,medium,high,low,0.09495312475494637
+13,medium,medium,low,high,0.0945496571659504
+15,medium,medium,high,low,0.09388791272719836
+1,low,low,low,low,0.09362391254221736
+3,low,low,high,low,0.09291048778857777
+10,medium,low,low,low,0.0926655567534599
+12,medium,low,high,low,0.09186820487637916

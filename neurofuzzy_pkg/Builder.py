@@ -82,6 +82,7 @@ class Builder():
         # build centers and widths of MFs
         self.arc.FuzzificationLayer.centers = MFs.center_init(feature_mins, feature_maxs, n_mfs)
         self.arc.FuzzificationLayer.widths = MFs.widths_init(feature_mins, feature_maxs, n_mfs)
+        print("WEI", self.arc.FuzzificationLayer.widths)
 
 
         save_weights(self.arc.FuzzificationLayer, "centers", df_name)

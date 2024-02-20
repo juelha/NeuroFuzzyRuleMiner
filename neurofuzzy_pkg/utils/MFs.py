@@ -31,7 +31,6 @@ def center_init(feature_mins, feature_maxs, n_mfs):
     centers = np.array(centers)
     #centers.ravel()
     centers = centers.ravel()
-    print("c", centers)
     return centers
 
 
@@ -45,7 +44,7 @@ def widths_init(feature_mins, feature_maxs, n_mfs):
     Returns: 
         numpy.ndarray: initalized widths with the shape (x.size,)
     """
-    x = np.repeat(feature_mins-feature_maxs, n_mfs)
+    x = np.repeat(feature_maxs-feature_mins, n_mfs)
 
     
     return x/(2*n_mfs+1)
@@ -149,7 +148,7 @@ Args:
  
     w = np.array_split(layer.widths, len(feature_names)) # hc
  
-    print("max", max_vals)
+    #print("max", max_vals)
    
    # print("c", c)
     #print("w", w)
@@ -158,7 +157,7 @@ Args:
     for xID, max_value in enumerate(max_vals):
     #for name, input in zip(names,layer.inputs):
 #        x = np.arange(0, means[xID] , (means[xID]*0.01))
-        x = np.arange(min_vals[xID], max_value, max_value/1000)
+        x = np.arange(min_vals.iloc[xID], max_value, max_value/1000)
         y = {}
 
         for mfID in range(layer.n_mfs):
@@ -180,9 +179,9 @@ Args:
 
         plt.legend()
 
-        plt.title('Membership Functions')
+        plt.title(f'Membership Functions for {feature_names[xID]}')
         plt.ylabel('Degree of Membership')
-        plt.xlabel(feature_names[xID])
+        plt.xlabel(f' {feature_names[xID]} (cm)')
 
         
         # get save path 

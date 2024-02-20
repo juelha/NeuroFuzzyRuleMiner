@@ -45,11 +45,21 @@ class Classifier():
         acc = []
         for input_vec, target_vec in (zip(tqdm(inputs, desc='class testing'), targets)):
             classID = self.get_class(input_vec) 
-            acc.append(self.is_class_correct(classID, target_vec))
-        return np.mean(acc)
+            acc.append(classID == target_vec)
+        total_acc = np.mean(acc, axis=1)
+        total_acc = np.where(total_acc != 1, 0, 1)
+        print("accs", total_acc)
+        self.print_results(np.mean(total_acc), len(inputs) - np.count_nonzero( total_acc))
+        return np.mean(total_acc)
 
     
     def is_class_correct(self, classID, target):
         #print("target", target)
        # print("classid", classID)
         return classID == target
+    
+
+    def print_results(self, total_acc, n_incorrect):
+        print("\n┌─────────────────────────────────────────────────────────────────┐" + ("\n") +
+                f"  Classifying Results: Accuracy total: {np.round(total_acc,2)}, No. incorrect: {n_incorrect} " + ("\n") +
+                "└─────────────────────────────────────────────────────────────────┘\n")

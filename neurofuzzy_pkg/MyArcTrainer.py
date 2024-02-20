@@ -123,8 +123,8 @@ class MyArcTrainer(Trainer):
             targets = np.resize(targets, prediction.shape) # the only difference to trainer !!!!!!!!!!!!!!!!!!!!!
             loss_agg.append(self.error_function(prediction, targets))
             # calculating accuracy
-            
-            #accuracy = np.mean(accuracy)
+          #  accuracy = self.accuracy_function(prediction, targets)
+         #   accuracy = np.mean(accuracy, axis=1)
            # accuracy_aggregator.append(accuracy)
             errorterm = self.error_function_derived(prediction, targets)
 
@@ -155,17 +155,29 @@ class MyArcTrainer(Trainer):
     def accuracy_function(self, prediction, target):
         
         accs = []
-        for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
-            
-            y = prediction[cidx] # in order to slice [:,idx]
-            t = target[cidx]
-            for idx, number in enumerate(classweight):
-                if bool(number)==True:
+        weights = self.arc.RuleConsequentLayer.class_weights
+        output = []
+        # go through weights and select the max idx
+        # since weights are one-hot encoded this will match the idx of the belonging class
+        for i,w in enumerate(weights):
+            idx_max = np.argmax(w)
+            accs.append(target[i][idx_max] == np.round(prediction[i][idx_max], 0)) 
+               
+        accs = np.array(accs)
+        accs = accs.reshape(-1, 1)
+        # error = output
 
-                    acc = t[idx] == np.round(y[idx], 0)
-                  #  print("here", t[idx])
-                   # print("hopre", y[idx])
-                    accs.append(acc)
+        # for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
+            
+        #     y = prediction[cidx] # in order to slice [:,idx]
+        #     t = target[cidx]
+        #     for idx, number in enumerate(classweight):
+        #         if bool(number)==True:
+
+        #             acc = t[idx] == np.round(y[idx], 0)
+        #           #  print("here", t[idx])
+        #            # print("hopre", y[idx])
+        #             accs.append(acc)
         
         return accs#self.get_class_accuracy(prediction,target)
 
@@ -197,7 +209,7 @@ class MyArcTrainer(Trainer):
        # print("classid", classID)
         return classID == target
     
-    def error_function(self, pred, tar):
+    def error_function(self, prediction, target):
         """Derived error function:  
             error function: tf.reduce_mean(0.5*(prediction - targets)**2)
         
@@ -209,6 +221,22 @@ class MyArcTrainer(Trainer):
         """
 
         error_term = []
+        weights = self.arc.RuleConsequentLayer.class_weights
+
+      #  prediction = np.where(prediction == 0, -1, prediction)
+       # target = np.where(target == 0, -1, target)
+
+        
+        output = []
+        # go through weights and select the max idx
+        # since weights are one-hot encoded this will match the idx of the belonging class
+        for i,w in enumerate(weights):
+            idx_max = np.argmax(w)
+            output.append(0.5* (target[i][idx_max]-prediction[i][idx_max])**2) 
+               
+        output = np.array(output)
+        output = output.reshape(-1, 1)
+        error = output
         #target = target[0]
        
         # losses = []
@@ -240,7 +268,7 @@ class MyArcTrainer(Trainer):
         # tar = np.clip(tar, epsilon, 1 - epsilon)
       #  error = np.sum( tar * pred / np.shape(tar)[1], axis=1)
      #   error = 1-error
-        error = 0.5*( tar - pred  )**2
+      #  error = 0.5*( target - prediction  )**2
        # print("e", error)
         return error
      #   return self.cross_entropy_loss(pred,tar)
@@ -408,19 +436,19 @@ class MyArcTrainer(Trainer):
             x = np.sum(x, axis=3)
             x = np.sum(x, axis=1)
             x = np.sum(x, axis=1)
-            deltas.append(x/81 * self.learning_rate)
+            deltas.append(x/81* self.learning_rate)
 
             x = delta[1]
             x = np.sum(x, axis=0)
             x = np.sum(x, axis=1)
             x = np.sum(x, axis=1)
-            deltas.append(x/81 * self.learning_rate)
+            deltas.append(x/81* self.learning_rate)
             
             x = delta[2]
             x = np.sum(x, axis=0) # or 1
             x = np.sum(x, axis=2)
             x = np.sum(x, axis=0)
-            deltas.append(x/81 * self.learning_rate)
+            deltas.append(x/81* self.learning_rate)
 
             x = delta[3]
             x = np.sum(x, axis=1) # or 2
@@ -458,13 +486,40 @@ class MyArcTrainer(Trainer):
           #  for j in n_mfs:
         #  print("p", p)
             if param_name == "centers":
-                if p <= mins[i] or p >= hmm[i]: 
+                if p <= mins.iloc[i] or p >= hmm.iloc[i]: 
+                    deltas[i] = 0#0.00001 # randomize todo
+
+                elif i in [1,4,7,10] and p >= hmm.iloc[i] - 1/5* (hmm.iloc[i] - mins.iloc[i]): # hc
                     deltas[i] = 0#0.00001 # randomize todo
             if param_name == "widths":
                 
-                if p <= 0 or p >= hmm[i]/5: #hc
+                if p <= 0 or p >= (hmm.iloc[i] - mins.iloc[i])/3: #hc
                     #print("yqa")
                     deltas[i] = 0
+
+
+
+
+
+        # for i, p in enumerate(para):
+        #   #  for j in n_mfs:
+        # #  print("p", p)
+        #     if param_name == "centers":
+                
+        #         if p <= mins.iloc[i] or p >= hmm.iloc[i]: # low and high
+
+        #             deltas[i] = 0
+
+        #         elif i in [1,4,7,10] and p >= hmm.iloc[i] - 1/3* (hmm.iloc[i] - mins.iloc[i]): # hc
+        #             deltas[i] = 0#0.00001 # randomize todo
+
+                    
+        #     if param_name == "widths":
+                
+        #        if p < 0  or p >= (hmm[i] - mins[i])/4: #hc
+        #             print("p", p)
+        #             #print("yqa")
+        #             deltas[i] = 0
             # print("P",p)
        # print("deltas", deltas)
         para =  para - deltas #np.multiply(deltas, self.learning_rate)

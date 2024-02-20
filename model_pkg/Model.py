@@ -71,7 +71,7 @@ class Model():
         print("Build done")
 
     def class_acc(self):
-        self.data.load_data_for_building()
+       
         self.classifier.arc = self.arc
         return self.classifier.get_class_accuracy(self.data.inputs, self.data.targets, self.data.df_name)
 
@@ -103,7 +103,7 @@ class Model():
         # loading data, performing datapipeline and getting datasets
         self.data.load_data_for_training()
         self.trainer.arc = self.arc
-        tf.keras.backend.clear_session()
+       # tf.keras.backend.clear_session()
         # trainig model
         self.trainer(self.data.train_ds,  self.data.test_ds, self.data.validation_ds)
         # saving figs after training

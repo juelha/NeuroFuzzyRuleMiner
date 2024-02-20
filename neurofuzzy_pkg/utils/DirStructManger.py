@@ -29,7 +29,7 @@ def generate_folders_config(df_name):
         os.mkdir(save_path)
         save_path += "/weights"
         os.mkdir(save_path)
-    print("f'Directory {df_name} created in config, full path is {save_path}'") 
+    print(f'Directory {df_name} created in config, full path is {save_path}') 
 
 
 def generate_folders_results(df_name):
@@ -52,4 +52,4 @@ def generate_folders_results(df_name):
         os.mkdir(save_path1)
         save_path2 = save_path + "/after_training"
         os.mkdir(save_path2)
-    print("f'Directory {df_name} created, full path is {save_path}'") 
+    print(f'Directory {df_name} created in results, full path is {save_path}') 
