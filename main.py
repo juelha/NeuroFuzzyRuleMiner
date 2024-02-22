@@ -32,11 +32,11 @@ def main():
     n_epochs = 5
     df_name = "iris"
     n_participants = 4
-    fuzzy_labels = ["small", "medium", "high"]
+    fuzzy_labels = ["small" , "medium","high"] # "medium", 
     lingusitic_output = ["Setosa", "Versicolour", "Virginica"]
 
-    df_name = "dummy2"
-    n_participants = 2
+    df_name = "dummy3"
+    n_participants = 3
     fuzzy_labels = ["low", "medium", "high"]
     lingusitic_output = ["low","high"]
 
@@ -56,12 +56,12 @@ def main():
     MyModel.trainMyArc()
     print(MyModel.class_acc()) # when arc is not trained -> 0.688
 
-    # for i in range(1):
+    # for i in range(4):
     #     MyModel.trainMyArc()
     #     MyModel.build_MyArc_CW()
-    #     MyModel.arc.RuleConsequentLayer.save_weights(df_name)
+    #    # MyModel.arc.RuleConsequentLayer.save_weights(df_name)
 
-
+    print(MyModel.class_acc())
     # print(MLPModel.summary()) 
 
 
@@ -69,6 +69,7 @@ def main():
     MyRules.get_best_rules(inputs=MyModel.data.inputs)
    # MyRules.print_results()
     
+
     return 0
 
 
