@@ -23,7 +23,7 @@ def center_init_con(n_mfs, feature_ranges):
         centers.append((feature_ranges/(n_mfs+1))*(i+1))
     return centers
 
-def center_init(n_mfs, feature_ranges):
+def center_init(n_mfs, feature_mins, feature_maxs):
     """Calculating the centers of the MFs by dividing domain of input equally
     Args:
         n_mfs (int): number of MFs
@@ -36,47 +36,55 @@ def center_init(n_mfs, feature_ranges):
     centers = []
    # print("inputs", inputs)
 
-    for x in feature_ranges:
-       # print("X", x)
-        centers_per_x = []
-        print("x", x)
-       # print("\n")
-        for i in range(n_mfs):
-            center = (x/(n_mfs-1))*(i)
-           # print("center", center)
-            centers_per_x.append(center)
-        centers.append(centers_per_x)
+    # for i,f_min in enumerate(feature_mins):
+    #    # print("X", x)
+    #     centers_per_x = []
+    #     print("x", f_min)
+
+    for i, _ in enumerate(feature_maxs):    
+# centers.append(np.arange(start=y[i], stop=x[i] + (x[i]-y[i])/(n_mfs-1),step=(x[i]-y[i])/(n_mfs-1)))
+        centers.append(np.linspace(start=feature_mins[i], stop=feature_maxs[i], num=n_mfs, endpoint=True))
+    # centers = np.array(centers)
+    # print("\n")
+        # for i in range(n_mfs):
+        #     center = (x/(n_mfs-1))*(i)
+        #    # print("center", center)
+        #     centers_per_x.append(center)
+        # centers.append(centers_per_x)
 
     # centers = np.asarray(centers, dtype=np.float32)
 
     # centers = centers.T # get shape (n_mfs, n_inputs)
-
+  #  print("centers", centers)
     return centers
 
 
 
-def widths_init(n_mfs, centers, n_inputs):
+def widths_init(n_mfs, feature_mins, feature_maxs):
     """
     """
     widths = []
     counter = 0
    # print("c", centers)
 
-    for xID in range(n_inputs):
+    for xID,_ in enumerate(feature_mins):
         widths_per_x = []
        # print("\n")
-        for i in range(n_mfs):
+        #for i in range(n_mfs):
             
-            widths_per_x.append(centers[xID][1]/2)
+        x = np.repeat(feature_maxs[xID]-feature_mins[xID], n_mfs)
+        x = x/(2*(n_mfs+1))
+       # print("Huh", x)
+      #  widths_per_x.append(x)
            # print("center", center)
 
-        widths.append(widths_per_x)
+        widths.append(x)
 
     # widths = np.asarray(widths, dtype=np.float32)
 
     # widths = widths.T # get shape (n_mfs, n_inputs)
     
- #   print("hE",widths)
+    #print("hE",widths)
     
     return widths
 
@@ -157,7 +165,7 @@ def MF_tri_prime_b(x, a, b):
     mu = (2*abs(a-x)/b**2)
     return mu
 
-def visuMFs(layer, dir, df_name, max_vals, mf_names=["low", "middle", "high"]):
+def visuMFs(layer, dir, df_name, min_vals, max_vals, mf_names=["low", "middle", "high"]):
     """Visualizing the current MFs
 visuMFs(inputMFs, self.arc, dir="before_training", func="inputMFs")
 inputMFs.mf_type, inputMFs.n_mfs, inputMFs.centers, inputMFs.widths, inputMFs.domain_input, 
@@ -177,7 +185,7 @@ Args:
     for xID, max_value in enumerate(max_vals):
     #for name, input in zip(names,layer.inputs):
 #        x = np.arange(0, means[xID] , (means[xID]*0.01))
-        x = np.arange(0, max_value, 0.01)
+        x = np.arange(min_vals.iloc[xID], max_value, 0.01)
         y = {}
 
         for mfID in range(layer.n_mfs):

@@ -44,7 +44,9 @@ class Classifier():
     def get_class_accuracy(self, inputs, targets, df_name =None):
         acc = []
         for input_vec, target_vec in (zip(tqdm(inputs, desc='class testing'), targets)):
-            classID = self.get_class(input_vec) 
+            classID = self.get_class(input_vec)
+            print("classD", classID)
+            print("target_vec", target_vec) 
             acc.append(classID == target_vec)
         total_acc = np.mean(acc, axis=1)
         total_acc = np.where(total_acc != 1, 0, 1)

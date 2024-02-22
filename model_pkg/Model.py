@@ -52,7 +52,7 @@ class Model():
       #  self.feature_names = self.data.feature_names
        # self.arc.feature_names = self.feature_names
        # self.arc.feature_ranges = self.data.feature_ranges
-        self.arc.build(self.data.inputs, self.data.targets, self.data.feature_maxs, self.data.df_name)
+        self.arc.build(self.data.inputs, self.data.targets, self.data.feature_mins, self.data.feature_maxs, self.data.df_name)
         print("Build done")
 
     def build_MyArc_CW(self):
@@ -89,9 +89,9 @@ class Model():
         self.arc.FuzzificationLayer.load_weights(self.data.df_name)
         self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
         self.data.load_data_for_training() # doubled ! hc
-        MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_maxs )
+        MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", min_vals=self.data.feature_mins, max_vals=self.data.feature_maxs )
         self.train()
-        MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_maxs )
+        MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training",  min_vals=self.data.feature_mins, max_vals=self.data.feature_maxs )
         self.arc.FuzzificationLayer.save_weights(self.data.df_name)
 
 

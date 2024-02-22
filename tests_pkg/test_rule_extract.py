@@ -21,7 +21,7 @@ def testing_rule_extraction():
     # test 
     MLPModel = testing_mlp()
 
-    ruleExtractor(MamdaniModel, MLPModel)
+    RuleMiner(MamdaniModel, MLPModel)
 
     return 0
 

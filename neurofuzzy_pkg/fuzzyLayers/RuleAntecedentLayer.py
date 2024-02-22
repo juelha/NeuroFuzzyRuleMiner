@@ -124,7 +124,7 @@ class RuleAntecedentLayer():
         # print("n", n)
         # print("k", k)
         # print("n rules", self.n_rules)
-        print("ruleID",ruleID)
+       # print("ruleID",ruleID)
 
         assert self.n_rules == ruleID, f'the number of rules generated in IF-Part: {ruleID} has to equal: {self.n_rules} -> coefficient(n_cols * n_rows, k) - n_cols * n_rows' 
 

@@ -192,7 +192,9 @@ class MyArcTrainer(Trainer):
             error_term (float): output of derived error function
         """
         error_term = []
-        targets = targets[0]
+        
+        targets = targets#.numpy()
+     #   print("TAR", targets)
      #   print("pred", prediction)
       #  print("tar", targets)
         for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
@@ -229,7 +231,7 @@ class MyArcTrainer(Trainer):
             error_term (float): output of derived error function
         """
         error_term = []
-        targets = targets[0]
+       # targets = targets[0]
       #  print("tar", targets)
       #  print("pre", prediction)
 
@@ -364,6 +366,29 @@ class MyArcTrainer(Trainer):
                         delta *= mu1
                         gradient_center = delta* centers_derived[xID2][mfID2]
                         gradient_width = delta * widths_der[xID2][mfID2]
+
+                        hmm = np.repeat(self.max_vals, 3)
+                        mins = np.repeat(self.min_vals, 3)
+                        #print("honik",hmm)
+                       # for i, p in enumerate(para):
+                        #  for j in n_mfs:
+                        #  print("p", p)
+                        #if param_name == "centers":
+
+                        # centers
+                        # for p in gradient_center:
+                        #     if p <= mins.iloc[i] or p >= hmm.iloc[i]: 
+                        #         gradient_center = 0#0.00001 # randomize todo
+
+                        #     elif i in [1,4,7,10] and p >= hmm.iloc[i] - 1/5* (hmm.iloc[i] - mins.iloc[i]): # hc
+                        #         deltas[i] = 0#0.00001 # randomize todo
+                        # if param_name == "widths":
+                                
+                        #     if p <= 0 or p >= (hmm.iloc[i] - mins.iloc[i])/3: #hc
+                        #         #print("yqa")
+                        #         deltas[i] = 0
+
+
                         layer.centers[xID2][mfID2] -= np.multiply(gradient_center, self.learning_rate)
                         layer.widths[xID2][mfID2] -= np.multiply(gradient_width, self.learning_rate)
                         i += 1

@@ -44,19 +44,19 @@ class FuzzificationLayer():
         self.outputs = []
 
  
-    def build(self, feature_ranges, inputs=None):
+    def build(self, feature_mins, feature_maxs, inputs=None):
         """Initializes trainable parameters
 
         Args:
             inputs (tf.Tensor): inputs
         """
 
-        feature_names = feature_ranges.keys().values.tolist()
-        n_inputs = tf.shape(feature_ranges)[0]
+        feature_names = feature_mins.keys().values.tolist()
+        n_inputs = tf.shape(feature_mins)[0]
 
         # build centers and widths of MFs
-        self.centers = np.asarray(MFs.center_init(self.n_mfs, feature_ranges),dtype=np.float32)
-        self.widths = np.asarray(MFs.widths_init(self.n_mfs, self.centers, n_inputs), dtype=np.float32)
+        self.centers = np.asarray(MFs.center_init(self.n_mfs, feature_mins, feature_maxs),dtype=np.float32)
+        self.widths = np.asarray(MFs.widths_init(self.n_mfs, feature_mins, feature_maxs), dtype=np.float32)
 
 
         # build weights 

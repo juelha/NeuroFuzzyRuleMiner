@@ -204,7 +204,7 @@ class DataPipeline():
         """
         # target is one-hot-encoded to have two outputs, representing two output perceptrons
      #   df = df.map(lambda features, target: (features, self.make_binary(target)))
-     #   df = df.map(lambda inputs, target: (inputs, tf.one_hot(int(target), 3)))
+        df = df.map(lambda inputs, target: (inputs, tf.one_hot(int(target), 3)))
         # cache this progress in memory
        # df = df.cache()
         # shuffle, batch, prefetch
@@ -213,7 +213,7 @@ class DataPipeline():
         df = df.prefetch(buffer_size=1)
         return df
     
-    def load_data_for_building(self, df_name="dummy"):
+    def load_data_for_building(self, df_name="iris"):
         """
         one batch dataset, input and target 
 
@@ -223,9 +223,9 @@ class DataPipeline():
         self.generate_folders(self.df_name) 
         # make targets binary 
         treshhold = np.mean(targets)        
-        targets = targets.apply(lambda x: int(x >= treshhold))
+     #   targets = targets.apply(lambda x: int(x >= treshhold))
         print(type(targets))
-        print(targets.head())
+        print(targets)
         
         self.feature_names = list(df.columns)
 
@@ -238,7 +238,7 @@ class DataPipeline():
         # pipeline and one-hot encoding target vector
         df = df.apply(self.pipeline_for_building)
 
-        for features, targets in df.take(5):
+        for features, targets in df.take(150):
           print ('Features: {}, Target: {}'.format(features, targets))
 
         self.inputs = df.map(lambda x,y: x)

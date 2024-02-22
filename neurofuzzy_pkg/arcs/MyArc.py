@@ -60,7 +60,7 @@ class MyArc():
             x = layer(x)
         return x        
 
-    def build(self, inputs, targets, feature_ranges, df_name =None):
+    def build(self, inputs, targets, feature_mins, feature_maxs, df_name =None):
         """Forward propagating the inputs through the network
 
         Args: 
@@ -69,7 +69,7 @@ class MyArc():
         Returns: 
             done (boolean): if built
         """
-        self.build_MFs(feature_ranges, df_name)
+        self.build_MFs(feature_mins, feature_maxs, df_name)
         self.build_classweights(inputs, targets, df_name)
         return True       
     
@@ -108,9 +108,10 @@ class MyArc():
             idx_max = l.index(max_val)
             
             tar = self.RuleConsequentLayer.tars[ruleID][idx_max]
-            print("tar", tar)
-            print("we,", self.RuleConsequentLayer.weights[ruleID] )
+          #  print("tar", tar)
+            
             self.RuleConsequentLayer.weights[ruleID] = tar
+          #  print("we,", self.RuleConsequentLayer.weights[ruleID] )
    
         self.RuleConsequentLayer.save_weights(df_name)
         self.RuleConsequentLayer.load_weights(df_name)
@@ -118,11 +119,11 @@ class MyArc():
         done = True
 
 
-    def build_MFs(self, feature_ranges, df_name):
+    def build_MFs(self, feature_mins, feature_maxs, df_name):
         done = False
 
 
-        self.FuzzificationLayer.build(feature_ranges)
+        self.FuzzificationLayer.build(feature_mins, feature_maxs)
                
         self.FuzzificationLayer.save_weights(df_name)
         self.FuzzificationLayer.load_weights(df_name)

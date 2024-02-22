@@ -11,7 +11,7 @@ from neurofuzzy_pkg import *
 
 from tqdm import tqdm 
 
-class ruleExtractor():
+class RuleMiner():
     """
     The ruleExtractor-Class() is responsible for:
     - extracting the rules from the neurofuzzy model
@@ -36,6 +36,8 @@ class ruleExtractor():
         self.feature_names = neuro_fuzzy_model.data.feature_names
         self.linguistic_mf = ["low","medium","high"]
         self.lingusitic_output = ["bad", "good"]
+
+        self.translation = {"[1. 0. 0.]": 'setosa', "[0. 1. 0.]": 'versicolor', "[0. 0. 1.]": 'virginica'}
         
         self.n_outputs = 2# hc neuro_fuzzy_model.arc.RuleConsequentLayer.n_mfs
         self.n_mfs = 3
@@ -43,7 +45,7 @@ class ruleExtractor():
         self.df_name = df_name
 
         # calling functions
-        self.extractRules()
+        #self.extractRules()
         
 
     def extractRules(self):
@@ -101,6 +103,7 @@ class ruleExtractor():
                 self.rulesDict[name].append(nan)
             
             self.rulesDict['Output'].append(rulesTHEN[ruleID])
+          #  self.rulesDict['Output'].append(self.translation[str(rulesTHEN[ruleID])])
             # if rulesTHEN[ruleID] == [1,0]:
             #     self.rulesDict['Output'].append(self.lingusitic_output[0])
             # if rulesTHEN[ruleID] == [0,1]:
@@ -125,7 +128,7 @@ class ruleExtractor():
 
 
     
-    def get_best_rules(self, inputs, n=10):
+    def get_best_rules(self, inputs, n=20):
         """
         Args:
             inputs ():
@@ -141,24 +144,31 @@ class ruleExtractor():
 
         x = np.concatenate(x, axis=1)
         #print("actvation np ", activations)
-
+       # print("inp", type(inputs))
         x = np.sum(x, axis = 1)
-        #x = x/np.shape(inputs)[0] # normalize
+       # print("X", x)
+        x = x/54#np.shape(inputs)[0] # normalize
         best_indeces = np.argsort(x)[-n:]  # get best n indeces, low to high
         best_indeces = np.flip(best_indeces) # reverse so highest activation is first
-      #  print("hooonk", best_indeces)
+       # print("hooonk", best_indeces)
         
         best_rules = {}
+        
         for para in self.feature_names:
             best_rules[para] = []
         best_rules['Output'] = []
-
+        
+      #  print("se", self.rulesDict)
         rule=[]
-        for key in list(self.rulesDict.keys()):
+        for key in list(best_rules.keys()):
             for idx in best_indeces:
+              #  print("HOk", self.rulesDict[key][idx])
                 best_rules[key].append(self.rulesDict[key][idx])
        # best_rules = self.rulesDict.iloc[best_indeces]
-       # best_rules = best_rules.assign( Activations = x[best_indeces] )
+        best_rules['Activations']= np.round(x[best_indeces],2) 
+        print("Honk", best_indeces)
+        best_rules["ruleNo."] = best_indeces + 1
+      #  print("huh", best_rules)
         self.save_results(best_rules, best=True)
         return best_rules
 
@@ -246,23 +256,23 @@ class ruleExtractor():
         return 0 
 
 
-    def print_results(self,):
-        """Printing results of rule extraction to console
-        """      
+    # def print_results(self,):
+    #     """Printing results of rule extraction to console
+    #     """      
 
-        # bad yield
-        print("\n┌───────────────────────────────────────────────────────────────┐" + ("\n") +
-                "│                           Results                             │" + ("\n") +
-                "└───────────────────────────────────────────────────────────────┘\n")
+    #     # bad yield
+    #     print("\n┌───────────────────────────────────────────────────────────────┐" + ("\n") +
+    #             "│                           Results                             │" + ("\n") +
+    #             "└───────────────────────────────────────────────────────────────┘\n")
 
-        n_rules_generated = int(self.n_mfs**self.n_participants)
-        n_rules_validated = 0
+    #     n_rules_generated = int(self.n_mfs**self.n_participants)
+    #     n_rules_validated = 0
 
-        validation_percentage = 100 * (n_rules_validated/n_rules_generated)
+    #     validation_percentage = 100 * (n_rules_validated/n_rules_generated)
 
-        print(f'# Rules Generated: {n_rules_generated}')
-        print(f'# Rules Validated: {n_rules_validated}')
-        print(f'Percentage of Validation: {round(validation_percentage,2)}%')
+    #     print(f'# Rules Generated: {n_rules_generated}')
+    #     print(f'# Rules Validated: {n_rules_validated}')
+    #     print(f'Percentage of Validation: {round(validation_percentage,2)}%')
         
         
 

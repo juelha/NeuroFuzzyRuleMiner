@@ -37,7 +37,7 @@ def main():
     # My Model
     #batch_size = 64
     learning_rate = 1
-    n_epochs = 10 
+    n_epochs = 5 
 
     df_name = "iris"
 
@@ -47,7 +47,7 @@ def main():
                      Classifier())
     
     MyModel.build_MyArc() # works 
-   # MyModel.trainMyArc()
+    MyModel.trainMyArc()
     print(MyModel.class_acc()) 
    # MyModel.build_MyArc_MF()
     # for i in range(1):
@@ -64,8 +64,9 @@ def main():
     # print(MLPModel.summary()) 
 
 
-    rules = ruleExtractor(MyModel, df_name)
-    rules.print_results()
+    rules = RuleMiner(MyModel, df_name)
+    rules.extractRules()
+#    rules.print_results()
     rules.get_best_rules(inputs=MyModel.data.inputs)
     
     return 0
