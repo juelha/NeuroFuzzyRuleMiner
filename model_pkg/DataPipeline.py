@@ -62,11 +62,57 @@ class DataPipeline():
         """
         if self.df_name == None:
             print("no df specified")
+        elif self.df_name == "iris":
+            df, targets = self.load_iris()
         elif self.df_name == "wine":
             df, targets = self.load_wine()
         elif self.df_name == "dummy":
             df, targets = self.load_dummy()
         return df,targets
+
+
+    def load_iris(self):
+        """Load specified dataset
+        
+        Args:
+            df_name (str): dataset to load 
+                           options: ['dummy2', 'dummy3', 'dummy4', 'xor', 'iris']
+
+        Returns:
+            df, targets ('pandas.core.frame.DataFrame')
+        
+        Raises:
+            ValueError: if no df_name was given
+            
+        Note: assumes last column of df is the target vector
+        """
+        # check if str is in possible datasets
+        
+        # if self.df_name not in self.df_names:
+        #     raise ValueError(
+        #         f"Valid values for df name are {self.df_names}.")
+    
+        file_name = self.df_name + '_df.csv'
+        save_path = os.path.dirname(__file__) +  '/../data'
+        full_path = os.path.join(save_path, file_name)
+        assert  os.path.exists(full_path), f'File {file_name} not found'
+        df = pd.read_csv(full_path)
+        # shuffle first so inputs and targets stay on same row
+        df = df.sample(frac=1) # do we need to shuffle here? 
+        # separate into input and targets 
+        targets = df.pop(df.columns[-1]) # always use last column
+        # get featuer names <- documenting MFs
+        self.feature_names = list(df.columns)
+        # get max value of each feature <- center init        
+        self.feature_maxs = df.max()
+        self.feature_mins = df.min()
+        self.n_features = len(self.feature_names)
+        self.n_classes = len(np.unique(targets))
+      #  print(f"Dataset {self.df_name} loaded: \n {df.head()} \n")
+
+        return df,targets
+    
+    
 
     def load_wine(self):
         """Loads wine quality dataset
@@ -157,8 +203,8 @@ class DataPipeline():
             df (tf.PrefetchDataset): prepared dataset
         """
         # target is one-hot-encoded to have two outputs, representing two output perceptrons
-        df = df.map(lambda features, target: (features, self.make_binary(target)))
-        df = df.map(lambda inputs, target: (inputs, tf.one_hot(int(target), 2)))
+     #   df = df.map(lambda features, target: (features, self.make_binary(target)))
+     #   df = df.map(lambda inputs, target: (inputs, tf.one_hot(int(target), 3)))
         # cache this progress in memory
        # df = df.cache()
         # shuffle, batch, prefetch
@@ -208,7 +254,7 @@ class DataPipeline():
         """
         #df = df.map(lambda features, target: (features, self.make_binary(target)))
         # note: perfomance is better without converting to one_hot
-        df = df.map(lambda inputs, target: (inputs, tf.one_hot(target,2)))
+        df = df.map(lambda inputs, target: (inputs, tf.one_hot(target,3)))
        # df = df.shuffle(50)
 
         return df

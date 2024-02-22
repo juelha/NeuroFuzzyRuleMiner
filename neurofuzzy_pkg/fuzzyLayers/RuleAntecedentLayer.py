@@ -118,11 +118,13 @@ class RuleAntecedentLayer():
         n = n_mfs * n_inputs
         k = self.n_participants 
         self.n_rules = int(coefficient(n, k) - n)
+
+      
         # print("in", inputs)
         # print("n", n)
         # print("k", k)
         # print("n rules", self.n_rules)
-        # print(ruleID)
+        print("ruleID",ruleID)
 
         assert self.n_rules == ruleID, f'the number of rules generated in IF-Part: {ruleID} has to equal: {self.n_rules} -> coefficient(n_cols * n_rows, k) - n_cols * n_rows' 
 

@@ -15,7 +15,7 @@ class Model():
     """Masterclass for combining data, architecture and trainer.
     """
 
-    def __init__(self, data, arc, trainer):
+    def __init__(self, data, arc, trainer, classifier=None):
         """Initializes Model()-Object
 
         Args:
@@ -32,6 +32,7 @@ class Model():
         self.data = data
         self.arc = arc
         self.trainer = trainer
+        self.classifier = classifier
 
     def run(self):
         """
@@ -40,13 +41,18 @@ class Model():
         self.train()
         self.summary()
 
+    def class_acc(self):
+       
+        self.classifier.arc = self.arc
+        return self.classifier.get_class_accuracy(self.data.inputs, self.data.targets, self.data.df_name)
+
     def build_MyArc(self):
         # load data for building my arc
         self.data.load_data_for_building()
       #  self.feature_names = self.data.feature_names
        # self.arc.feature_names = self.feature_names
        # self.arc.feature_ranges = self.data.feature_ranges
-        self.arc.build(self.data.inputs, self.data.targets, self.data.feature_ranges, self.data.df_name)
+        self.arc.build(self.data.inputs, self.data.targets, self.data.feature_maxs, self.data.df_name)
         print("Build done")
 
     def build_MyArc_CW(self):
@@ -83,9 +89,9 @@ class Model():
         self.arc.FuzzificationLayer.load_weights(self.data.df_name)
         self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
         self.data.load_data_for_training() # doubled ! hc
-        MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_ranges )
+        MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_maxs )
         self.train()
-        MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_ranges )
+        MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_maxs )
         self.arc.FuzzificationLayer.save_weights(self.data.df_name)
 
 

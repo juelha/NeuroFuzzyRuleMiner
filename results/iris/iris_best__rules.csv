@@ -1,0 +1,11 @@
+,sepal length,sepal width,petal length,petal width,Output
+1,,medium,medium,,[0. 1. 0.]
+2,,medium,,medium,[0. 1. 0.]
+3,medium,medium,,,[1. 0. 0.]
+4,high,medium,,,[0. 1. 0.]
+5,,,medium,medium,[0. 1. 0.]
+6,medium,,medium,,[0. 1. 0.]
+7,high,,medium,,[0. 1. 0.]
+8,high,,,medium,[0. 1. 0.]
+9,medium,,,medium,[0. 1. 0.]
+10,medium,high,,,[1. 0. 0.]

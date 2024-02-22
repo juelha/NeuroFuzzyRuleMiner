@@ -39,14 +39,16 @@ def main():
     learning_rate = 1
     n_epochs = 10 
 
-    df_name = "dummy"
+    df_name = "iris"
 
     MyModel = Model(DataPipeline(df_name), 
                      MyArc(), 
-                     MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate))
+                     MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate),
+                     Classifier())
     
     MyModel.build_MyArc() # works 
-    MyModel.trainMyArc()
+   # MyModel.trainMyArc()
+    print(MyModel.class_acc()) 
    # MyModel.build_MyArc_MF()
     # for i in range(1):
     #     MyModel.build_MyArc() 
@@ -57,13 +59,14 @@ def main():
     ## Model with MLP arc
     # MLPModel = Model(DataPipeline(df_name),  
     #                  MLP((2,6),2),  
-    #                  Trainer())
- #   MLPModel.train()
+    #                  Trainer(5))
+    # MLPModel.train()
     # print(MLPModel.summary()) 
 
 
- #   rules = ruleExtractor(MyModel, MLPModel, df_name)
-    # rules.print_results()
+    rules = ruleExtractor(MyModel, df_name)
+    rules.print_results()
+    rules.get_best_rules(inputs=MyModel.data.inputs)
     
     return 0
 

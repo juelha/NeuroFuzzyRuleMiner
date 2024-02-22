@@ -108,7 +108,8 @@ class MyArc():
             idx_max = l.index(max_val)
             
             tar = self.RuleConsequentLayer.tars[ruleID][idx_max]
-            #print("tar", tar)
+            print("tar", tar)
+            print("we,", self.RuleConsequentLayer.weights[ruleID] )
             self.RuleConsequentLayer.weights[ruleID] = tar
    
         self.RuleConsequentLayer.save_weights(df_name)

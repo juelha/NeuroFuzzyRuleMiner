@@ -50,6 +50,32 @@ class MyArcTrainer(Trainer):
         
 
 
+    def get_class(self, input_vec, df_name=None): 
+        # propagating through network
+        outputs = self.arc(input_vec)
+       # print("out", outputs)
+        outputs = np.sum(outputs, axis=1) # make 1d
+        idx_max = np.argmax(outputs)
+      # print("out after", outputs)
+
+       # max_val = max(outputs)
+       # idx_max = outputs.index(max_val)
+        classID = self.arc.RuleConsequentLayer.weights[idx_max]
+        return classID
+    
+
+    def get_class_accuracy(self, inputs, targets, df_name =None):
+        acc = []
+        for input_vec, target_vec in (zip(tqdm(inputs, desc='class testing'), targets)):
+            classID = self.get_class(input_vec) 
+            acc.append(self.is_class_correct(classID, target_vec))
+        return np.mean(acc)
+
+    
+    def is_class_correct(self, classID, target):
+        #print("target", target)
+       # print("classid", classID)
+        return classID == target
 
     def test(self, ds):
         """Forward pass of test_data
@@ -62,34 +88,35 @@ class MyArcTrainer(Trainer):
 
         test_accuracy_aggregator = []
         test_loss_aggregator = []
-
-        # iterate over batch
+        print("DF", ds)
         for (inputs_batch, targets_batch) in ds:
-            
+            accuracy = self.get_class_accuracy(inputs_batch, targets_batch)
+
             for inputs, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
-                
-                # forward pass to get prediction
-                prediction = self.arc(inputs)
+                    
+                    # forward pass to get prediction
+                    prediction = self.arc(inputs)
 
-                target = np.resize(target, prediction.shape)
-                ones = np.ones(shape=prediction.shape)
+                    target = np.resize(target, prediction.shape)
+                    ones = np.ones(shape=prediction.shape)
 
-                # get loss
-              #  print(prediction)
-              #  print(target)
-                sample_test_loss = self.error_function(prediction, target)
-               # print("sample_test_loss",sample_test_loss)
-                # get accuracy
-                sample_test_accuracy =  self.accuracy_function(prediction, target)
-              #  sample_test_accuracy = ones - self.error_function(prediction, target)
-                sample_test_accuracy = np.mean(sample_test_accuracy)
-                test_loss_aggregator.append(sample_test_loss)
-#                test_loss_aggregator.append(sample_test_loss.numpy())
-                test_accuracy_aggregator.append(sample_test_accuracy)
+                    # get loss
+                #  print(prediction)
+                #  print(target)
+                    sample_test_loss = self.error_function(prediction, target)
+                # print("sample_test_loss",sample_test_loss)
+                    # get accuracy
+                #   sample_test_accuracy =  self.accuracy_function(prediction, target)
+                #  sample_test_accuracy = ones - self.error_function(prediction, target)
+                #  sample_test_accuracy = np.mean(sample_test_accuracy)
+                    test_loss_aggregator.append(sample_test_loss)
+    #                test_loss_aggregator.append(sample_test_loss.numpy())
+                    #test_accuracy_aggregator.append(sample_test_accuracy)
 
         # return averages per batch
         test_loss = tf.reduce_mean(test_loss_aggregator)
         test_accuracy = tf.reduce_mean(test_accuracy_aggregator)
+        test_accuracy =  np.mean(accuracy)
         return test_loss, test_accuracy
 
 
@@ -111,7 +138,9 @@ class MyArcTrainer(Trainer):
         # iterating over data entries of a batch
         deltas_avg = None
         assigned = False
+        accuracy = self.get_class_accuracy(inputs_batch, targets_batch)
         for inputs, targets in (zip(tqdm(inputs_batch, desc='training'), targets_batch)):
+        #for inputs, targets in (zip(tqdm(inputs_batch, desc='training'), targets_batch)):
 
             # forward propagation
             prediction =  self.arc(inputs)
@@ -120,9 +149,9 @@ class MyArcTrainer(Trainer):
             train_loss_agg.append(self.error_function(prediction, targets))
             errorterm = self.error_function_derived(prediction, targets)
             # calculating accuracy
-            accuracy = self.accuracy_function(prediction,targets)
+            #accuracy = self.accuracy_function(prediction,targets)
             #accuracy = np.mean(accuracy)
-            accuracy_aggregator.append(accuracy)
+           # accuracy_aggregator.append(accuracy)
             # print("errorterm\n\n")
             # print(errorterm)
             # print("targets\n\n")
@@ -148,7 +177,7 @@ class MyArcTrainer(Trainer):
         ## step 3: adapt the parameters with average gradients
         self.adapt(self.arc.FuzzificationLayer, deltas_avg, centers_derived, widths_der)
         
-        acc = np.mean(accuracy_aggregator)
+        acc = np.mean(accuracy)
         return train_loss, acc
 
 
