@@ -29,7 +29,7 @@ def main():
 
     # My Model
     learning_rate = 1
-    n_epochs = 7
+    n_epochs = 1
     df_name = "iris"
     n_participants = 4
     fuzzy_labels = ["small" , "medium","high"] 
