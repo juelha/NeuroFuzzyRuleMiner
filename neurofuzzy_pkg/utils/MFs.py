@@ -47,7 +47,7 @@ def widths_init(feature_mins, feature_maxs, n_mfs):
     x = np.repeat(feature_maxs-feature_mins, n_mfs)
 
     
-    return x/(2*n_mfs+1)
+    return x/(2*(n_mfs+1))
 
 
 def MF_gaussian(x, center, width):
@@ -139,6 +139,7 @@ Args:
         domain_input (int): upper boundary of the domain of the input 
         file_name (str): name of plot that will be saved in analysis folder 
     """
+    plt.rc("font", family="serif")
     n_mfs = 3
     
     feature_names = max_vals.keys().values.tolist()
@@ -177,11 +178,17 @@ Args:
             plt.axvline(c[xID][mfID],0,1, c=plt.gca().lines[-1].get_color(), ls='--')
 
 
-        plt.legend()
+        # plt.legend( title="Fuzzy Labels",# bbox_to_anchor=( 1, 0.2), 
+        #        fontsize=18,  title_fontsize=18)
+        
 
-        plt.title(f'Membership Functions for {feature_names[xID]}')
-        plt.ylabel('Degree of Membership')
-        plt.xlabel(f' {feature_names[xID]} (cm)')
+        plt.legend(loc=(0.0, -0.4), title="Fuzzy Labels",# bbox_to_anchor=( 1, 0.2), 
+                mode="expand", borderaxespad=0, ncol=3, fontsize=18,  title_fontsize=18)
+
+
+        plt.title(f'MFs for {feature_names[xID]}', fontsize=20)
+        plt.ylabel('µ', fontsize=18,  rotation='horizontal', ha='right')
+        plt.xlabel(f' {feature_names[xID]} (cm)', fontsize=18)
 
         
         # get save path 

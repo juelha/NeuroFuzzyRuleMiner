@@ -29,16 +29,18 @@ def main():
 
     # My Model
     learning_rate = 1
-    n_epochs = 5
+    n_epochs = 7
     df_name = "iris"
     n_participants = 4
     fuzzy_labels = ["small" , "medium","high"] # "medium", 
     lingusitic_output = ["Setosa", "Versicolour", "Virginica"]
 
-    df_name = "dummy3"
-    n_participants = 3
-    fuzzy_labels = ["low", "medium", "high"]
-    lingusitic_output = ["low","high"]
+    # df_name = "dummy3"
+    # n_participants = 3
+    # fuzzy_labels = ["low", "medium", "high"]
+    # lingusitic_output = ["low","high"]
+
+    #[ 70 106 119 133]
 
 
     # df_name = "xor"
@@ -53,15 +55,16 @@ def main():
                      Builder(),
                      Classifier())
     MyModel.build_MyArc() 
-    MyModel.trainMyArc()
+   # MyModel.trainMyArc()
     print(MyModel.class_acc()) # when arc is not trained -> 0.688
+    #MyModel.trainMyArc()
+    # for i in range(5):
+    #     MyModel.trainMyArc(save=True)
+    #    # MyModel.build_MyArc_CW()
+    #     print(MyModel.class_acc())
+       # MyModel.arc.RuleConsequentLayer.save_weights(df_name)
 
-    # for i in range(4):
-    #     MyModel.trainMyArc()
-    #     MyModel.build_MyArc_CW()
-    #    # MyModel.arc.RuleConsequentLayer.save_weights(df_name)
-
-    print(MyModel.class_acc())
+   # print(MyModel.class_acc())
     # print(MLPModel.summary()) 
 
 

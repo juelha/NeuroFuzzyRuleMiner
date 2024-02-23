@@ -489,11 +489,11 @@ class MyArcTrainer(Trainer):
                 if p <= mins.iloc[i] or p >= hmm.iloc[i]: 
                     deltas[i] = 0#0.00001 # randomize todo
 
-                elif i in [1,4,7,10] and p >= hmm.iloc[i] - 1/5* (hmm.iloc[i] - mins.iloc[i]): # hc
+                elif i in [1,4,7,10] and p >= hmm.iloc[i] - (1/3* (hmm.iloc[i] - mins.iloc[i])): # hc
                     deltas[i] = 0#0.00001 # randomize todo
             if param_name == "widths":
                 
-                if p <= 0 or p >= (hmm.iloc[i] - mins.iloc[i])/3: #hc
+                if p <= 0 or p >= (hmm.iloc[i] - mins.iloc[i])/(2*(n_mfs)): #hc
                     #print("yqa")
                     deltas[i] = 0
 

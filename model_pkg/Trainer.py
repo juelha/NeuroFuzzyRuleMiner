@@ -95,10 +95,11 @@ class Trainer():
        
         # training loop until self.iters 
         for epoch in range(self.n_epochs):
-            # print(f'Epoch: {str(epoch)} starting with \n \
-            # test accuracy {self.test_accuracies[-1]} \n \
-            # test loss {self.test_losses[-1]} \n \
-            # train loss {self.train_losses[-1]}')
+            print(f'Epoch: {str(epoch)} starting with \n \
+            test accuracy {self.test_accuracies[-1]} \n \
+            train accuracy {self.train_accuracies[-1]} \n \
+            test loss {self.test_losses[-1]} \n \
+            train loss {self.train_losses[-1]}')
 
            
 

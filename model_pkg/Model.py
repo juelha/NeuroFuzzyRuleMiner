@@ -9,7 +9,7 @@ import os.path
 # custom
 from model_pkg import *
 import neurofuzzy_pkg.utils.MFs as MFs
-from neurofuzzy_pkg.utils.WeightManager import load_weights
+from neurofuzzy_pkg.utils.WeightManager import load_weights, save_weights
 
 
 class Model():
@@ -77,7 +77,7 @@ class Model():
 
 
 
-    def trainMyArc(self):
+    def trainMyArc(self, save=False):
         # get feature_names names 
         load_weights(self.arc.FuzzificationLayer, "centers", self.data.df_name)
         load_weights(self.arc.FuzzificationLayer, "widths", self.data.df_name)
@@ -94,6 +94,12 @@ class Model():
        # print("!!!", self.trainer.max_vals)
         self.train()
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_maxs,  min_vals= self.data.feature_mins,mf_names=self.arc.fuzzy_labels )
+        
+        
+        if save:
+            save_weights(self.arc.FuzzificationLayer, "centers", self.data.df_name)
+            save_weights(self.arc.FuzzificationLayer, "widths", self.data.df_name)
+            save_weights(self.arc.RuleConsequentLayer, "class_weights", self.data.df_name)
         #self.arc.FuzzificationLayer.save_weights(self.data.df_name)
 
 
