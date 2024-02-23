@@ -70,7 +70,6 @@ class DataPipeline():
         Note: assumes last column of df is the target vector
         """
         # check if str is in possible datasets
-        
         if self.df_name not in self.df_names:
             raise ValueError(
                 f"Valid values for df name are {self.df_names}.")
@@ -92,7 +91,6 @@ class DataPipeline():
         self.n_features = len(self.feature_names)
         self.n_classes = len(np.unique(targets))
       #  print(f"Dataset {self.df_name} loaded: \n {df.head()} \n")
-
         return df,targets
     
     
@@ -121,9 +119,7 @@ class DataPipeline():
         = 80:10:10
         """
         df, targets = self.loader()
-        # calculate treshhold
-       # self.treshhold = np.mean(targets)  
-        #generate_folders(self.df_name) 
+
 
         # one hot encoding
         b = tf.one_hot(targets, self.n_classes)

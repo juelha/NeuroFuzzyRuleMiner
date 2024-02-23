@@ -12,10 +12,8 @@ def main():
     1. Train NeuroFuzzy model
         - The NeuroFuzzy model will be trained as a classifier 
         - The trained weights (parameters of membership functions and classweights) will give us the rules
-    2. Train MLP model 
-        - Trained as classifier to validate rules from NeuroFuzzy model
     3. Extract neuro fuzzy rules 
-        - ruleExtractor will extract rules from Neurofuzzy model and check with mlp if they are "valid" 
+        - RuleMiner will extract rules from Neurofuzzy model 
     """
     
     print(
@@ -28,11 +26,14 @@ def main():
 
     learning_rate = 1
     n_epochs = 1
+
+    # parameters for running iris dataset
     df_name = "iris"
     n_participants = 4
     fuzzy_labels = ["small" , "medium","high"] 
     lingusitic_output = ["Setosa", "Versicolour", "Virginica"]
 
+    # parameters for running xor dataset
     # df_name = "xor"
     # fuzzy_labels = ["false", "true"]
     # n_participants = 2
@@ -46,7 +47,7 @@ def main():
                      Classifier())
     MyModel.build_MyArc() 
     MyModel.trainMyArc()
-    print(MyModel.class_acc()) # when arc is not trained -> 0.688
+    print(MyModel.class_acc()) 
 
 
 
@@ -58,6 +59,5 @@ def main():
 
 
 if __name__ == "__main__":
-   # start_time = time.time()
     main()
-  #  print("--- %s seconds ---" % (time.time() - start_time))
+
