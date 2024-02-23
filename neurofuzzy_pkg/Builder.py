@@ -71,12 +71,7 @@ class Builder():
 
 
     def build_MFs(self, feature_maxs, feature_mins, df_name, n_mfs):
-        
-       # self.arc.FuzzificationLayer.build(feature_ranges)
-
-       # feature_maxs = self.arc.FuzzificationLayer.preprocess_x(feature_maxs)
-        #feature_mins = self.arc.FuzzificationLayer.preprocess_x(feature_mins)
-
+    
         feature_maxs = feature_maxs.to_numpy() # drops names from max value, either do this or give names of features directly to visualizer
         feature_mins = feature_mins.to_numpy()
         # build centers and widths of MFs

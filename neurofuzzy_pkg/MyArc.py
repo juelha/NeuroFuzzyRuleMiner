@@ -73,13 +73,9 @@ class MyArc():
         self.trainable_params = 0
 
         for layer in self.internal_layers:
-         #   print(layer)
             if hasattr(layer,'train_params'):
-               # print(layer.built)
                 assert layer.built == True, f'The layer {type(layer)} has not been built yet'
                 for param in layer.train_params:
-          #          print(param)
-           #         print(layer.train_params[param].size)
                     self.trainable_params += layer.train_params[param].size
     
     def __str__(self) -> str:

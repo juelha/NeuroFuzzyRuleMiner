@@ -66,7 +66,6 @@ class Trainer():
             class neurofuzzyTrainer() 
         """
         self.training_loop(train_ds,  test_ds, validation_ds)
-      #  self.visualize_training(self.df_name, self.arc.Name)
 
 
 
@@ -88,11 +87,6 @@ class Trainer():
         self.train_losses.append(train_loss)
         self.train_accuracies.append(train_acc)
 
-        # same thing for validation ds
-        # validation_ds_loss, validation_ds_accuracy = self.test(validation_ds_og)
-        # self.v_losses.append(validation_ds_loss)
-        # self.v_accuracies.append(validation_ds_accuracy)
-       
         # training loop until self.iters 
         for epoch in range(self.n_epochs):
             print(f'Epoch: {str(epoch)} starting with \n \
@@ -100,11 +94,9 @@ class Trainer():
             train accuracy {self.train_accuracies[-1]} \n \
             test loss {self.test_losses[-1]} \n \
             train loss {self.train_losses[-1]}')
-
            
 
             # train and keep track
-          #  print("FUCKOFF",train_ds[0].shape)
             train_loss, train_acc = self.train_step(train_ds)
             self.train_accuracies.append(train_acc)
             self.train_losses.append(train_loss)
@@ -115,10 +107,6 @@ class Trainer():
             self.test_losses.append(test_loss)
             self.test_accuracies.append(test_accuracy)
 
-            # same thing for validation ds
-            # validation_ds_loss, validation_ds_accuracy = self.test(validation_ds_og)
-            # self.v_losses.append(validation_ds_loss)
-            # self.v_accuracies.append(validation_ds_accuracy)
 
         print("Training Loop completed")
         return 0

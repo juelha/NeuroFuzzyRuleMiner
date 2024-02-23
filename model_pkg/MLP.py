@@ -64,11 +64,9 @@ class MLP(tf.keras.Model):
             to check the rules  
         """
         encaps_inputs = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
-       # print("Hereee")
-       # print(inputs)
         [[x] for x in inputs]
         for input in inputs:
-           # print("in", input)
+    
             encaps_inputs = encaps_inputs.write(encaps_inputs.size(), [input])
         return encaps_inputs.stack()
 
@@ -85,18 +83,10 @@ class MLP(tf.keras.Model):
         """
         # make input fit to layer dense
         inputs = self.manage_input(inputs)
-      #  print("inputs",inputs)
 
         for layer in self.hidden:
               inputs = layer(inputs)
-      #  print("in", inputs)
         inputs = self.out(inputs)
-
-        #inputs = inputs[0]
-       # numpy_array = inputs.numpy()
-      #  numpy_array = numpy_array.reshape((400, 2)) # hc
-         
-      # inputs =  tf.reshape(inputs,(400, 2) )
 
         return inputs
 

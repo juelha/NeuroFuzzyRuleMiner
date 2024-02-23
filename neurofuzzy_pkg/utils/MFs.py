@@ -21,15 +21,10 @@ def center_init(feature_mins, feature_maxs, n_mfs):
     Returns: 
         numpy.ndarray: initalized widths with the shape (x.size,)
     """
-    n_inputs = feature_maxs.size // n_mfs
-    # multiplicator = np.tile(np.arange(1, n_mfs + 1), n_inputs)
-    # cetnters = (x / (n_mfs + 1)) * multiplicator
     centers = []
     for i, _ in enumerate(feature_maxs):    
-    # centers.append(np.arange(start=y[i], stop=x[i] + (x[i]-y[i])/(n_mfs-1),step=(x[i]-y[i])/(n_mfs-1)))
         centers.append(np.linspace(start=feature_mins[i], stop=feature_maxs[i], num=n_mfs, endpoint=True))
     centers = np.array(centers)
-    #centers.ravel()
     centers = centers.ravel()
     return centers
 
@@ -45,8 +40,6 @@ def widths_init(feature_mins, feature_maxs, n_mfs):
         numpy.ndarray: initalized widths with the shape (x.size,)
     """
     x = np.repeat(feature_maxs-feature_mins, n_mfs)
-
-    
     return x/(2*(n_mfs+1))
 
 
@@ -144,44 +137,24 @@ Args:
     
     feature_names = max_vals.keys().values.tolist()
     
-    c = np.array_split(layer.centers, len(feature_names)) # hc
-   # print("HERE", c)
- 
-    w = np.array_split(layer.widths, len(feature_names)) # hc
- 
-    #print("max", max_vals)
-   
-   # print("c", c)
-    #print("w", w)
-  #  length_inputs = tf.shape(layer.centers)[0]
+    c = np.array_split(layer.centers, len(feature_names)) 
+    w = np.array_split(layer.widths, len(feature_names)) 
+
     # for each input see what the mfs mean -> domain input might be diff
     for xID, max_value in enumerate(max_vals):
-    #for name, input in zip(names,layer.inputs):
-#        x = np.arange(0, means[xID] , (means[xID]*0.01))
+
         x = np.arange(min_vals.iloc[xID], max_value, max_value/1000)
         y = {}
 
         for mfID in range(layer.n_mfs):
             y[mfID] = []
-
-#            print(layer.centers[j+i*layer.n_mfs])
-         #   for bleh in x:
-              #  print(c[xID])
-              #  print(c[xID][mfID])
             y[mfID] =layer.mf_type(x,c[xID][mfID],w[xID][mfID])
-
-           # print("x", x)
-            #print("y,", y[mfID])
             plt.plot(x, y[mfID], label=mf_names[mfID])
-
-          #  print("hui", c[xID][mfID])
             plt.axvline(c[xID][mfID],0,1, c=plt.gca().lines[-1].get_color(), ls='--')
 
 
         # plt.legend( title="Fuzzy Labels",# bbox_to_anchor=( 1, 0.2), 
         #        fontsize=18,  title_fontsize=18)
-        
-
         plt.legend(loc=(0.0, -0.4), title="Fuzzy Labels",# bbox_to_anchor=( 1, 0.2), 
                 mode="expand", borderaxespad=0, ncol=3, fontsize=18,  title_fontsize=18)
 

@@ -13,8 +13,6 @@ import neurofuzzy_pkg.utils.MFs as MFs
 
 
 from tqdm import tqdm 
-#from neurofuzzy_pkg.fuzzyLayers.RuleConsequentLayer import RuleConsequentLayer
-   
 
 class MyArcTrainer(Trainer):   
     """
@@ -34,10 +32,6 @@ class MyArcTrainer(Trainer):
         self.builder = None
         self.n_mfs = None
         self.max_vals = None
-    
-      #  self.df_name = None
-       # self.feature_ranges = None 
-
 
     def __call__(self, train_ds, test_ds, validation_ds):
         """Running the training loop and saving the MFs before and after 
@@ -46,8 +40,6 @@ class MyArcTrainer(Trainer):
             train_ds (PrefetchDataset): dataset for training
             test_ds (PrefetchDataset): dataset for testing
         """
-        # train
-        
         self.training_loop(train_ds, test_ds, validation_ds)
         
 
@@ -79,18 +71,10 @@ class MyArcTrainer(Trainer):
         inputs_batch, targets_batch = ds
         accuracy = self.get_class_accuracy(inputs_batch, targets_batch)
         for input, target in (zip(tqdm(inputs_batch, desc='testing'), targets_batch)):
-       # for input, target in (zip(inputs_batch, targets_batch)):
             prediction = self.arc(input)
             target = np.resize(target, prediction.shape) # the only difference to trainer !!!!!!!!!!!!!!!!!!!!!
             loss = self.loss_func(prediction, target)
-           # accuracy = self.accuracy_function(prediction, target)
-
-           # accuracy =  target == np.round(prediction, 0)
-            #accuracy = np.mean(accuracy)
-
             loss_aggregator.append(loss)
-          #  accuracy_aggregator.append(np.mean(accuracy))  
-
         # return averages per batch
         test_loss = np.mean(loss_aggregator)
         test_accuracy =  np.mean(accuracy)
@@ -116,35 +100,14 @@ class MyArcTrainer(Trainer):
         assigned = False
         accuracy = self.get_class_accuracy(inputs_batch, targets_batch)
         for inputs, targets in (zip(tqdm(inputs_batch, desc='training'), targets_batch)):
-      #  for inputs, targets in (zip(inputs_batch, targets_batch)):
             # forward propagation
             prediction =  self.arc(inputs)
             # calculating error in outputlayer
             targets = np.resize(targets, prediction.shape) # the only difference to trainer !!!!!!!!!!!!!!!!!!!!!
             loss_agg.append(self.error_function(prediction, targets))
-            # calculating accuracy
-          #  accuracy = self.accuracy_function(prediction, targets)
-         #   accuracy = np.mean(accuracy, axis=1)
-           # accuracy_aggregator.append(accuracy)
             errorterm = self.error_function_derived(prediction, targets)
 
             self.adapt(self.arc.FuzzificationLayer, errorterm)
-            # redo this bit 
-            # delta = np.array(errorterm)
-            # delta = np.reshape(delta, ( int(delta.shape[0]),1))
-            # if assigned == False: 
-            #     deltas_avg = delta
-            #     assigned = True
-            # else:
-            #     deltas_avg = np.concatenate((deltas_avg, delta), axis=1)
-
-
-        ## step 2: get averages of all entries
-      #  deltas_avg = np.mean(deltas_avg,axis=1)
-        
-
-        ## step 3: adapt the parameters with average gradients
-       # self.adapt(self.arc.FuzzificationLayer, deltas_avg)
         
         # return average loss
         loss =  np.mean(loss_agg)
@@ -165,33 +128,14 @@ class MyArcTrainer(Trainer):
                
         accs = np.array(accs)
         accs = accs.reshape(-1, 1)
-        # error = output
-
-        # for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
-            
-        #     y = prediction[cidx] # in order to slice [:,idx]
-        #     t = target[cidx]
-        #     for idx, number in enumerate(classweight):
-        #         if bool(number)==True:
-
-        #             acc = t[idx] == np.round(y[idx], 0)
-        #           #  print("here", t[idx])
-        #            # print("hopre", y[idx])
-        #             accs.append(acc)
         
-        return accs#self.get_class_accuracy(prediction,target)
-
+        return accs
 
     def get_class(self, input_vec, df_name=None): 
         # propagating through network
         outputs = self.arc(input_vec)
-       # print("out", outputs)
         outputs = np.sum(outputs, axis=1) # make 1d
         idx_max = np.argmax(outputs)
-      # print("out after", outputs)
-
-       # max_val = max(outputs)
-       # idx_max = outputs.index(max_val)
         classID = self.arc.RuleConsequentLayer.class_weights[idx_max]
         return classID
     
@@ -205,8 +149,6 @@ class MyArcTrainer(Trainer):
 
     
     def is_class_correct(self, classID, target):
-        #print("target", target)
-       # print("classid", classID)
         return classID == target
     
     def error_function(self, prediction, target):
@@ -222,10 +164,6 @@ class MyArcTrainer(Trainer):
 
         error_term = []
         weights = self.arc.RuleConsequentLayer.class_weights
-
-      #  prediction = np.where(prediction == 0, -1, prediction)
-       # target = np.where(target == 0, -1, target)
-
         
         output = []
         # go through weights and select the max idx
@@ -237,41 +175,7 @@ class MyArcTrainer(Trainer):
         output = np.array(output)
         output = output.reshape(-1, 1)
         error = output
-        #target = target[0]
-       
-        # losses = []
-        # for p,t in zip(pred,tar):
-        #     # Calculate cross-entropy loss
-        #     loss = - np.sum(t * np.log(p) + (1 - t) * np.log(1 - p))
-
-        #     # Normalize by the number of examples
-        #     num_examples = len(t)
-        #     loss /= num_examples
-        #     losses.append(loss)
-        # for cidx,classweight in enumerate(self.arc.RuleConsequentLayer.weights):
-        
-        #     out_row = prediction[cidx] # in order to slice [:,idx]
-        #     tar = target[cidx]
-        #   #  print("tar", at)
-        #     for idx, number in enumerate(classweight):
-        #         if bool(number)==True:
-
-                
-        #             error =  0.5*( tar[idx] - out_row[idx]  )**2
-                    
-        #             error_term.append(error)
-     #   print("HM", np.shape(tar)[1])
-        # epsilon = 1e-15  # Small constant to prevent log(0)
-
-        # # Clip predicted probabilities to avoid log(0) or log(1)
-        # pred = np.clip(pred, epsilon, 1 - epsilon)
-        # tar = np.clip(tar, epsilon, 1 - epsilon)
-      #  error = np.sum( tar * pred / np.shape(tar)[1], axis=1)
-     #   error = 1-error
-      #  error = 0.5*( target - prediction  )**2
-       # print("e", error)
         return error
-     #   return self.cross_entropy_loss(pred,tar)
 
     def cross_entropy_loss_prime(self, p,t):
     # https://shivammehta25.github.io/posts/deriving-categorical-cross-entropy-and-softmax/
@@ -279,9 +183,6 @@ class MyArcTrainer(Trainer):
 
 
     def cross_entropy_loss(self, p, t):
-        # Calculate cross-entropy loss
-      #  print("HERE", len(t))
-        
         return - np.sum(t * np.log(p), axis=1) / len(t)
 
 
@@ -295,15 +196,7 @@ class MyArcTrainer(Trainer):
         Returns:
             error_term (float): output of derived error function
         """
-        #return self.cross_entropy_loss_prime(prediction, target)
-        error_term = []
-    #   #  target = target[0]
         weights = self.arc.RuleConsequentLayer.class_weights
-
-      #  prediction = np.where(prediction == 0, -1, prediction)
-       # target = np.where(target == 0, -1, target)
-
-        
         output = []
         # go through weights and select the max idx
         # since weights are one-hot encoded this will match the idx of the belonging class
@@ -314,36 +207,7 @@ class MyArcTrainer(Trainer):
         output = np.array(output)
         output = output.reshape(-1, 1)
         error = output#1-output / np.shape(target)[1]
-    #   #  print("error", error_term)
-       # return  np.sum(-1* (target-prediction),axis=1)#error_term
-       # return  np.sum(prediction- target,axis=1)#error_term
-        #return self.cross_entropy_loss_prime(prediction, target)
-
-
-
-        # # Clip predicted probabilities to avoid log(0) or log(1)
-        # pred = np.clip(pred, epsilon, 1 - epsilon)
-        # tar = np.clip(tar, epsilon, 1 - epsilon)
-      #  error = np.sum( tar * pred / np.shape(tar)[1], axis=1)
-     #   error = 1-error
-        
-
-
-
-    #     pred = np.where(prediction == 0, -1, prediction)
-    #     tar = np.where(target == 0, -1, target)
-
-    #   #  zeros = np.zeros_like(tar)
-
-    #    # honk = np.concatenate((zeros, 1-tar*pred),axis=1)
-
-
-    #     # my hinge
-    #     error = np.sum( tar * pred / np.shape(tar)[1], axis=1)
-    #     error = 1-error
-     #   error = np.sum(1-tar*pred, axis=1)
         return error
-
 
 
     def calc_mf_derv_center(self):
@@ -355,15 +219,11 @@ class MyArcTrainer(Trainer):
         return calc
 
 
-
-
     def adapt(self, layer, error):
         
 
-        # get those directly from antecedent layer with inputs attribute
         mus = self.arc.RuleAntecedentLayer.inputs
-     #   print("MUS", mus[0])
-      #  
+   
         # reshape error to match each mu 
         error = np.reshape(error, mus[0].shape)
         deltas = []
@@ -374,14 +234,9 @@ class MyArcTrainer(Trainer):
                     continue
                 delta = delta* mu
             deltas.append(delta)
-       # delta = [mu * error for mu in mus]
-        #delta.reverse() # the other mu for each 
-     #   print("HERERE", deltas)
         
         centers_prime = self.calc_mf_derv_center()
         widths_prime = self.calc_mf_derv_widths()
-        
-
 
         self.adapt_parameter('centers', layer, deltas, centers_prime)
         self.adapt_parameter('widths', layer, deltas, widths_prime)
@@ -395,9 +250,8 @@ class MyArcTrainer(Trainer):
 
         """
 
-                # deriv para have to be meshgridded too
+        # deriv para have to be meshgridded too
         para_prime = np.array_split(para_prime, range(self.n_mfs, len(para_prime), self.n_mfs)) # hc
-       # x.reverse()  # so it fits with convention 
         para_prime = np.array(np.meshgrid(*para_prime,indexing='ij'))
         delta = [d * para_prime[i] for i, d in enumerate(delta)]
 
@@ -412,9 +266,6 @@ class MyArcTrainer(Trainer):
             x = np.sum(x, axis=0)
             deltas.append(x)#/9* self.learning_rate)
 
-          #  deltas = [np.sum(d, axis=(i+1)%2) for i, d in enumerate(delta)]
-
-        
         elif delta[0].ndim == 3: 
             #print("true")
             x = delta[0]
@@ -459,32 +310,13 @@ class MyArcTrainer(Trainer):
         deltas = np.array(deltas)
         deltas = deltas.ravel()
 
-        
-    #   # print("para", para_prime)
-    #     deltas = deltas * para_prime
-        
-      #  print("deltas", deltas)
-
-        # self.fuzzi ...
-       # param_to_tune = getattr(layer, param)
-        
-      #  print("Delta", delta)
-
-
         # params to tune
         para = getattr(layer, param_name)
         
-
-
-      #  print("heh", para)
         n_mfs = 3 #hc
-       # print("HOOONK",self.max_vals)
         hmm = np.repeat(self.max_vals, n_mfs)
         mins = np.repeat(self.min_vals, n_mfs)
-        #print("honik",hmm)
         for i, p in enumerate(para):
-          #  for j in n_mfs:
-        #  print("p", p)
             if param_name == "centers":
                 if p <= mins.iloc[i] or p >= hmm.iloc[i]: 
                     deltas[i] = 0#0.00001 # randomize todo
@@ -494,33 +326,7 @@ class MyArcTrainer(Trainer):
             if param_name == "widths":
                 
                 if p <= 0 or p >= (hmm.iloc[i] - mins.iloc[i])/(2*(n_mfs)): #hc
-                    #print("yqa")
                     deltas[i] = 0
 
-
-
-
-
-        # for i, p in enumerate(para):
-        #   #  for j in n_mfs:
-        # #  print("p", p)
-        #     if param_name == "centers":
-                
-        #         if p <= mins.iloc[i] or p >= hmm.iloc[i]: # low and high
-
-        #             deltas[i] = 0
-
-        #         elif i in [1,4,7,10] and p >= hmm.iloc[i] - 1/3* (hmm.iloc[i] - mins.iloc[i]): # hc
-        #             deltas[i] = 0#0.00001 # randomize todo
-
-                    
-        #     if param_name == "widths":
-                
-        #        if p < 0  or p >= (hmm[i] - mins[i])/4: #hc
-        #             print("p", p)
-        #             #print("yqa")
-        #             deltas[i] = 0
-            # print("P",p)
-       # print("deltas", deltas)
-        para =  para - deltas #np.multiply(deltas, self.learning_rate)
+        para =  para - deltas 
         setattr(layer, param_name, para)

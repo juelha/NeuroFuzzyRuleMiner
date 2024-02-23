@@ -89,8 +89,6 @@ class DataPipeline():
         # get max value of each feature <- center init        
         self.feature_maxs = df.max()
         self.feature_mins = df.min()
-        print("MAX", self.feature_maxs )
-        print("MINs", self.feature_mins )
         self.n_features = len(self.feature_names)
         self.n_classes = len(np.unique(targets))
       #  print(f"Dataset {self.df_name} loaded: \n {df.head()} \n")

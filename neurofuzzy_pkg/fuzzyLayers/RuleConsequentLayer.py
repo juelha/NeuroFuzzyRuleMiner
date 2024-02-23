@@ -65,31 +65,14 @@ class RuleConsequentLayer():
         Attr:
             weights (np): shape=(n_inputs, n_inputs_og)
         """
-        #inputs, inputs_og = inputs_inputs_og_zip
-
-      #  print("inputs_inputs_og_zip", inputs_inputs_og_zip)
-        
-
-        #print("In", inputs)
-        # # build weights     
+   
         self.class_weights = np.zeros((inputs.shape[0], self.n_classes), dtype=np.float32) # danger output classes hc 
-    # print("weights", self.class_weights)
+
 
         for ruleID, firingStrength in enumerate(inputs):  
             self.dictrules[ruleID].append(firingStrength)
             self.tars[ruleID].append(one_hot_tar)
-            #  print("ruleID",ruleID)
-            # print("firingStrength", firingStrength)
-            
 
-      #  print("weights after", self.class_weights)
-
-        # self.weights = np.ones((inputs.shape[0], inputs_og.shape[0] ), dtype=np.float32)
-
-        # # build biases
-        # self.biases = np.full(inputs.shape[0], 0.5, dtype=np.float32)
-
-      #  self.train_params = {'weights': self.weights}#, 'biases': self.biases}
         self.built = True
 
         # call self
@@ -106,14 +89,9 @@ class RuleConsequentLayer():
             TNorms (tf.Tensor): tensor containing the normed firing strength of the rules, 
             shape=(n_rules,), dtype=tf.float32
         """
-        # check if built
 
         self.inputs = x
-
-
         x = x[:, np.newaxis] * self.class_weights
-    
-       
         return x # returning layer as well for defuzzication  
 
     

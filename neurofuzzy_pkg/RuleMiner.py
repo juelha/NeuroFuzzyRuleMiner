@@ -53,8 +53,6 @@ class RuleMiner():
         # get rules and combine
         rulesIF = self.get_if_part(self.fuzzy_labels)
         rulesTHEN = self.get_then_part()
-      #  print("huh", rulesIF)
-     #   print("ha", rulesTHEN)
         rules = np.concatenate((rulesIF, rulesTHEN), axis=1)
    
         # save as df 
@@ -105,18 +103,13 @@ class RuleMiner():
         acc = []
         x = []
         # get activations per output for inptus
-        for input_vec in tqdm(inputs, desc='class selecting'):
-            
+        for input_vec in tqdm(inputs, desc='class selecting'):           
             x.append(self.arc(input_vec)) 
-
         x = np.concatenate(x, axis=1)
-        #print("actvation np ", activations)
-
         x = np.sum(x, axis = 1)
         x = x/np.shape(inputs)[0] # normalize
         best_indeces = np.argsort(x)[-n:]  # get best n indeces, low to high
         best_indeces = np.flip(best_indeces) # reverse so highest activation is first
-      #  print("hooonk", best_indeces)
         best_rules = self.rulesDict.iloc[best_indeces]
         best_rules = best_rules.assign( Activations = x[best_indeces] )
         self.save_results(best_rules, best=True)
@@ -142,8 +135,6 @@ class RuleMiner():
             xIDs.append(element['xID'])
             # get crisp value of x (use center of mf)
             crisp_xs.append(self.arc.FuzzificationLayer.centers[element['xID']][element['mfID']])
-
-
 
         # construct dataset
         test_seq = tf.convert_to_tensor(([crisp_xs]),dtype=tf.float32)

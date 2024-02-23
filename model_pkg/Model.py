@@ -47,9 +47,6 @@ class Model():
         # load data for building my arc
         self.data.load_data_for_building()
         self.builder.arc = self.arc#
-        #self.arc.RuleAntecedentLayer.n_features = self.data.n_features
-       # self.arc.RuleConsequentLayer.n_classes = self.data.n_classes
-        
         self.builder(self.data.inputs, self.data.targets, self.data.feature_maxs, self.data.feature_mins, self.data.df_name, self.arc.n_mfs)
 
         print("Build done")
@@ -57,9 +54,6 @@ class Model():
     def build_MyArc_CW(self):
         # load data for building my arc
         self.data.load_data_for_building()
-       # self.feature_names = self.data.feature_names
-        #self.arc.feature_names = self.feature_names
-        #self.arc.feature_ranges = self.data.feature_ranges
         self.builder.build_classweights(self.data.inputs, self.data.targets, self.data.df_name)
         print("Build done")
 
@@ -71,7 +65,6 @@ class Model():
         print("Build done")
 
     def class_acc(self):
-       
         self.classifier.arc = self.arc
         return self.classifier.get_class_accuracy(self.data.inputs, self.data.targets, self.data.df_name)
 
@@ -82,16 +75,12 @@ class Model():
         load_weights(self.arc.FuzzificationLayer, "centers", self.data.df_name)
         load_weights(self.arc.FuzzificationLayer, "widths", self.data.df_name)
         load_weights(self.arc.RuleConsequentLayer, "class_weights", self.data.df_name)
-     #   self.arc.FuzzificationLayer.load_weights(self.data.df_name)
-      #  self.arc.RuleConsequentLayer.load_weights(self.data.df_name)
         self.data.load_data_for_training() # doubled ! hc
         self.trainer.builder = self.builder
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_maxs, min_vals= self.data.feature_mins, mf_names=self.arc.fuzzy_labels )
         self.trainer.max_vals = self.data.feature_maxs
         self.trainer.min_vals = self.data.feature_mins
         self.trainer.n_mfs = self.arc.n_mfs
-      #  print("???", self.data.feature_ranges)
-       # print("!!!", self.trainer.max_vals)
         self.train()
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_maxs,  min_vals= self.data.feature_mins,mf_names=self.arc.fuzzy_labels )
         
