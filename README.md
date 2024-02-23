@@ -19,3 +19,4 @@
 
 ## About
 Implementation belonging to the Bachelorsthesis at University of Osnabrück by Julia Hattendorf
+Note, the naive implementation has been archived in the branch 'for-loop'
