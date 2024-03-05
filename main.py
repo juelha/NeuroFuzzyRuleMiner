@@ -1,7 +1,6 @@
 # custom packagess
 from model_pkg import *
 from neurofuzzy_pkg import * 
-from tests_pkg import *
 from neurofuzzy_pkg import utils
 import time
 
