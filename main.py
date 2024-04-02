@@ -44,7 +44,8 @@ def main():
                      MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate),
                      Builder(),
                      Classifier())
-    MyModel.build_MyArc() 
+   # MyModel.build_MyArc() 
+    MyModel.load_MyArc()
     MyModel.trainMyArc()
     print(MyModel.class_acc()) 
 

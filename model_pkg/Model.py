@@ -68,13 +68,16 @@ class Model():
         self.classifier.arc = self.arc
         return self.classifier.get_class_accuracy(self.data.inputs, self.data.targets, self.data.df_name)
 
-
-
-    def trainMyArc(self, save=False):
-        # get feature_names names 
+    def load_MyArc(self):   
+        # load data for building my arc
+        self.data.load_data_for_building()
+        self.builder.arc = self.arc
         load_weights(self.arc.FuzzificationLayer, "centers", self.data.df_name)
         load_weights(self.arc.FuzzificationLayer, "widths", self.data.df_name)
         load_weights(self.arc.RuleConsequentLayer, "class_weights", self.data.df_name)
+
+    def trainMyArc(self, save=False):
+        # get feature_names names 
         self.data.load_data_for_training() # doubled ! hc
         self.trainer.builder = self.builder
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_maxs, min_vals= self.data.feature_mins, mf_names=self.arc.fuzzy_labels )
