@@ -318,10 +318,10 @@ class MyArcTrainer(Trainer):
         mins = np.repeat(self.min_vals, n_mfs)
         for i, p in enumerate(para):
             if param_name == "centers":
-                if p <= mins.iloc[i] or p >= hmm.iloc[i]: 
+                if p <= mins.iloc[i] or p >= hmm.iloc[i]: # range 
                     deltas[i] = 0#0.00001 # randomize todo
 
-                elif i in [1,4,7,10] and p >= hmm.iloc[i] - (1/3* (hmm.iloc[i] - mins.iloc[i])): # hc
+                elif i in [1,4,7,10] and p >= hmm.iloc[i] - (1/5* (hmm.iloc[i] - mins.iloc[i])): # middle center passing
                     deltas[i] = 0#0.00001 # randomize todo
             if param_name == "widths":
                 

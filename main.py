@@ -23,7 +23,7 @@ def main():
 "██║░╚███║███████╗╚██████╔╝██║░░██║╚█████╔╝░░░░░░██║░░░░░╚██████╔╝███████╗███████╗░░░██║░░░░░░░░░██║░╚═╝░██║╚█████╔╝██████╔╝███████╗███████╗" + ("\n") +
 "╚═╝░░╚══╝╚══════╝░╚═════╝░╚═╝░░╚═╝░╚════╝░░░░░░░╚═╝░░░░░░╚═════╝░╚══════╝╚══════╝░░░╚═╝░░░░░░░░░╚═╝░░░░░╚═╝░╚════╝░╚═════╝░╚══════╝╚══════╝")
 
-    learning_rate = 1
+    learning_rate = 1.0
     n_epochs = 1
 
     # parameters for running iris dataset
@@ -44,9 +44,9 @@ def main():
                      MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate),
                      Builder(),
                      Classifier())
-   # MyModel.build_MyArc() 
-    MyModel.load_MyArc()
-    MyModel.trainMyArc()
+    MyModel.build_MyArc() 
+   # MyModel.load_MyArc()
+    MyModel.trainMyArc(save=True)
     print(MyModel.class_acc()) 
 
 

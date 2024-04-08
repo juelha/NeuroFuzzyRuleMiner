@@ -45,7 +45,7 @@ def save_weights(layer, param_name, df_name):
     # np.save(other_name, self.class_weights)
     
 
-def load_weights(layer, param_name, df_name):
+def load_weights(layer, param_name, df_name, best=True):
     """load weights from yaml file
     
     Args:
@@ -57,7 +57,10 @@ def load_weights(layer, param_name, df_name):
         AssertionError: if save_path not found
     """
     # opt 1: yaml
-    file_name = f"config_{param_name}.yaml"
+    if best:
+        file_name = f"config_{param_name}_best.yaml"
+    else:
+        file_name = f"config_{param_name}.yaml"
     relative_path = f"/../../config/{df_name}/weights/"
     save_path = os.path.dirname(__file__) +  relative_path
     full_path = os.path.join(save_path, file_name)
