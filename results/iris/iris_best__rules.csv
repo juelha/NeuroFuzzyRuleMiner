@@ -1,11 +1,11 @@
 ,sepal length,sepal width,petal length,petal width,Class,Activations
-10,small,medium,small,small,Setosa,0.10744356850560154
-41,medium,medium,medium,medium,Versicolour,0.0774405429614489
-32,medium,small,medium,medium,Versicolour,0.04144321993418214
-37,medium,medium,small,small,Setosa,0.025904298838289926
-45,medium,medium,high,high,Virginica,0.02478436239598464
-42,medium,medium,medium,high,Virginica,0.01935195692648656
-72,high,medium,high,high,Virginica,0.015135802968958601
-46,medium,high,small,small,Setosa,0.013208623356487589
-5,small,small,medium,medium,Versicolour,0.01159986827051287
-19,small,high,small,small,Setosa,0.010230152229940498
+32,medium,small,medium,medium,Versicolour,0.029091461024916825
+10,small,medium,small,small,Setosa,0.026232721993066786
+5,small,small,medium,medium,Versicolour,0.01249176105668202
+37,medium,medium,small,small,Setosa,0.011068794161698908
+19,small,high,small,small,Setosa,0.0103484859592638
+46,medium,high,small,small,Setosa,0.007082139086205544
+72,high,medium,high,high,Virginica,0.006570302060973982
+1,small,small,small,small,Setosa,0.006526284479772098
+45,medium,medium,high,high,Virginica,0.004444076786636959
+35,medium,small,high,medium,Virginica,0.0039460170837848285

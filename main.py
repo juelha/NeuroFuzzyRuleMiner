@@ -24,7 +24,7 @@ def main():
 "╚═╝░░╚══╝╚══════╝░╚═════╝░╚═╝░░╚═╝░╚════╝░░░░░░░╚═╝░░░░░░╚═════╝░╚══════╝╚══════╝░░░╚═╝░░░░░░░░░╚═╝░░░░░╚═╝░╚════╝░╚═════╝░╚══════╝╚══════╝")
 
     learning_rate = 1.0
-    n_epochs = 1
+    n_epochs = 3
 
     # parameters for running iris dataset
     df_name = "iris"
@@ -44,9 +44,9 @@ def main():
                      MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate),
                      Builder(),
                      Classifier())
-    MyModel.build_MyArc() 
-   # MyModel.load_MyArc()
-    MyModel.trainMyArc(save=True)
+    MyModel.build() 
+    #MyModel.load()
+    MyModel.train(save=True)
     print(MyModel.class_acc()) 
 
 
