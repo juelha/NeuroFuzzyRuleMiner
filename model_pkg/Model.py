@@ -43,7 +43,7 @@ class Model():
         self.train()
         self.summary()
 
-    def build_MyArc(self):
+    def build(self):
         # load data for building my arc
         self.data.load_data_for_building()
         self.builder.arc = self.arc#
@@ -64,13 +64,13 @@ class Model():
         self.arc.build_MFs(self.data.feature_ranges, self.data.df_name)
         print("Build done")
 
-    def class_acc(self):
+    def class_accuracy(self):
         self.classifier.arc = self.arc
         return self.classifier.get_class_accuracy(self.data.inputs, self.data.targets, self.data.df_name)
 
 
 
-    def trainMyArc(self, save=False):
+    def train(self, save=False):
         # get feature_names names 
         load_weights(self.arc.FuzzificationLayer, "centers", self.data.df_name)
         load_weights(self.arc.FuzzificationLayer, "widths", self.data.df_name)
@@ -81,7 +81,11 @@ class Model():
         self.trainer.max_vals = self.data.feature_maxs
         self.trainer.min_vals = self.data.feature_mins
         self.trainer.n_mfs = self.arc.n_mfs
-        self.train()
+        self.trainer.arc = self.arc
+        # trainig model
+        self.trainer(self.data.train_ds,  self.data.test_ds, self.data.validation_ds)
+        # saving figs after training
+        self.trainer.visualize_training(df_name=self.data.df_name, type_model=self.arc.Name)
         MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_maxs,  min_vals= self.data.feature_mins,mf_names=self.arc.fuzzy_labels )
         
         
@@ -91,18 +95,6 @@ class Model():
             save_weights(self.arc.RuleConsequentLayer, "class_weights", self.data.df_name)
         #self.arc.FuzzificationLayer.save_weights(self.data.df_name)
 
-
-    def train(self):
-        """Calling trainer
-        """
-        # loading data, performing datapipeline and getting datasets
-        self.data.load_data_for_training()
-        self.trainer.arc = self.arc
-       # tf.keras.backend.clear_session()
-        # trainig model
-        self.trainer(self.data.train_ds,  self.data.test_ds, self.data.validation_ds)
-        # saving figs after training
-        self.trainer.visualize_training(df_name=self.data.df_name, type_model=self.arc.Name)
 
     
 
