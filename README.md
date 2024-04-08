@@ -3,7 +3,6 @@
 ## Getting Started
 
 ### Used Packages
-- keras 2.7.0  
 - Numpy 1.21.4 
 - Python 3.9.7 
 - pandas  1.3.4
