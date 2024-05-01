@@ -18,7 +18,7 @@ class Trainer():
     ___________________________________________________________
     """
 
-    def __init__(self, arc=None, n_epochs=5, learning_rate=0.01, optimizer_func=Adam):
+    def __init__(self, arc=None, optimizer_func=Adam, constraint_center=None, constraint_width=None, learning_rate=None, n_epochs=None):
         """Initializes Trainer()-Object
         
         Args:
@@ -36,7 +36,7 @@ class Trainer():
         self.arc = arc
 
         # hyperparamers
-        self.n_epochs = int(n_epochs)
+        self.n_epochs = n_epochs
         self.learning_rate = learning_rate
         self.loss_func = self.error_function
         self.optimizer_func = optimizer_func(learning_rate)
@@ -56,24 +56,24 @@ class Trainer():
         self.v_losses = []
 
 
-    def __call__(self, train_ds,  test_ds, validation_ds):
+    def __call__(self, train_ds,  test_ds, validation_ds,  constraint_center, constraint_width, learning_rate, n_epochs):
         """Calling the trainer calls training_loop()
         Args: 
-            train_ds (PrefetchDataset): dataset for training
-            test_ds (PrefetchDataset): dataset for testing
+            train_ds (tuple of two numpy.ndarrays): dataset for training
+            test_ds (tuple of two numpy.ndarrays): dataset for testing
         Note: 
             Implemented for cleaner code and the use in the inherited 
             class neurofuzzyTrainer() 
         """
-        self.training_loop(train_ds,  test_ds, validation_ds)
+        self.training_loop(train_ds,  test_ds, validation_ds,  constraint_center, constraint_width, learning_rate, n_epochs)
 
 
 
-    def training_loop(self, train_ds, test_ds, validation_ds_og):
+    def training_loop(self, train_ds, test_ds, validation_ds_og, n_epochs=None):
         """Training of the model
         Args: 
-            train_ds (PrefetchDataset): dataset for training
-            test_ds (PrefetchDataset): dataset for testing
+            train_ds (tuple of two numpy.ndarrays): dataset for training (input, target)
+            test_ds (tuple of two numpy.ndarrays): dataset for testing (input, target)
         """
 
         # run model on test_ds to keep track of progress during training
@@ -88,7 +88,7 @@ class Trainer():
         self.train_accuracies.append(train_acc)
 
         # training loop until self.iters 
-        for epoch in range(self.n_epochs):
+        for epoch in range(n_epochs):
             print(f'Epoch: {str(epoch)} starting with \n \
             test accuracy {self.test_accuracies[-1]} \n \
             train accuracy {self.train_accuracies[-1]} \n \
@@ -142,7 +142,7 @@ class Trainer():
         test_accuracy =  np.mean(accuracy_aggregator)
         return test_loss, test_accuracy
 
-    def train_step(self, ds):
+    def train_step(self, ds,  constraint_center, constraint_width, learning_rate):
         """Implements train step for batch of datasamples
         Args:
             input (tf.Tensor): input sequence of a batch of dataset

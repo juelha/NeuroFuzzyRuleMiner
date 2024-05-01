@@ -45,13 +45,13 @@ def main():
                      Builder(),
                      Classifier())
     MyModel.build() 
-    MyModel.train()
+    #MyModel.train()
     print(MyModel.class_accuracy()) 
 
 
-
-    MyRules = RuleMiner(MyModel, df_name, fuzzy_labels, lingusitic_output)
-    MyRules.get_best_rules(inputs=MyModel.data.inputs)
+    Tuner(MyModel)
+  #  MyRules = RuleMiner(MyModel, df_name, fuzzy_labels, lingusitic_output)
+  #  MyRules.get_best_rules(inputs=MyModel.data.inputs)
     
 
     return 0

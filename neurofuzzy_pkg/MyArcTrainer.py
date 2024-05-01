@@ -33,14 +33,17 @@ class MyArcTrainer(Trainer):
         self.n_mfs = None
         self.max_vals = None
 
-    def __call__(self, train_ds, test_ds, validation_ds):
+    def __call__(self, train_ds, test_ds, validation_ds, constraint_center =None, constraint_width=None, learning_rate=None, n_epochs=None):
         """Running the training loop and saving the MFs before and after 
         
         Args:
-            train_ds (PrefetchDataset): dataset for training
-            test_ds (PrefetchDataset): dataset for testing
+            train_ds (tuple of two numpy.ndarrays): dataset for training
+            test_ds (tuple of two numpy.ndarrays): dataset for testing
         """
-        self.training_loop(train_ds, test_ds, validation_ds)
+        self.constraint_center = constraint_center
+        self.constraint_width = constraint_width
+        self.learning_rate = learning_rate
+        self.training_loop(train_ds, test_ds, validation_ds, n_epochs=n_epochs)
         
 
 
@@ -59,7 +62,7 @@ class MyArcTrainer(Trainer):
     def test(self, ds):
         """Forward pass of test_data
         Args:
-            test_ds (TensorSliceDataset): batch of testing dataset
+            test_ds (tuple of two numpy.ndarrays): batch of testing dataset
         Returns:
             test_loss (float): average loss from output to target
             test_accuracy (float): average accuracy of output
@@ -84,8 +87,7 @@ class MyArcTrainer(Trainer):
     def train_step(self, train_batch):
         """Implements train step for batch of datasamples
         Args:
-            input (tf.Tensor): input sequence of a batch of dataset
-            target (tf.Tensor): output sequence of a batch of dataset
+            train_batch (tuple of two numpy.ndarrays): batch of testing dataset
         Returns:
             loss (float): average loss before after train step
         """
@@ -144,7 +146,7 @@ class MyArcTrainer(Trainer):
         acc = []
         for input_vec, target_vec in (zip(tqdm(inputs, desc='class testing'), targets)):
             classID = self.get_class(input_vec) 
-            acc.append(self.is_class_correct(classID, target_vec))
+            acc.append(classID == target_vec)
         return np.mean(acc)
 
     
@@ -219,7 +221,7 @@ class MyArcTrainer(Trainer):
         return calc
 
 
-    def adapt(self, layer, error):
+    def adapt(self, layer, error, ):
         
 
         mus = self.arc.RuleAntecedentLayer.inputs
@@ -314,18 +316,18 @@ class MyArcTrainer(Trainer):
         para = getattr(layer, param_name)
         
         n_mfs = 3 #hc
-        hmm = np.repeat(self.max_vals, n_mfs)
+        maxs = np.repeat(self.max_vals, n_mfs)
         mins = np.repeat(self.min_vals, n_mfs)
         for i, p in enumerate(para):
             if param_name == "centers":
-                if p <= mins.iloc[i] or p >= hmm.iloc[i]: 
+                if p <= mins.iloc[i] or p >= maxs.iloc[i]: 
                     deltas[i] = 0#0.00001 # randomize todo
 
-                elif i in [1,4,7,10] and p >= hmm.iloc[i] - (1/3* (hmm.iloc[i] - mins.iloc[i])): # hc
+                elif i in [1,4,7,10] and p >= maxs.iloc[i] - (self.constraint_center* (maxs.iloc[i] - mins.iloc[i])): # hc
                     deltas[i] = 0#0.00001 # randomize todo
             if param_name == "widths":
                 
-                if p <= 0 or p >= (hmm.iloc[i] - mins.iloc[i])/(2*(n_mfs)): #hc
+                if p <= 0 or p >= (maxs.iloc[i] - mins.iloc[i])/(self.constraint_width*(n_mfs)): #hc
                     deltas[i] = 0
 
         para =  para - deltas 

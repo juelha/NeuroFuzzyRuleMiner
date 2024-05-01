@@ -70,23 +70,23 @@ class Model():
 
 
 
-    def train(self, save=False):
+    def train(self, constraint_center=None, constraint_width=None, learning_rate=None, n_epochs=None, save=False):
         # get feature_names names 
         load_weights(self.arc.FuzzificationLayer, "centers", self.data.df_name)
         load_weights(self.arc.FuzzificationLayer, "widths", self.data.df_name)
         load_weights(self.arc.RuleConsequentLayer, "class_weights", self.data.df_name)
-        self.data.load_data_for_training() # doubled ! hc
+       # self.data.load_data_for_training() # doubled ! hc
         self.trainer.builder = self.builder
-        MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_maxs, min_vals= self.data.feature_mins, mf_names=self.arc.fuzzy_labels )
+      #  MFs.visuMFs(self.arc.FuzzificationLayer, df_name= self.data.df_name, dir="before_training", max_vals=self.data.feature_maxs, min_vals= self.data.feature_mins, mf_names=self.arc.fuzzy_labels )
         self.trainer.max_vals = self.data.feature_maxs
         self.trainer.min_vals = self.data.feature_mins
         self.trainer.n_mfs = self.arc.n_mfs
         self.trainer.arc = self.arc
         # trainig model
-        self.trainer(self.data.train_ds,  self.data.test_ds, self.data.validation_ds)
+        self.trainer(self.data.train_ds,  self.data.test_ds, self.data.validation_ds,  constraint_center, constraint_width, learning_rate, n_epochs)
         # saving figs after training
-        self.trainer.visualize_training(df_name=self.data.df_name, type_model=self.arc.Name)
-        MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_maxs,  min_vals= self.data.feature_mins,mf_names=self.arc.fuzzy_labels )
+       # self.trainer.visualize_training(df_name=self.data.df_name, type_model=self.arc.Name)
+       # MFs.visuMFs(self.arc.FuzzificationLayer, df_name=self.data.df_name, dir="after_training", max_vals=self.data.feature_maxs,  min_vals= self.data.feature_mins,mf_names=self.arc.fuzzy_labels )
         
         
         if save:
@@ -96,7 +96,7 @@ class Model():
         #self.arc.FuzzificationLayer.save_weights(self.data.df_name)
 
 
-    
+
 
     def validate_input(self, rule_ds):
         """Validate an input obtained by a rule in ruleExtractor()
