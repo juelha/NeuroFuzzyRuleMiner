@@ -44,12 +44,12 @@ def main():
                      MyArcTrainer(n_epochs=n_epochs, learning_rate=learning_rate),
                      Builder(),
                      Classifier())
-    MyModel.build() 
+    #MyModel.build() 
     # MyModel.train(save=True)
-    print(MyModel.class_accuracy()) 
+    #print(MyModel.class_accuracy()) 
 
 
-   # Tuner(MyModel)
+    Tuner(MyModel)
     # MyRules = RuleMiner(MyModel, df_name, fuzzy_labels, lingusitic_output)
     # MyRules.get_best_rules(inputs=MyModel.data.inputs)
         

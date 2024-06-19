@@ -323,7 +323,7 @@ class MyArcTrainer(Trainer):
                 if p <= mins.iloc[i] or p >= maxs.iloc[i]: 
                     deltas[i] = 0#0.00001 # randomize todo
 
-                elif i in [1,4,7,10] and p >= maxs.iloc[i] - (self.constraint_center* (maxs.iloc[i] - mins.iloc[i])): # hc
+                elif i in [1,4,7,10] and p >= (para[i-1] + (maxs.iloc[i] - mins.iloc[i])/2)* self.constraint_center or  p >= (para[i+1] + (maxs.iloc[i] - mins.iloc[i])/2)* self.constraint_center : # hc
                     deltas[i] = 0#0.00001 # randomize todo
             if param_name == "widths":
                 

@@ -66,16 +66,16 @@ class Tuner():
 
         search_dict = {}
 
-        search_dict['constraint_center'] = [1/x for x in np.arange(start = 1, stop = 5, step = 1)] 
-        search_dict['constraint_width'] = [x for x in np.arange(start = 1, stop = 5, step = 1)] 
-        search_dict['learning_rate'] = [1.0]
-        search_dict['n_epochs'] = [int(x) for x in np.arange(start = 5, stop = 10, step = 1)] 
-
-
-        # search_dict['constraint_center'] = [1/3] 
-        # search_dict['constraint_width'] = [2] 
+        #search_dict['constraint_center'] = [1/x for x in np.arange(start = 1, stop = 20, step = 1)] 
+        # search_dict['constraint_width'] = [x for x in np.arange(start = 1, stop = 5, step = 1)] 
         # search_dict['learning_rate'] = [1.0]
-        # search_dict['n_epochs'] = [5] 
+        # search_dict['n_epochs'] = [int(x) for x in np.arange(start = 5, stop = 10, step = 1)] 
+
+
+        search_dict['constraint_center'] = [1.0] 
+        search_dict['constraint_width'] = [2] 
+        search_dict['learning_rate'] = [1.0]
+        search_dict['n_epochs'] = [5] 
 
        # search_dict['MF'] = [True,False]
        # search_dict['n_fuzzy_labels'] = [int(x) for x in np.linspace(start = 0, stop = 1500, num = 100)]
@@ -85,7 +85,7 @@ class Tuner():
 
         return search_dict
 
-    def grid_search(self, model, search_dict, avg_epochs=10):
+    def grid_search(self, model, search_dict, avg_epochs=50):
         """
         simple grid search on search space 
 
@@ -132,7 +132,7 @@ class Tuner():
                 #     acc = 0.234
                 accs.append(acc)
 
-            #print("HERE", accs)
+            print("HERE", accs)
            # print(np.mean(accs))
             new_dict['accuracy'].append(np.mean(accs))
 
@@ -151,7 +151,7 @@ class Tuner():
         completeName = os.path.join(save_path, file_name)
 
        # df = pd.DataFrame(search_dict)
-        search_dict.to_csv(completeName)
+        search_dict.to_csv(completeName, index=False)
 
         # save best hps
         l = search_dict['accuracy']
