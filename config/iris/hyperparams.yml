@@ -24,7 +24,7 @@ state: !!python/tuple
         - 1
         - !!python/tuple
           - 1
-          - 2
+          - 1
         - &id002 !!python/object/apply:numpy.dtype
           args:
           - f8
@@ -41,7 +41,7 @@ state: !!python/tuple
           - 0
         - false
         - !!binary |
-          AAAAAAAA8D8AAAAAAADgPw==
+          VVVVVVVV1T8=
       - !!python/object/apply:builtins.slice
         - 0
         - 1
@@ -59,10 +59,10 @@ state: !!python/tuple
         - 1
         - !!python/tuple
           - 1
-          - 2
-        - !!python/object/apply:numpy.dtype
+          - 1
+        - &id003 !!python/object/apply:numpy.dtype
           args:
-          - i4
+          - i8
           - false
           - true
           state: !!python/tuple
@@ -76,7 +76,7 @@ state: !!python/tuple
           - 0
         - false
         - !!binary |
-          AQAAAAEAAAA=
+          AgAAAAAAAAA=
       - !!python/object/apply:builtins.slice
         - 1
         - 2
@@ -94,11 +94,11 @@ state: !!python/tuple
         - 1
         - !!python/tuple
           - 1
-          - 2
+          - 1
         - *id002
         - false
         - !!binary |
-          exSuR+F6hD97FK5H4XqEPw==
+          AAAAAAAA8D8=
       - !!python/object/apply:builtins.slice
         - 2
         - 3
@@ -116,24 +116,11 @@ state: !!python/tuple
         - 1
         - !!python/tuple
           - 1
-          - 2
-        - !!python/object/apply:numpy.dtype
-          args:
-          - i8
-          - false
-          - true
-          state: !!python/tuple
-          - 3
-          - <
-          - null
-          - null
-          - null
-          - -1
-          - -1
-          - 0
+          - 1
+        - *id003
         - false
         - !!binary |
-          AQAAAAAAAAABAAAAAAAAAA==
+          BQAAAAAAAAA=
       - !!python/object/apply:builtins.slice
         - 3
         - 4
@@ -177,7 +164,7 @@ state: !!python/tuple
       - name: null
         start: 0
         step: 1
-        stop: 2
+        stop: 1
   _typ: dataframe
   attrs: {}
 - axis: 0

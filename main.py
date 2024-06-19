@@ -24,7 +24,7 @@ def main():
 "╚═╝░░╚══╝╚══════╝░╚═════╝░╚═╝░░╚═╝░╚════╝░░░░░░░╚═╝░░░░░░╚═════╝░╚══════╝╚══════╝░░░╚═╝░░░░░░░░░╚═╝░░░░░╚═╝░╚════╝░╚═════╝░╚══════╝╚══════╝")
 
     learning_rate = 1
-    n_epochs = 1
+    n_epochs = 5
 
     # parameters for running iris dataset
     df_name = "iris"
@@ -45,14 +45,14 @@ def main():
                      Builder(),
                      Classifier())
     MyModel.build() 
-    #MyModel.train()
+    # MyModel.train(save=True)
     print(MyModel.class_accuracy()) 
 
 
-    Tuner(MyModel)
-  #  MyRules = RuleMiner(MyModel, df_name, fuzzy_labels, lingusitic_output)
-  #  MyRules.get_best_rules(inputs=MyModel.data.inputs)
-    
+   # Tuner(MyModel)
+    # MyRules = RuleMiner(MyModel, df_name, fuzzy_labels, lingusitic_output)
+    # MyRules.get_best_rules(inputs=MyModel.data.inputs)
+        
 
     return 0
 

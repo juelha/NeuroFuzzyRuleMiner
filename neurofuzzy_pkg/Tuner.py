@@ -19,6 +19,8 @@ from tqdm import tqdm
 import os
 import yaml
 
+from neurofuzzy_pkg.utils.WeightManager import load_weights, save_weights, load_hyperparams
+
 class Tuner():   
     """
     - tunes hyper parameters
@@ -64,10 +66,16 @@ class Tuner():
 
         search_dict = {}
 
-        search_dict['constraint_center'] = [1/x for x in np.arange(start = 0, stop = 11, step = 1)] 
-        search_dict['constraint_width'] = [x for x in np.arange(start = 0, stop = 11, step = 1)] 
-        search_dict['learning_rate'] = [0.01, 0.1, 1.0]
-        search_dict['n_epochs'] = [int(x) for x in np.arange(start = 1, stop = 11, step = 1)] 
+        search_dict['constraint_center'] = [1/x for x in np.arange(start = 1, stop = 5, step = 1)] 
+        search_dict['constraint_width'] = [x for x in np.arange(start = 1, stop = 5, step = 1)] 
+        search_dict['learning_rate'] = [1.0]
+        search_dict['n_epochs'] = [int(x) for x in np.arange(start = 5, stop = 10, step = 1)] 
+
+
+        # search_dict['constraint_center'] = [1/3] 
+        # search_dict['constraint_width'] = [2] 
+        # search_dict['learning_rate'] = [1.0]
+        # search_dict['n_epochs'] = [5] 
 
        # search_dict['MF'] = [True,False]
        # search_dict['n_fuzzy_labels'] = [int(x) for x in np.linspace(start = 0, stop = 1500, num = 100)]
@@ -77,7 +85,7 @@ class Tuner():
 
         return search_dict
 
-    def grid_search(self, model, search_dict, avg_epochs=5):
+    def grid_search(self, model, search_dict, avg_epochs=10):
         """
         simple grid search on search space 
 
@@ -111,15 +119,27 @@ class Tuner():
 
             # train with those hyperparams
             accs = []
-            for _ in range(avg_epochs):
+            for i in range(avg_epochs):
+                model.arc.FuzzificationLayer.centers = None
+                model.arc.FuzzificationLayer.widths = None
+                model.arc.RuleConsequentLayer.class_weights = None
+                
+                model.build()
                 model.train(constraint_center=a, constraint_width=b, learning_rate=c, n_epochs=d )
                 # get accuracy 
-                acc = self.get_class_accuracy(model.data.inputs, model.data.targets)
+                acc = self.get_class_accuracy(model, model.data.inputs, model.data.targets)
+                # if i%2 == 0:
+                #     acc = 0.234
                 accs.append(acc)
 
+            #print("HERE", accs)
+           # print(np.mean(accs))
             new_dict['accuracy'].append(np.mean(accs))
 
         print(new_dict)
+        save_weights(model.arc.FuzzificationLayer, "centers", model.data.df_name)
+        save_weights(model.arc.FuzzificationLayer, "widths", model.data.df_name)
+        save_weights(model.arc.RuleConsequentLayer, "class_weights", model.data.df_name)
         new_dict = pd.DataFrame(new_dict)
         return new_dict
 
@@ -150,20 +170,39 @@ class Tuner():
 
         
         
-    def get_class(self, input_vec, df_name=None): 
+    def get_class(self,model, input_vec, df_name=None): 
         # propagating through network
-        outputs = self.arc(input_vec)
+        outputs = model.arc(input_vec)
         outputs = np.sum(outputs, axis=1) # make 1d
         idx_max = np.argmax(outputs)
-        classID = self.arc.RuleConsequentLayer.class_weights[idx_max]
+        classID = model.arc.RuleConsequentLayer.class_weights[idx_max]
         return classID
 
-    def get_class_accuracy(self, inputs, targets, df_name =None):
+        # old
+    # def get_class_accuracy(self, model,inputs, targets, df_name =None):
+    #     acc = []
+    #     for input_vec, target_vec in (zip(inputs, targets)):
+    #         classID = self.get_class(model,input_vec) 
+    #         acc.append(classID == target_vec)
+    #     return np.mean(acc)
+    
+    def get_class_accuracy(self, model, inputs, targets, df_name =None):
         acc = []
-        for input_vec, target_vec in (zip(inputs, targets)):
-            classID = self.get_class(input_vec) 
+        for input_vec, target_vec in (zip(tqdm(inputs, desc='class testing'), targets)):
+            classID = self.get_class(model, input_vec) 
+            # print("class",classID)
+            
+            # print("tar", target_vec)
+            # print("\n")
             acc.append(classID == target_vec)
-        return np.mean(acc)
+      #  print(acc)
+        total_acc = np.mean(acc, axis=1)
+       # print("total", total_acc)
+        total_acc = np.where(total_acc != 1, 0, 1)
+       # print("total after", total_acc)
+        wrong_indices = np.where(total_acc == 0)[0]
+       # self.print_results(np.mean(total_acc), len(inputs) - np.count_nonzero( total_acc))
+        return np.mean(total_acc)
 
     def rs_hparams(self, arc, train_input, train_target):
         """

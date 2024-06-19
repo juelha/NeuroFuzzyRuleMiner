@@ -13,7 +13,36 @@ Collection of
 
 """
 
+def load_hyperparams(df_name, best=False):
+    """load weights from yaml file
+    
+    Args:
+        layer (callable): layer the param is the attribute to
+        param_name (str): name of parameter to load either: "centers", "widths", "weights
+        dataset_name (str): name of datasets weights have been built on
 
+    Raises:
+        AssertionError: if save_path not found
+    """
+    # opt 1: yaml
+   
+    relative_path = f"/../../config/{df_name}/"
+    save_path = os.path.dirname(__file__) +  relative_path
+    file_name = f"hyperparams.yml"
+    full_path = os.path.join(save_path, file_name)
+    assert os.path.exists(full_path), f'File {file_name} not found'
+    with open(full_path, 'r') as config_file:
+        # Converts yaml document to np array object
+        params = yaml.load(config_file, Loader=UnsafeLoader)
+        return params
+
+    # # opt 2: np.save
+    # file_name = "config_weights"
+    # other_name = os.path.join(save_path, file_name)
+    # loaded_weights = np.load(other_name+'.npy')
+    #print("self.centers")
+    #print(self.centers)
+            # save params for training 
 
 
 def save_weights(layer, param_name, df_name):
@@ -45,7 +74,7 @@ def save_weights(layer, param_name, df_name):
     # np.save(other_name, self.class_weights)
     
 
-def load_weights(layer, param_name, df_name, best=True):
+def load_weights(layer, param_name, df_name, best=False):
     """load weights from yaml file
     
     Args:
