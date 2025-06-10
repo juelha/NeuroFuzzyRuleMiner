@@ -1,7 +1,7 @@
 # Neuro-Fuzzy Rule Miner
 
 ## About
-Implementation belonging to the Bachelorsthesis at University of Osnabrück by Julia Hattendorf
+Implementation belonging to the Bachelor thesis at University of Osnabrück by Julia Hattendorf
 
 Publication: TBA
 
