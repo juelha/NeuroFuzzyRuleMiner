@@ -21,7 +21,7 @@ You can listen to the podcast episode about the topic [here](https://cogsci-jour
 - Follow instructions from /set_up/cheatsheet.txt
 - Open the main.py either by navigating with the terminal or by using your preferred IDE 
 - Make sure the environment that includes the required packages is activated
-- run
+- run main.py
 
 ## Explanations
 
@@ -46,23 +46,26 @@ The propagation of the input through the architecture is computed as follows:
 **Fuzzification-Layer:**
 
 The input vector $\vec{x}$ is fuzzified. Each input $x_i$ has its own set of membership functions $MF_i$, for example: $MF_i = (MF_{low}, MF_{medium}, MF_{high})$.  The outputs of this layer can be referred to as the degrees of membership, $\mu_{ij}$, of an input $x_i$ to a function $MF_{ij}$.
-$$ \mu_{ij} = MF_{ij}(x_i) $$
+
+$$\mu_{ij} = MF_{ij}(x_i)$$
 
 
 **IF-Layer:**
 
 The fuzzified inputs are combined via a T-norm operation, here multiplication. This represents the if-part of the fuzzy rule. The outputs of this layer is referred to as the rule strengths $\vec{R} = (r_1, r_2, ..., r_{m^n})$, where $\rho$ = (1, ..., $m^n$) for $n$ inputs and $m$ membership functions.
-$$ R_\rho = \text{T-norm} (\mu_{ij}, \mu_{(i+1)j}, ..., \mu_{nm}) = \mu_{ij} * \mu_{(i+1)j} * ... * \mu_{nm} $$
+
+$$R_\rho = \text{T-norm} (\mu_{ij}, \mu_{(i+1)j}, ..., \mu_{nm}) = \mu_{ij} * \mu_{(i+1)j} * ... * \mu_{nm}$$
 
 **THEN-Layer:**
 
 The rule strengths are mapped to classes by one-hot encoded class weights.
-$$ y_\rho = R_\rho * class weight_\rho $$
+
+$$y_\rho = R_\rho * class weight_\rho$$
 
 
 ### Dataset <a id="data"></a>
 
-<img align="right" width="600" src="https://github.com/juelha/NeuroFuzzyRuleMiner/blob/main/doc/figures/iris_scatter.png" hspace="10">
+<img align="right" width="500" src="https://github.com/juelha/NeuroFuzzyRuleMiner/blob/main/doc/figures/iris_scatter.png" hspace="10">
 
 The Iris dataset is a popular classification problem where four features were measured for the three iris species setosa, versicolor, virginica.
 
